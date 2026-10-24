@@ -372,6 +372,16 @@ img.ic{width:18px;height:18px;image-rendering:pixelated;vertical-align:-4px}
 /* rarity stamps, score bump, coach */
 .bigstamp{position:absolute;z-index:12;left:50%;top:44%;transform:translate(-50%,-50%) rotate(-6deg);font-family:var(--f-px);font-weight:700;font-size:clamp(34px,7vw,84px);line-height:1;color:var(--c);border:5px solid var(--c);padding:6px 20px;text-shadow:0 0 26px var(--c);background:rgba(10,10,18,.72);pointer-events:none;letter-spacing:.06em;white-space:nowrap;animation:bigstamp 1.7s cubic-bezier(.2,1.6,.4,1) forwards}
 .bigstamp.small{font-size:clamp(24px,4.4vw,48px);border-width:3px;animation-duration:1.2s}
+.incoming{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;min-height:20px}
+.incoming span{letter-spacing:.1em;text-transform:uppercase;font-size:11px}
+.incoming b{font-family:var(--f-px);font-weight:400;font-size:13px;color:var(--gc);border:1px solid var(--gc);padding:0 6px;line-height:18px;opacity:.9}
+.incoming b:first-of-type{opacity:1;box-shadow:0 0 8px var(--gc)}
+.creator p{line-height:1.6}
+.suggest-form{display:grid;gap:6px;margin:6px 0 4px}
+.suggest-form label{font-size:13px;color:var(--muted)}
+.suggest-form textarea,.suggest-form input{font:inherit;color:var(--ink);background:rgba(255,255,255,.04);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.suggest-form textarea:focus,.suggest-form input:focus{outline:2px solid var(--amber);outline-offset:1px}
+.suggest-form .btn{justify-self:start}
 .persona{display:grid;gap:2px;justify-items:center;text-align:center;padding:12px 14px;border:2px solid var(--amber);background:rgba(246,183,90,.08);animation:personaIn .5s cubic-bezier(.2,1.6,.4,1) both .35s}
 .persona b{font-family:var(--f-px);font-size:clamp(26px,5vw,38px);color:var(--gold);line-height:1.1}
 .persona small{color:var(--muted);font-size:12.5px}
@@ -424,6 +434,7 @@ ol.coach b{color:var(--ink)}
       <button class="mi" type="button" id="freeBtn"><span class="mi-t">Endless</span><span class="mi-s" id="freeSub">How long can you last?</span></button>
       <button class="mi" type="button" id="howBtn"><span class="mi-t">How to Play</span></button>
       <button class="mi" type="button" id="profileBtn"><span class="mi-t">Crate &amp; Rank</span><span class="mi-s" id="rankChip">Static</span></button>
+      <button class="mi" type="button" id="creatorBtn"><span class="mi-t">Creator</span></button>
       <button class="mi" type="button" id="soundBtn" aria-pressed="false"><span class="mi-t">Music: On</span></button>
     </nav>
     <nav class="mm mods" id="modMenu" hidden aria-label="Choose a modifier"></nav>
@@ -436,12 +447,28 @@ ol.coach b{color:var(--ink)}
   </aside>
 </section>
 
+<div class="modal sheet" id="creatorModal" hidden>
+  <div class="mbox creator" role="dialog" aria-modal="true" aria-labelledby="creatorTitle">
+    <div class="sheet-head"><h2 id="creatorTitle">Made by Luis Sandejas</h2><button class="xbtn" type="button" data-close aria-label="Close">×</button></div>
+    <p>Hi! I'm Luis, a maths student in Hong Kong. I love music and I love puzzles, so I built a game that's both: a fight against an alien that only knows the charts, won by the songs you actually love.</p>
+    <p>B-SIDE is a one-person project and it's still growing. If something feels off, or you have an idea that would make it more fun, tell me. I read everything.</p>
+    <form class="suggest-form" id="suggestForm">
+      <label for="sgMsg">Your suggestion</label>
+      <textarea id="sgMsg" maxlength="800" rows="4" required placeholder="A feature, a bug, a song that's missing…"></textarea>
+      <label for="sgContact">How to reach you <small>(optional)</small></label>
+      <input id="sgContact" maxlength="120" autocomplete="off" placeholder="Instagram, email, anything">
+      <button class="btn" type="submit">Send to Luis</button>
+      <p class="muted" id="sgStatus" role="status"></p>
+    </form>
+    <p class="muted" style="font-size:13px">Code and updates: <a href="https://github.com/LuisSandejas/B-Side" target="_blank" rel="noopener">github.com/LuisSandejas/B-Side</a></p>
+  </div>
+</div>
 <div class="modal sheet" id="howModal" hidden>
   <div class="mbox how" role="dialog" aria-modal="true" aria-labelledby="howTitle">
     <div class="sheet-head"><h2 id="howTitle">How to play</h2><button class="xbtn" type="button" data-close aria-label="Close">×</button></div>
     <ol>
       <li><b>Type a song that answers the request</b> the UFO beams down (a genre, a decade, finish the title, name an artist, and more). That hits The Topline.</li>
-      <li><b>Or type any song by an artist walking toward you.</b> That reclaims them on the spot.</li>
+      <li><b>Or type any song by a named Echo walking toward you.</b> That reclaims them on the spot and unleashes their genre's skill on the nameless aliens around them: Power Chord (rock), Bass Drop (electronic), Mic Drop (hip-hop), Blue Note Chain (jazz), Crescendo (classical), Sugar Rush (pop), Smooth Operator (R&amp;B). "Next up" shows who's coming, so you can think ahead.</li>
       <li><b>Accepted songs join your squad</b> and fight on the beat. Rarer songs hit harder, and songs go stale the longer they stay on stage.</li>
       <li><b>Don't let Echoes reach your squad.</b> Each one that breaks through makes the crowd forget a little. When the crowd forgets everything, the set is over.</li>
       <li><b>Genres counter each other:</b> each beats the next one in this ring. The middle squad slot is your Headliner; if it counters the boss's genre, it blocks the boss's attacks.</li>
@@ -482,6 +509,7 @@ ol.coach b{color:var(--ink)}
     <div class="live"><i></i><span>Live</span><span class="rtype" id="reqType">Genre</span><span class="tleft" id="reqLeft">34s</span></div>
     <p class="req-text" id="reqText"></p>
     <div class="crit-row" id="critRow"></div>
+    <div class="incoming" id="incoming" aria-live="polite"></div>
     <div class="tbar" id="reqBarWrap"><i id="reqBar" style="width:100%"></i></div>
   </section>
   <aside class="rail left" aria-label="Last played and squad">
@@ -551,7 +579,7 @@ ol.coach b{color:var(--ink)}
     <p class="eyebrow">First set</p><h3 id="coachTitle">Keep the city's music alive</h3>
     <ol class="coach">
       <li><b>Read what the UFO beams down</b> and type a song that fits it. That hits The Topline.</li>
-      <li><b>Or type any song by an artist walking toward you.</b> That reclaims them on the spot.</li>
+      <li><b>Or type any song by a named Echo walking toward you.</b> That reclaims them on the spot and unleashes their genre's skill on the nameless aliens around them: Power Chord (rock), Bass Drop (electronic), Mic Drop (hip-hop), Blue Note Chain (jazz), Crescendo (classical), Sugar Rush (pop), Smooth Operator (R&amp;B). "Next up" shows who's coming, so you can think ahead.</li>
       <li><b>Every accepted song joins your squad</b> and plays on the beat. Rarer songs hit harder, and you'll feel it.</li>
     </ol>
     <button class="btn" id="coachGo" type="button" style="justify-self:start">Let's go</button>
@@ -1367,24 +1395,36 @@ function spawnEcho(){
   /* every spawn draws from its own seeded stream, so the daily lineup is the same for everyone */
   const r=rng((G.seed^hash('echo|'+G.spawned))>>>0);
   const counts=[0,1,2].map(l=>G.echoes.filter(m=>m.lane===l).length);const minC=Math.min(...counts);let lane=Math.floor(r()*3);if(counts[lane]>minC+1)lane=counts.indexOf(minC);
-  let art=null;for(let k=0;k<FAMOUS.length&&!art;k++){const rr=r();const a=G.echoTake&&rr<.75?G.echoTake[G.takeI++%G.echoTake.length]:G.echoSpot&&G.echoSpot.length&&rr<.33?G.echoSpot[G.spotI++%G.echoSpot.length]:G.echoOrder[G.echoI++%G.echoOrder.length];if(!G.echoes.some(e=>e.artist===a.name))art=a;}
-  if(!art)art=G.echoOrder[0];
-  const ph=G.boss.phase,tp=Math.min(ph,4),rt=r();const type=G.spawned<2?'normal':rt<.03+.01*tp?'golden':rt<.15+.07*tp?'star':rt<.27+.07*tp?'fast':'normal';
-  const mr=r();const masked=G.spawned>=2&&(G.mod==='masked'?mr<.6:G.spawned>=3&&mr<.06+.04*tp);
+  /* only some Echoes carry an artist name; the rest are nameless grunts the squad and genre skills mow down */
+  const named=G.spawned<2||G.spawned%3===0||(!G.echoes.some(e=>e.named)&&r()<.25);
+  const art=named?takeUpcoming():pick(FAMOUS,r);
+  const ph=G.boss.phase,tp=Math.min(ph,4),rt=r();const type=G.spawned<2?'normal':!named?(rt<.25?'fast':'normal'):rt<.03+.01*tp?'golden':rt<.15+.07*tp?'star':rt<.27+.07*tp?'fast':'normal';
+  const mr=r();const masked=named&&G.spawned>=2&&(G.mod==='masked'?mr<.6:G.spawned>=3&&mr<.06+.04*tp);
   let hp=Math.min(56+6*Math.max(0,ph-3),24+5*(ph-1)+Math.floor(Math.min(G.phaseSpawned,30)*.25));let sp=echoSpeed()*(.9+r()*.2);
+  if(!named)hp=Math.round(hp*.5);
   if(type==='fast'){hp=Math.round(hp*.7);sp*=1.6;}if(type==='golden'){hp=Math.round(hp*.8);sp*=.8;}if(type==='star')hp=Math.round(hp*1.1);
-  G.echoes.push({id:++uidc,artist:art.name,full:echoLabel(art.name),masked,type,genre:art.genre,lane,y:Math.max(SPAWN_Y,shipBottom()-6),hp,max:hp,speed:sp,flash:0,born:G.t});
+  G.echoes.push({id:++uidc,named,artist:named?art.name:'',full:named?echoLabel(art.name):'',masked,type,genre:art.genre,lane,y:Math.max(SPAWN_Y,shipBottom()-6),hp,max:hp,speed:sp,flash:0,born:G.t,slowUntil:0,slowF:1});
+  if(named)renderIncoming();
   G.spawned++;G.phaseSpawned++;
   if(type==='golden'){pop('GOLDEN ECHO!',LANES[lane],60,'gold');log(`A Golden Echo appeared: play a song by ${masked?'this masked artist':art.name} for a huge bonus.`);}
   const tier=Math.floor((tempoMult()-1)/.07);if(tier>G.tempoTier){G.tempoTier=tier;pop('TEMPO UP!',96,150,'cyan big');log(`Tempo up! The beat and the Echoes speed up.`);}
   renderOrSoon();
 }
 const shipBottom=()=>G.boss.y+44;
+/* the next named Echoes, drawn from their own seeded stream and shown in advance so players can think ahead */
+function fillUpcoming(){if(!G.upR)G.upR=rng((G.seed^hash('upcoming'))>>>0);if(!G.upcoming)G.upcoming=[];const r=G.upR;
+  while(G.upcoming.length<4){let art=null;for(let k=0;k<FAMOUS.length&&!art;k++){const rr=r();const a=G.echoTake&&rr<.75?G.echoTake[G.takeI++%G.echoTake.length]:G.echoSpot&&G.echoSpot.length&&rr<.33?G.echoSpot[G.spotI++%G.echoSpot.length]:G.echoOrder[G.echoI++%G.echoOrder.length];
+      if(!G.echoes.some(e=>e.artist===a.name)&&!G.upcoming.includes(a))art=a;}G.upcoming.push(art||G.echoOrder[0]);}}
+function takeUpcoming(){fillUpcoming();const a=G.upcoming.shift();fillUpcoming();return a;}
+let incomingKey='';
+function renderIncoming(){const el=$('#incoming');if(!el)return;if(!G||G.demo){el.innerHTML='';incomingKey='';return;}fillUpcoming();const next=G.upcoming.slice(0,3);
+  const key=next.map(a=>a.name).join('|');if(key===incomingKey&&el.childElementCount)return;incomingKey=key;
+  el.innerHTML='<span>Next up</span>'+next.map(a=>`<b style="--gc:${GENRES[a.genre].color}"></b>`).join('');[...el.querySelectorAll('b')].forEach((b,i)=>b.textContent=next[i].name);}
 function frontEcho(lane){let f=null;for(const m of G.echoes)if(m.lane===lane&&m.hp>0&&(!f||m.y>f.y))f=m;return f;}
 const freshness=c=>clamp(1-(G.t-c.joined)/70,.3,1);
 /* attract mode: the menu sits on top of a game that plays itself */
 function startDemo(){newGame({demo:true});}
-function demoMove(){let s=null;const near=G.echoes.filter(m=>m.y>70&&!m.masked).sort((a,b)=>b.y-a.y)[0];
+function demoMove(){let s=null;const near=G.echoes.filter(m=>m.named&&m.y>70&&!m.masked).sort((a,b)=>b.y-a.y)[0];
   if(near&&Math.random()<.55){const a=ARTISTS.find(x=>artistMatch(near.artist,x.name));if(a)s=a.songs.find(x=>!G.playedIds.has(x.id));}
   if(!s){const r=G.request;s=r.single&&!G.playedIds.has(r.single.id)?r.single:requestHint();}
   if(s&&!G.playedIds.has(s.id))evaluate(s);}
@@ -1396,7 +1436,7 @@ function update(dt){
   G.t+=dt;G.boss.y+=(L.shipY-G.boss.y)*Math.min(1,dt*2.5);
   if(G.t<G.breakUntil){G.events=G.events.filter(e=>{if(G.t>=e.at){e.fn();return false;}return true;});G.uiT-=dt;if(G.uiT<=0){G.uiT=.2;renderTimers();}return;}
   G.nextSpawn-=dt;if(G.nextSpawn<=0){spawnEcho();G.nextSpawn=spawnInterval();}
-  for(const m of [...G.echoes]){m.y+=m.speed*dt;if(m.y>=BREACH_Y)breach(m);}
+  for(const m of [...G.echoes]){m.y+=m.speed*dt*(m.slowUntil>G.t?m.slowF:1);if(m.y>=BREACH_Y)breach(m);}
   G.nextBroadcast-=dt;if(G.nextBroadcast<=0){bossAttack();G.nextBroadcast=broadcastEvery();}
   if(!G.takeover){G.nextRemix-=dt;if(G.nextRemix<=0){remix();G.nextRemix=32;}}
   G.request.left-=dt;if(G.request.left<=0)requestTimeout();
@@ -1505,7 +1545,7 @@ function accept(song,reqOK,hits){
     G.request=makeRequest();renderRequest();flashRequest();
   }
   for(const m of hits){const golden=m.type==='golden';G.stats.reclaims++;if(golden)G.stats.golden++;pop(golden?'GOLDEN RECLAIM!':'RECLAIMED!',LANES[m.lane],m.y-2,'gold big');pop(m.artist.toUpperCase().slice(0,16),LANES[m.lane],m.y+14,'tag');
-    killEcho(m,true);const bd=golden?40:8;G.boss.hp=Math.max(0,G.boss.hp-bd);G.stats.dmgBoss+=bd;G.crowd=Math.min(G.crowdMax,G.crowd+(golden?5:2));if(golden){G.hype=Math.min(100,G.hype+40);flashCol='255,212,107';flashUntil=performance.now()+250;}
+    killEcho(m,true);{const src={lane:m.lane,y:m.y,genre:m.genre};G.events.push({at:G.t+.12,fn:()=>genreSkill(src)});}const bd=golden?40:8;G.boss.hp=Math.max(0,G.boss.hp-bd);G.stats.dmgBoss+=bd;G.crowd=Math.min(G.crowdMax,G.crowd+(golden?5:2));if(golden){G.hype=Math.min(100,G.hype+40);flashCol='255,212,107';flashUntil=performance.now()+250;}
     addScore(golden?300:m.masked?110:70);
     fx.push(`<b>${golden?'Golden reclaim':'Reclaimed'} ${esc(m.artist)}${m.masked?' (unmasked!)':''}</b>`);log(`You reclaimed ${m.artist}!${golden?' Golden: +5 memory, boss took 40.':' +2 memory, boss took 8.'}`);}
   if(hits.length){sfx(()=>sfxReclaim(hits.some(h=>h.type==='golden')));if(checkPhase()==='win')return;}
@@ -1720,6 +1760,43 @@ function drawSky(ms){const ph=G.boss.phase;const look=(ph-1)%3,lap=Math.floor((p
 /* ===================== rarity feel: the rarer the song, the louder the moment ===================== */
 let rings=[],scans=[],raysUntil=0,raysX=96,hitStopUntil=0;
 function bigStamp(text,sub,col,small,disc){const el=document.createElement('div');el.className='bigstamp'+(small?' small':'');el.style.setProperty('--c',col);if(disc){const d=document.createElement('span');d.className='disc';el.appendChild(d);}el.appendChild(document.createTextNode(text));if(sub){const s=document.createElement('small');s.textContent=sub;el.appendChild(s);}$('#gameScreen').appendChild(el);setTimeout(()=>el.remove(),1800);}
+/* ===================== genre skills =====================
+   Reclaiming a named Echo unleashes its genre's skill on the nameless grunts around it, with its own sound
+   played over a ducked soundtrack. */
+const SKILLS={
+  rock:{name:'POWER CHORD',fx(src,near){shake(520,5);G.echoes.filter(m=>!m.named&&near(m,80)).forEach(m=>hurtEcho(m,40,'#ff5a4f'));},sound:sndPowerChord},
+  electronic:{name:'BASS DROP',fx(){shake(380,3);G.echoes.forEach(m=>{m.slowUntil=G.t+5;m.slowF=.35;if(!m.named)hurtEcho(m,14,'#3fe0ff');});},sound:sndBassDrop},
+  hiphop:{name:'MIC DROP',fx(src,near,dist){shake(460,5);G.echoes.filter(m=>!m.named).sort((a,b)=>dist(a)-dist(b)).slice(0,3).forEach(m=>hurtEcho(m,999,'#f2b24c'));},sound:sndMicDrop},
+  jazz:{name:'BLUE NOTE CHAIN',fx(src,near,dist){let px=LANES[src.lane],py=src.y;G.echoes.filter(m=>!m.named).sort((a,b)=>dist(a)-dist(b)).slice(0,5).forEach((m,i)=>{
+    const fx_=px,fy=py;px=LANES[m.lane];py=m.y;G.events.push({at:G.t+.09*i,fn:()=>{launchProjectile(fx_,fy,LANES[m.lane],m.y+8,'#6f95ff',90);hurtEcho(m,30,'#6f95ff');}});});},sound:sndVibes},
+  classical:{name:'CRESCENDO',fx(src){raysUntil=performance.now()+1300;raysX=LANES[src.lane];G.crowd=Math.min(G.crowdMax,G.crowd+3);G.echoes.forEach(m=>{m.y=Math.max(SPAWN_Y,m.y-34);if(!m.named)hurtEcho(m,15,'#e6d6a8');});},sound:sndChoir},
+  pop:{name:'SUGAR RUSH',fx(src,near){for(const c of ['#ff63c3','#ffd46b','#3fe0ff'])burstAt(LANES[src.lane],src.y,14,[c,'#ffffff']);G.echoes.filter(m=>!m.named&&Math.abs(m.lane-src.lane)<=1&&Math.abs(m.y-src.y)<95).forEach(m=>hurtEcho(m,35,'#ff63c3'));},sound:sndSparkle},
+  rnb:{name:'SMOOTH OPERATOR',fx(){G.echoes.forEach(m=>{m.slowUntil=G.t+4;m.slowF=0;if(!m.named)hurtEcho(m,10,'#ad85ff');});},sound:sndRhodes},
+};
+function hurtEcho(m,d,col){if(!G.echoes.includes(m))return;const dmg=Math.min(d,m.hp);m.hp-=d;m.flash=performance.now()+120;G.stats.dmg+=dmg;
+  pop(d>=999?'POOF':String(dmg),LANES[m.lane]+(Math.random()*8-4),m.y,'counter');burstAt(LANES[m.lane],m.y+8,6,[col,'#ffffff']);if(m.hp<=0){killEcho(m,false);addScore(20);}}
+function genreSkill(src){if(!G||G.over)return;const sk=SKILLS[src.genre];if(!sk)return;const x=LANES[src.lane],col=GENRES[src.genre].color,t=performance.now();
+  const dist=m=>Math.hypot(LANES[m.lane]-x,m.y-src.y),near=(m,r)=>dist(m)<=r;
+  G.stats.skills=(G.stats.skills||0)+1;pop(sk.name,x,Math.max(70,src.y-14),'gold big');flashCol=hex2rgb(col).join(',');flashUntil=t+200;
+  rings.push({x,y:src.y+8,r1:90,c:col,t0:t,dur:640},{x,y:src.y+8,r1:50,c:'#ffffff',t0:t+90,dur:480});
+  sk.fx(src,near,dist);sfx(()=>{duckMusic(1.5);sk.sound(now()+.01);});log(`${sk.name}! ${GENRES[src.genre].label} skill hit the Echoes around it.`);}
+/* drop the soundtrack under a skill so the skill sound is the star */
+function duckMusic(sec){if(!A.musicBus||A.muted)return;const mg=A.musicBus.gain,t=now();mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(.25,t+.06);mg.setValueAtTime(.25,t+sec);mg.linearRampToValueAtTime(.7,t+sec+.6);}
+/* skill sounds: all in the current key, so they sit on top of whatever is playing */
+const skillRoot=(lo,hi)=>{let f=mtof(keyTone(0));while(f>hi)f/=2;while(f<lo)f*=2;return f;};
+function sndPowerChord(t){const f=skillRoot(82,165);const sh=A.ctx.createWaveShaper();sh.curve=distCurve();const lp=Flt('lowpass',3200,.8);const g=Gn();env(g,t,.006,.16,1.3);sh.connect(lp);lp.connect(g);out(g,{rev:.25});
+  [1,1.5,2].forEach((m,i)=>[-9,9].forEach(d=>{const o=Osc('sawtooth',f*m,t,1.45,sh,d);o.frequency.setValueAtTime(f*m*.94,t);o.frequency.exponentialRampToValueAtTime(f*m,t+.07);}));
+  const n=Gn();env(n,t,.002,.08,.06);const bp=Flt('bandpass',2600,2);bp.connect(n);out(n,{});Noise(t,.08,bp);kick(t,1.2);crash(t+.02,.9);}
+function sndBassDrop(t){sfxRiser(t,.28);const d=t+.28,f=skillRoot(40,62);const g=Gn();env(g,d,.004,.34,1.2);out(g,{});const o=Osc('sine',f*4,d,1.3,g);o.frequency.exponentialRampToValueAtTime(f,d+.35);
+  const lp=Flt('lowpass',400,9);const g2=Gn();env(g2,d,.01,.1,1.1);lp.connect(g2);out(g2,{});Osc('sawtooth',f*2,d,1.2,lp);const lfo=A.ctx.createOscillator();lfo.frequency.value=6;const lg=Gn(1300);lfo.connect(lg);lg.connect(lp.frequency);lfo.start(d);lfo.stop(d+1.25);kick(d,1.3);}
+function sndMicDrop(t){const g=Gn();env(g,t,.003,.4,1.1);const sh=A.ctx.createWaveShaper();sh.curve=distCurve();const lp=Flt('lowpass',900);sh.connect(lp);lp.connect(g);out(g,{});const o=Osc('sine',150,t,1.2,sh);o.frequency.exponentialRampToValueAtTime(skillRoot(40,62),t+.5);
+  [0,.12].forEach((o2,i)=>{const n=Gn();env(n,t+.18+o2,.004,.12,.1);const bp=Flt('bandpass',i?900:2600,4);bp.frequency.setValueAtTime(i?900:2600,t+.18+o2);bp.frequency.exponentialRampToValueAtTime(i?2600:900,t+.28+o2);bp.connect(n);out(n,{});Noise(t+.18+o2,.12,bp);});crash(t,.6);}
+function sndVibes(t){[0,2,4,6,8].forEach((k,i)=>{let f=mtof(keyTone(k)+24);while(f>1800)f/=2;const tt=t+i*.09;const g=Gn();env(g,tt,.003,.07,1.1);const trem=A.ctx.createOscillator();trem.frequency.value=5.5;const tg=Gn(.35);trem.connect(tg);tg.connect(g.gain);trem.start(tt);trem.stop(tt+1.2);out(g,{rev:.45,pan:(i-2)*.2});Osc('sine',f,tt,1.2,g);const g2=Gn();env(g2,tt,.002,.02,.25);out(g2,{rev:.3});Osc('sine',f*4,tt,.3,g2);});}
+function sndChoir(t){[0,2,4,7].forEach((k,i)=>{let f=mtof(keyTone(k)+12);while(f>700)f/=2;while(f<180)f*=2;const g=Gn();g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.05,t+.3);g.gain.setValueAtTime(.05,t+1);g.gain.exponentialRampToValueAtTime(.0001,t+2.1);
+    const bp=Flt('bandpass',900+i*250,1.4);bp.connect(g);out(g,{rev:.7,pan:(i-1.5)*.25});[-12,0,12].forEach(d=>Osc('sawtooth',f,t,2.2,bp,d));});bell(t+.3,keyTone(4)+36,.04);bell(t+.55,keyTone(7)+36,.035);}
+function sndSparkle(t){[0,2,4,7,9,11,14].forEach((k,i)=>{let f=mtof(keyTone(k)+24);while(f>2400)f/=2;const tt=t+i*.055;const lp=Flt('lowpass',5000);const g=Gn();env(g,tt,.003,.05,.22);lp.connect(g);out(g,{rev:.3,pan:(i%3-1)*.3});[-14,0,14].forEach(d=>Osc('sawtooth',f,tt,.25,lp,d));});bell(t+.4,keyTone(7)+36,.05);}
+function sndRhodes(t){[0,2,4,6].forEach((k,i)=>{let f=mtof(keyTone(k)+12);while(f>800)f/=2;while(f<160)f*=2;const tt=t+i*.03;const g=Gn();env(g,tt,.004,.07,1.8);const trem=A.ctx.createOscillator();trem.frequency.value=4.5;const tg=Gn(.3);trem.connect(tg);tg.connect(g.gain);trem.start(tt);trem.stop(tt+1.9);out(g,{rev:.4,pan:(i-1.5)*.2});Osc('sine',f,tt,1.9,g);const g2=Gn();env(g2,tt,.002,.025,.4);out(g2,{});Osc('sine',f*7,tt,.45,g2);});}
+
 /* hype callouts: every accepted song earns a line that fits it, so playing always feels like winning something */
 const CALLOUTS={
   white:["THAT'S A B-SIDE!",'WOWZA!','DEEP CUT!','CRATE KING','UNDERGROUND!','WHO EVEN KNOWS THIS?'],
@@ -1974,7 +2051,7 @@ if(window.ResizeObserver){const ro=new ResizeObserver(()=>layout());ro.observe($
 const labelEls=new Map();
 function updateLabels(){
   if(!G)return;const layer=$('#labels');const seen=new Set();
-  for(const m of G.echoes){seen.add(m.id);let el=labelEls.get(m.id);if(!el){el=document.createElement('div');layer.appendChild(el);labelEls.set(m.id,el);}
+  for(const m of G.echoes){if(!m.named)continue;seen.add(m.id);let el=labelEls.get(m.id);if(!el){el=document.createElement('div');layer.appendChild(el);labelEls.set(m.id,el);}
     const txt=(m.type==='star'?'★ ':m.type==='golden'?'✦ ':'')+(m.masked?maskedLabel(m):m.artist);if(el._t!==txt){el.textContent=txt;el._t=txt;}
     const cls='elabel'+(m.type==='golden'?' gold':m.type==='star'?' star':'')+(m.masked?' masked':'')+(m.y>BREACH_Y-30?' near':'');if(el.className!==cls)el.className=cls;
     if(el._g!==m.genre){el.style.setProperty('--gc',GENRES[m.genre].color);el._g=m.genre;}
@@ -1995,7 +2072,7 @@ function renderMeters(){
   const db=$('#dropBtn');if(db)db.hidden=!(G.hype>=100&&!G.over);
 }
 function musicBright(){if(!A.tone||!G||G.demo||!A.bar)return;if(A.bar.sec&&(A.bar.sec.s==='intro'||A.bar.sec.s==='break'))return;const tgt=Math.min(16000,Math.round(5200+1700*Math.min(G.combo,6)+(G.hype>=100?2500:0)+(A.bar.dropping?8000:0)));if(tgt!==A.toneT){A.toneT=tgt;A.tone.frequency.setTargetAtTime(tgt,A.ctx.currentTime,.25);}}
-function renderTimers(){musicBright();checkMissions();if(!G.demo){if(G.hype>=100&&!G.hypeCharged){G.hypeCharged=true;sfx(()=>sfxCharge());}else if(G.hype<100)G.hypeCharged=false;}if(G.score!==G._ls){G._ls=G.score;const sc=$('#scoreChip');sc.classList.remove('bump');void sc.offsetWidth;sc.classList.add('bump');}$('#killChip').textContent=`${G.stats.kills} cleared`;
+function renderTimers(){renderIncoming();musicBright();checkMissions();if(!G.demo){if(G.hype>=100&&!G.hypeCharged){G.hypeCharged=true;sfx(()=>sfxCharge());}else if(G.hype<100)G.hypeCharged=false;}if(G.score!==G._ls){G._ls=G.score;const sc=$('#scoreChip');sc.classList.remove('bump');void sc.offsetWidth;sc.classList.add('bump');}$('#killChip').textContent=`${G.stats.kills} cleared`;
   if(!G)return;const r=G.request;const k=clamp(r.left/r.dur,0,1);$('#reqBar').style.width=(k*100)+'%';$('#reqBarWrap').classList.toggle('low',k<.3);$('#reqLeft').textContent=`${Math.ceil(Math.max(0,r.left))}s`;
   $('#timeChip').textContent=fmtTime(G.t);$('#speedChip').textContent=`Tempo ×${tempoMult().toFixed(2)}`;$('#scoreChip').textContent=fmtNum(G.score);
   const cc=$('#comboChip');cc.hidden=G.combo<2;cc.textContent=`Combo ×${G.combo}`;cc.className='chip'+(G.combo>=2?' combo':'');
@@ -2173,8 +2250,16 @@ function closeModMenu(){uiSfx(sfxBack);$('#modMenu').hidden=true;$('#mainMenu').
 $('#pressStart').addEventListener('click',openMenu);
 $('#startScreen').addEventListener('pointerdown',e=>{if(!menuOpen&&!e.target.closest('.today'))openMenu();});
 function openSheet(id){uiSfx(sfxSelect);renderTitle();$(id).hidden=false;const x=$(id).querySelector('[data-close]');x&&x.focus();}
-function closeSheets(){['#howModal','#profileModal'].forEach(id=>$(id).hidden=true);}
-$('#howBtn').addEventListener('click',()=>openSheet('#howModal'));$('#profileBtn').addEventListener('click',()=>openSheet('#profileModal'));
+function closeSheets(){['#howModal','#profileModal','#creatorModal'].forEach(id=>$(id).hidden=true);}
+$('#howBtn').addEventListener('click',()=>openSheet('#howModal'));$('#creatorBtn').addEventListener('click',()=>openSheet('#creatorModal'));
+/* suggestions go to the Supabase `feedback` table (insert-only for visitors), with a cooldown so one person can't flood it */
+$('#suggestForm').addEventListener('submit',async e=>{e.preventDefault();const msg=$('#sgMsg').value.trim(),contact=$('#sgContact').value.trim(),st=$('#sgStatus');
+  if(msg.length<3){st.textContent='Write a little more first.';return;}
+  let last=0;try{last=+localStorage.getItem('bside-sg-last')||0;}catch(err){}if(Date.now()-last<60000){st.textContent='Thanks! Give it a minute before sending another.';return;}
+  st.textContent='Sending…';
+  try{const r=await fetchT(`${CATALOG.url}/rest/v1/feedback`,6000,{method:'POST',headers:{apikey:CATALOG.key,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({message:msg,contact:contact||null})});
+    if(!r.ok)throw new Error(r.status);try{localStorage.setItem('bside-sg-last',String(Date.now()));}catch(err){}$('#sgMsg').value='';$('#sgContact').value='';st.textContent='Sent. Thank you! 🎧';uiSfx(sfxSelect);
+  }catch(err){st.textContent='Couldn\'t send right now. You can open an issue on GitHub instead.';}});$('#profileBtn').addEventListener('click',()=>openSheet('#profileModal'));
 document.querySelectorAll('.sheet').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m||e.target.closest('[data-close]')){m.hidden=true;uiSfx(sfxBack);}});});
 document.addEventListener('mouseover',e=>{const b=e.target.closest&&e.target.closest('.mi');if(b&&b!==lastHover){lastHover=b;uiSfx(sfxBlip);}});
 document.addEventListener('focusin',e=>{const b=e.target.closest&&e.target.closest('.mi');if(b&&b!==lastHover){lastHover=b;uiSfx(sfxBlip);}});
@@ -2270,7 +2355,7 @@ async function shareCard(){const cv=makeShareCard();if(!cv)return;const blob=awa
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='b-side-result.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('Saved your result card. Post it anywhere.');}
 
 $('#shareBtn').addEventListener('click',shareCard);
-let atBeat=0;if(AUTOTEST)window.__bside={search:{localMatch,matchScore,suggestScore,INDEX,remote,remoteSearch,norm,lev,LOCAL},step(sec){for(let t=0;t<sec;t+=.05){if(!G||G.over||G.paused)break;update(.05);const nb=atBeat+.05*2*tempoMult();if(Math.floor(nb)!==Math.floor(atBeat))onBeat(Math.floor(nb));atBeat=nb;}return G&&{t:G.t,hp:G.boss.hp,crowd:G.crowd,echoes:G.echoes.length,phase:G.boss.phase,score:G.score,req:G.request.type};},answer(){const r=G.request;if(r.theme)return null;const s=r.single||requestHint();return s?`${s.title} - ${s.artist}`:null;},req(){return G.request;},state(){return G;},fx(id){rarityFX(id,1);},card(){return makeShareCard();}};
+let atBeat=0;if(AUTOTEST)window.__bside={game:()=>G,search:{localMatch,matchScore,suggestScore,INDEX,remote,remoteSearch,norm,lev,LOCAL},step(sec){for(let t=0;t<sec;t+=.05){if(!G||G.over||G.paused)break;update(.05);const nb=atBeat+.05*2*tempoMult();if(Math.floor(nb)!==Math.floor(atBeat))onBeat(Math.floor(nb));atBeat=nb;}return G&&{t:G.t,hp:G.boss.hp,crowd:G.crowd,echoes:G.echoes.length,phase:G.boss.phase,score:G.score,req:G.request.type};},answer(){const r=G.request;if(r.theme)return null;const s=r.single||requestHint();return s?`${s.title} - ${s.artist}`:null;},req(){return G.request;},state(){return G;},fx(id){rarityFX(id,1);},card(){return makeShareCard();}};
 const catalogLoading=loadCatalog();
 /* boot: a short welcome while fonts and songs load, then the home screen over the live demo */
 (async function boot(){const bar=$('#splashBar'),t0=performance.now();let shown=8;const tick=setInterval(()=>{shown=Math.min(88,shown+(92-shown)*.12);bar.style.width=shown+'%';},120);
