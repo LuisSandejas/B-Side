@@ -68,7 +68,7 @@ def main() -> None:
             "year": int(r["year"]) if r["year"] else None, "popularity": int(r["popularity"]),
             "listeners": int(r["listeners"]), "artist_mbid": r["artist_mbid"] or None,
             "title_norm": norm(r["title"]), "search": f"{norm(r['title'])} {norm(r['artist'])}", "build_id": build_id,
-        } for r in csv.DictReader(f)]
+        } for r in csv.DictReader(f) if norm(r["title"])]  # a title must leave something to type (e.g. not just "The")
     print(f"Uploading {len(rows):,} songs as build {build_id}…")
     t0 = time.time()
     for i in range(0, len(rows), CHUNK):

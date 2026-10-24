@@ -55,11 +55,11 @@ Endless can be played with a **modifier**: Decades Night, No Airplay, Double Tim
 ## How it plays
 
 **Requests.** Easy ones open each set and harder ones arrive in later tracks:
-- *Songs:* genre, decade, "2000 or later", vibe (upbeat, sad, slow, party), love-song titles, songs by a band, by a Grammy winner or by an artist from a given country, era, year window, exact year, title shapes ("a one-word title", "a color in the title"), first letters, songs by a named artist, "a different song by whoever made X", same decade as / older than / newer than a reference song.
+- *Songs:* genre, decade, "2000 or later", vibe (upbeat, sad, slow, party), love-song titles, songs by a band, by a Grammy winner or by an artist from a given country, era, year window, exact year, title shapes ("a one-word title", "a color in the title"), first letters, anything by a named artist, anything by one of three artists, "a different song by whoever made X", same decade as / older than / newer than a reference song.
 - *Name an artist:* a rapper, a pop star, a band, a duo, a British solo artist, an artist from Canada, a Grammy winner, an artist with a one-word name, an artist who had a hit in the 80s, and more. Typing just the artist's name counts; their best-known fitting song joins your squad.
-- *Wordplay:* fill in the blank (typing just the missing word counts), unscramble, initials, and name-the-track clue cards.
+Every request has many right answers, so knowing *a* song is enough; there are no "guess the one exact title" cards. **Wordplay Night** leans on title words: letters, colors, numbers, one-word titles.
 
-Single-answer requests are worth ×1.5; two-part requests ×1.4; answering in the first half of the timer ×1.25.
+Two-part requests are worth ×1.4; answering in the first half of the timer ×1.25. Rare songs get a "That's a B-Side!" moment.
 
 **Rarity.** Every song has a popularity score (0–100) that sets its rarity. The aliens only know the charts, so rarer songs hurt them more:
 

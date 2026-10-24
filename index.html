@@ -372,6 +372,9 @@ img.ic{width:18px;height:18px;image-rendering:pixelated;vertical-align:-4px}
 /* rarity stamps, score bump, coach */
 .bigstamp{position:absolute;z-index:12;left:50%;top:44%;transform:translate(-50%,-50%) rotate(-6deg);font-family:var(--f-px);font-weight:700;font-size:clamp(34px,7vw,84px);line-height:1;color:var(--c);border:5px solid var(--c);padding:6px 20px;text-shadow:0 0 26px var(--c);background:rgba(10,10,18,.72);pointer-events:none;letter-spacing:.06em;white-space:nowrap;animation:bigstamp 1.7s cubic-bezier(.2,1.6,.4,1) forwards}
 .bigstamp.small{font-size:clamp(24px,4.4vw,48px);border-width:3px;animation-duration:1.2s}
+.bigstamp .disc{display:inline-block;width:.78em;height:.78em;margin-right:.28em;vertical-align:-.06em;border-radius:50%;background:radial-gradient(circle,var(--c) 0 13%,#0d0d14 14% 28%,#34343f 29% 31%,#0d0d14 32% 50%,#34343f 51% 53%,#0d0d14 54%);box-shadow:0 0 14px var(--c);animation:discspin .45s linear infinite}
+@keyframes discspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.bigstamp .disc{animation:none}}
 .bigstamp small{display:block;font-size:.32em;letter-spacing:.2em;margin-top:4px;text-align:center}
 @keyframes bigstamp{0%{transform:translate(-50%,-50%) rotate(-6deg) scale(3);opacity:0}14%{transform:translate(-50%,-50%) rotate(-6deg) scale(1);opacity:1}80%{opacity:1}100%{transform:translate(-50%,-56%) rotate(-6deg) scale(1.04);opacity:0}}
 .chip.score.bump{animation:bump .3s ease-out}
@@ -776,7 +779,7 @@ const MODS=[
   {id:'decades',name:'Decades Night',desc:'Every request is about years and eras. Know your timeline.',mult:1.1},
   {id:'noair',name:'No Airplay',desc:'Airplay songs are turned away at the door. Rarity bonuses are doubled.',mult:1.2},
   {id:'speed',name:'Double Time',desc:'Everything moves 30% faster. Score ×1.5.',mult:1.5},
-  {id:'wordplay',name:'Wordplay Night',desc:'Finish the title, unscramble, initials and name-the-track requests.',mult:1.1},
+  {id:'wordplay',name:'Wordplay Night',desc:'Every request is about words: title letters, colors, numbers, one-word titles.',mult:1.1},
   {id:'masked',name:'Masquerade',desc:'Most Echoes hide their names. Letters fill in as they get closer.',mult:1.2},
   {id:'takeover',name:'Genre Takeover',desc:'One genre floods the stage and the boss never remixes. Bring the counter.',mult:1.1},
   {id:'nohints',name:'No Safety Net',desc:'No hints, no skips. Score ×1.3.',mult:1.3},
@@ -1271,20 +1274,13 @@ const REQ={
   genreLetter:()=>{const g=pick(RING,rQ);const L=pick('ABCDHLMSTW'.split(''),rQ);return{label:'Genre + letter',crits:[C.genre(g),C.tletter(L)],html:`Play me a <em>${GENRES[g].label}</em> song whose title starts with <em>${L}</em>.`,two:true};},
   artistLetter:()=>{const L=pick('ABCDEFGHJKLMNPRSTW'.split(''),rQ);return{label:'Artist letter',crits:[C.letter(L)],html:`Play me a song by an artist starting with <em>${L}</em>.`};},
   titleLetter:()=>{const L=pick('ABCDEFGHIKLMNPRSTW'.split(''),rQ);return{label:'Title letter',crits:[C.tletter(L)],html:`Play me a song whose title starts with <em>${L}</em>.`};},
-  byArtist:()=>{const a=pick(ARTISTS.filter(a=>a.songs.length>=2),rQ);return{label:'Name a song',crits:[C.by(a.name)],html:`Play me anything by <em>${esc(a.name)}</em>.`,need:1};},
+  byArtist:()=>{const a=pick(ARTISTS.filter(a=>a.songs.length>=2&&a.fame>=70),rQ);return{label:'Name a song',crits:[C.by(a.name)],html:`Play me anything by <em>${esc(a.name)}</em>.`,need:1};},
+  anyOfThree:()=>{const pool=ARTISTS.filter(a=>a.songs.length>=2&&a.fame>=70);const picks=[];for(let k=0;k<12&&picks.length<3;k++){const a=pick(pool,rQ);if(!picks.includes(a))picks.push(a);}
+    const names=picks.map(a=>a.name);return{label:'Pick an artist',crits:[{chip:'One of three',label:`by ${names.join(', ')}`,test:s=>names.some(n=>artistMatch(n,s.artist))}],html:`Play anything by <em>${esc(names[0])}</em>, <em>${esc(names[1])}</em> or <em>${esc(names[2])}</em>.`,need:1};},
   sameArtistAs:()=>{const a=pick(ARTISTS.filter(a=>a.songs.length>=2),rQ);const ref=pick(a.songs,rQ);return{label:'Same artist',crits:[C.by(a.name),C.notTitle(ref.title)],html:`Play a <em>different</em> song by whoever made <em>${esc(ref.title)}</em>.`,need:1,hideArtist:true};},
   sameGenreAs:()=>{const a=pick(ARTISTS.filter(a=>a.songs.length>=2),rQ);return{label:'Same scene',crits:[C.genre(a.genre),C.notBy(a.name)],html:`Play something in the same genre as <em>${esc(a.name)}</em>, but not ${esc(a.name)}.`,two:true};},
   sameDecadeAs:()=>{const ref=pick(LOCAL.filter(s=>s.year>=1960),rQ);return{label:'Same decade',crits:[C.same(ref)],html:`Play something from the same decade as <em>${esc(ref.title)}</em> <small>(${esc(ref.artist)})</small>.`};},
   olderNewer:()=>{const ref=pick(LOCAL.filter(s=>s.year>=1975&&s.year<=2015),rQ);const older=rQ()<.5;return{label:older?'Older than':'Newer than',crits:[older?C.older(ref):C.newer(ref)],html:`Play something <em>${older?'older':'newer'}</em> than <em>${esc(ref.title)}</em> <small>(${esc(ref.artist)})</small>.`};},
-  fillTitle:()=>{const ph=G.boss.phase;const s=pick(unplayed(x=>titleWords(x.title).length>=2&&x.pop>=55),rQ);if(!s)return null;const words=cleanTitle(s.title).split(/\s+/);const cand=words.map((w,i)=>i).filter(i=>words[i].replace(/[^\w]/g,'').length>=3);if(!cand.length)return null;
-    let blanks=[pick(cand,rQ)];if(ph>=2&&cand.length>=3&&rQ()<.5)blanks.push(pick(cand.filter(i=>i!==blanks[0]),rQ));
-    const shown=words.map((w,i)=>blanks.includes(i)?w.replace(/[A-Za-z0-9]/g,'_'):w).join(' ');const hint=ph>=3&&rQ()<.5?`${GENRES[s.genre].label} · ${decadeOf(s.year)}s`:s.artist;
-    return{label:'Finish the title',crits:[C.exact(s)],html:`Finish the title: <em>${esc(shown)}</em> <small>(${esc(hint)})</small>`,single:s,need:1,missing:blanks.slice().sort((a,b)=>a-b).map(i=>words[i]).join(' ')};},
-  scramble:()=>{const s=pick(unplayed(x=>{const w=titleWords(x.title);return x.pop>=60&&w.length===1&&w[0].replace(/[^\w]/g,'').length>=4&&w[0].length<=8;}),rQ);if(!s)return null;
-    const hint=G.boss.phase>=3?`${GENRES[s.genre].label} · ${decadeOf(s.year)}s`:s.artist;return{label:'Unscramble',crits:[C.exact(s)],html:`Unscramble the title: <span class="mono">${esc(scrambleWord(titleWords(s.title)[0]))}</span> <small>(${esc(hint)})</small>`,single:s,need:1};},
-  initials:()=>{const s=pick(unplayed(x=>titleWords(x.title).length>=3&&x.pop>=60),rQ);if(!s)return null;const ini=titleWords(s.title).map(w=>w[0].toUpperCase()).join('. ')+'.';
-    return{label:'Initials',crits:[C.exact(s)],html:`Initials <span class="mono">${esc(ini)}</span> <small>(${esc(s.artist)} · ${decadeOf(s.year)}s)</small>`,single:s,need:1};},
-  clueCard:()=>{for(let k=0;k<20;k++){const s=pick(unplayed(x=>x.pop>=60),rQ);const n=titleWords(s.title).length;const crits=[C.by(s.artist),C.year(s.year),C.words(n)];if(answers(crits).length===1)return{label:'Name the track',crits,html:`Name the track: <em>${esc(s.artist)}</em> · <em>${s.year}</em> · <em>${n}-word title</em>`,single:s,need:1};}return null;},
   vibe:()=>{const v=pick(['upbeat','sad','slow','party'],rQ);return{label:'Vibe',crits:[C.vibe(v)],html:VIBES[v].html};},
   century:()=>({label:'This century',crits:[C.century()],html:'Play me any song from <em>2000 or later</em>.'}),
   love:()=>({label:'Love songs',crits:[C.love()],html:'Play me a song with <em>love</em>, <em>heart</em>, <em>kiss</em> or <em>baby</em> in the title.'}),
@@ -1307,10 +1303,10 @@ const REQ={
 function reqWeights(){const w=baseWeights();if(G.spot&&G.mod!=='wordplay'){w.spot=3;w.spotName=1;}return w;}
 function baseWeights(){const ph=G.boss.phase,mod=G.mod;
   if(mod==='decades')return{decade:3,genreDecade:3,era:2,window:2,exactYear:2,sameDecadeAs:3,olderNewer:3,nameHitDecade:2,century:1};
-  if(mod==='wordplay')return{fillTitle:5,scramble:4,initials:3,clueCard:3,byArtist:1};
-  const w={genre:3,decade:2,vibe:3,century:2,love:1,fillTitle:3,byArtist:2,titleShape:1,scramble:1,nameGenre:3,nameLetter:2,nameOneWord:1,nameGrammy:1,nameBand:1,bandSong:1,grammySong:1,nationSong:1,artistLetter:1,clueCard:1,era:1};
-  if(ph>=2)Object.assign(w,{genre:1,vibe:1,century:1,genreDecade:3,sameArtistAs:2,sameDecadeAs:2,olderNewer:2,sameGenreAs:1,initials:2,exactYear:1,genreLetter:1,window:1,nameHitDecade:2,nameDuo:1,nameSolo:1,nameNation:2,nameAbroad:1});
-  if(ph>=3)Object.assign(w,{decade:1,titleShape:1,genreDecade:3,fillTitle:3,initials:2,scramble:2,sameArtistAs:2,clueCard:2,exactYear:2,nameHitDecade:2});
+  if(mod==='wordplay')return{titleShape:4,titleLetter:3,genreLetter:2,genreShape:2,love:2,artistLetter:2,nameLetter:2,nameOneWord:1,anyOfThree:1};
+  const w={genre:3,decade:2,vibe:3,century:2,love:1,anyOfThree:3,byArtist:3,titleShape:1,titleLetter:1,nameGenre:3,nameLetter:2,nameOneWord:1,nameGrammy:1,nameBand:1,bandSong:1,grammySong:1,nationSong:1,artistLetter:1,era:1};
+  if(ph>=2)Object.assign(w,{genre:1,vibe:1,century:1,genreDecade:3,sameArtistAs:2,sameDecadeAs:2,olderNewer:2,sameGenreAs:1,anyOfThree:2,exactYear:1,genreLetter:1,window:1,nameHitDecade:2,nameDuo:1,nameSolo:1,nameNation:2,nameAbroad:1});
+  if(ph>=3)Object.assign(w,{decade:1,titleShape:1,genreDecade:3,anyOfThree:3,byArtist:2,sameArtistAs:2,exactYear:2,nameHitDecade:2});
   return w;}
 function makeRequest(depth=0){
   /* each request has its own seeded stream: everyone on the daily gets the same requests in the same order */
@@ -1696,14 +1692,14 @@ function drawSky(ms){const ph=G.boss.phase;const look=(ph-1)%3,lap=Math.floor((p
 }
 /* ===================== rarity feel: the rarer the song, the louder the moment ===================== */
 let rings=[],scans=[],raysUntil=0,raysX=96,hitStopUntil=0;
-function bigStamp(text,sub,col,small){const el=document.createElement('div');el.className='bigstamp'+(small?' small':'');el.style.setProperty('--c',col);el.textContent=text;if(sub){const s=document.createElement('small');s.textContent=sub;el.appendChild(s);}$('#gameScreen').appendChild(el);setTimeout(()=>el.remove(),1800);}
+function bigStamp(text,sub,col,small,disc){const el=document.createElement('div');el.className='bigstamp'+(small?' small':'');el.style.setProperty('--c',col);if(disc){const d=document.createElement('span');d.className='disc';el.appendChild(d);}el.appendChild(document.createTextNode(text));if(sub){const s=document.createElement('small');s.textContent=sub;el.appendChild(s);}$('#gameScreen').appendChild(el);setTimeout(()=>el.remove(),1800);}
 function rarityFX(id,slot){const x=LANES[slot],y=SQUAD_Y-14,t=performance.now();
   if(id==='air'){shake(140,1);rings.push({x,y,r1:18,c:'#a9aab8',t0:t,dur:360});}
   else if(id==='fan'){shake(240,2);rings.push({x,y,r1:32,c:'#7ec8ff',t0:t,dur:480});burstAt(x,y,14,['#7ec8ff','#ffffff']);}
-  else if(id==='dig'){shake(420,4);hitStopUntil=t+160;flashCol='199,155,255';flashUntil=t+240;rings.push({x,y,r1:62,c:'#c79bff',t0:t,dur:620},{x,y,r1:36,c:'#ffffff',t0:t+80,dur:460});burstAt(x,y,30,['#c79bff','#ffffff','#7a4bd8']);bigStamp('CRATE DIG','the aliens barely know it','#c79bff',true);sfx(()=>sfxDig());}
+  else if(id==='dig'){shake(420,4);hitStopUntil=t+160;flashCol='199,155,255';flashUntil=t+240;rings.push({x,y,r1:62,c:'#c79bff',t0:t,dur:620},{x,y,r1:36,c:'#ffffff',t0:t+80,dur:460});burstAt(x,y,30,['#c79bff','#ffffff','#7a4bd8']);bigStamp("IT'S A B-SIDE",'crate dig · the aliens barely know it','#c79bff',true,true);sfx(()=>sfxDig());}
   else{shake(800,6);hitStopUntil=t+420;flashCol='255,212,107';flashUntil=t+420;rings.push({x,y,r1:120,c:'#ffd46b',t0:t,dur:950},{x,y,r1:72,c:'#ffffff',t0:t+110,dur:720},{x,y,r1:40,c:'#ffd46b',t0:t+220,dur:600});raysUntil=t+1600;raysX=x;
     burstAt(x,y,50,['#ffd46b','#fff3c4','#ffffff']);for(let k=0;k<50;k++)particles.push({x:Math.random()*W,y:-4,vx:(Math.random()-.5)*20,vy:18+Math.random()*30,g:16,c:Math.random()<.7?'#ffd46b':'#ffffff',life:2.4,max:2.4,s:1});
-    bigStamp('WHITE LABEL','the aliens have never heard it','#ffd46b',false);sfx(()=>sfxChoir());}
+    bigStamp("THAT'S A B-SIDE!",'white label · the aliens have never heard it','#ffd46b',false,true);sfx(()=>sfxChoir());}
 }
 function drawRings(ms){
   if(ms<raysUntil&&!reduce){const left=(raysUntil-ms)/1600;cx.globalCompositeOperation='lighter';cx.fillStyle='#ffd46b';for(let k=0;k<12;k++){const a=k/12*Math.PI*2+ms/900;cx.globalAlpha=.16*left;cx.beginPath();cx.moveTo(raysX,SQUAD_Y-14);cx.lineTo(raysX+Math.cos(a-.06)*300,SQUAD_Y-14+Math.sin(a-.06)*300);cx.lineTo(raysX+Math.cos(a+.06)*300,SQUAD_Y-14+Math.sin(a+.06)*300);cx.closePath();cx.fill();}cx.globalAlpha=1;cx.globalCompositeOperation='source-over';}

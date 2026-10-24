@@ -290,8 +290,9 @@ def fit_line(xs: list[float], ys: list[float]) -> tuple[float, float]:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dump", help="path to musicbrainz-canonical-dump-*.tar.zst (default: newest in ~/.cache/b-side-catalog)")
-    ap.add_argument("--min-artist-users", type=int, default=150, help="keep artists with at least this many ListenBrainz listeners")
+    ap.add_argument("--min-artist-users", type=int, default=500, help="keep artists with at least this many ListenBrainz listeners")
     ap.add_argument("--min-song-users", type=int, default=20, help="keep songs with at least this many listeners")
+    ap.add_argument("--max-songs", type=int, default=400_000, help="keep at most this many songs, most played first (fits Supabase's free 500 MB)")
     ap.add_argument("--out", default=str(ROOT / "build" / "catalog.csv.gz"))
     args = ap.parse_args()
 
@@ -353,7 +354,11 @@ def main() -> None:
         cap = max(3, min(60, round(6 * math.log10(au) - 6)))  # 150 listeners -> 7 songs, 10k -> 18, 300k -> 27
         top = songs[0][0]
         picked += [(lead, *s) for s in songs[:cap] if s[0] >= top * 0.02]
-    log(f"step 4/6: {len(picked):,} songs from {len(by_artist):,} artists")
+    if len(picked) > args.max_songs:
+        picked.sort(key=lambda p: -p[1])
+        log(f"step 4/6: capping {len(picked):,} songs at the {args.max_songs:,} most played (cutoff: {picked[args.max_songs][1]} listeners)")
+        picked = picked[:args.max_songs]
+    log(f"step 4/6: {len(picked):,} songs from {len({p[0] for p in picked}):,} artists")
 
     # 5. release years and tags
     log("step 5/6: years and genre tags")
