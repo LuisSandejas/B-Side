@@ -11,3 +11,13 @@ supabase/.temp/
 # OS / editor
 .DS_Store
 node_modules/
+
+# generated catalog (scripts/catalog/build_catalog.py)
+build/
+
+# local Claude preview config
+.claude/
+
+# Python
+__pycache__/
+*.pyc

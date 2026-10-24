@@ -94,11 +94,16 @@ assets/                       social preview image (og.png), app icons, fonts/ (
 favicon.ico, site.webmanifest browser tab icon and home-screen install info
 robots.txt, sitemap.xml       search-engine basics
 vercel.json                   security headers and caching for the live site
+sw.js                         service worker: instant repeat loads and offline play
+scripts/catalog/
+  build_catalog.py            builds the big catalog from MusicBrainz + ListenBrainz
+  load_catalog.py             uploads it to Supabase
 supabase/
   migrations/
     20261024120000_create_songs.sql   songs table, indexes, read-only access policy
     20261024120100_seed_songs.sql     the songs that ship inside the game
     20261025090000_create_scores.sql  anonymous scores + score_stats() for the end-of-set curve
+    20261025120000_create_catalog.sql the big catalog table + search_catalog() for server-side lookup
 docs/
   ARCHITECTURE.md             how the game is put together
   SONG-CATALOG.md             catalog schema, rarity rules, adding songs
@@ -109,7 +114,9 @@ docs/
 
 ## Song catalog and scores (Supabase)
 
-The game knows about 2,700 songs: about 300 built into `index.html` (so it still works if nothing else loads) and the rest in `data/songs.json`, loaded while the splash screen shows. If the Supabase `songs` table has extra rows, those are added on top.
+The game ships with about 2,700 hand-picked songs: about 300 built into `index.html` (so it still works if nothing else loads) and the rest in `data/songs.json`, loaded while the splash screen shows. Echoes, requests and the Daily Set come only from this list, so they stay recognizable and identical for everyone.
+
+Anything else a player types is looked up in the **big catalog**: a few hundred thousand songs built from open [MusicBrainz](https://musicbrainz.org) and [ListenBrainz](https://listenbrainz.org) data and stored in the Supabase `catalog` table. The browser never downloads that table; it calls `search_catalog()`, which answers from a trigram index in milliseconds. Niche songs land in the rare tiers, so knowing deep cuts pays off. See [docs/SONG-CATALOG.md](docs/SONG-CATALOG.md) for how it's built and refreshed.
 
 Supabase also stores **anonymous scores** for the end-of-set curve. Anyone can submit a score, but nobody can read individual rows; the game only asks `score_stats()` for a histogram and how many scores sit below yours. Scores are never submitted from `localhost` or from `?autotest` runs, so testing doesn't pollute the data.
 
@@ -130,7 +137,9 @@ supabase db push
 
 `supabase init` may ask about editor settings; either answer is fine. `supabase link` asks for the database password — type it into the prompt, don't save it in a file. `supabase db push` creates the `songs` and `scores` tables and seeds the songs. Until then the game still works; the end-of-set curve just stays an estimate.
 
-To add songs, see [docs/SONG-CATALOG.md](docs/SONG-CATALOG.md).
+If `db push` can't connect, paste the migration files into the dashboard's **SQL Editor** and run them instead (`cat supabase/migrations/*.sql | pbcopy` copies them all, oldest first).
+
+To add songs or rebuild the big catalog, see [docs/SONG-CATALOG.md](docs/SONG-CATALOG.md).
 
 ---
 
@@ -149,7 +158,8 @@ It's a static site, so any static host works.
 ## Development notes
 
 - **Test hook.** Open `index.html?autotest` to expose `window.__bside` for scripted play-testing: `step(seconds)` advances the game, `answer()` returns a valid answer to the current request, `state()` returns the live game state, `card()` renders the share card. It also disables the auto-pause when the tab is hidden.
-- **Saved data** lives in the browser's `localStorage` under `bside-profile-v2` (rank, XP, streak, daily results, missions, crate, best endless run, whether the first-run tips were shown). That's how the game remembers a returning player: it's per browser and per device, so clearing site data or switching devices starts fresh. Syncing across devices needs player accounts (see the roadmap).
+- **Saved data** lives in the browser's `localStorage` (not cookies: cookies are sent to the server with every request and hold only 4 KB, while `localStorage` stays on the device). `bside-profile-v2` (rank, XP, streak, daily results, missions, crate, best endless run, whether the first-run tips were shown). That's how the game remembers a returning player: it's per browser and per device, so clearing site data or switching devices starts fresh. Syncing across devices needs player accounts (see the roadmap). `bside-found-v1` remembers up to 500 big-catalog songs the player has played, so they're recognized instantly, even offline.
+- **Performance.** Typing never scans the whole catalog: an inverted index (word prefixes and trigrams) narrows each search to a handful of candidates, and edit distance stops early once a match is impossible. That made matching about 200× and suggestions about 100× faster (tens of microseconds per keystroke). Server lookups are debounced, cancelled when the text changes, cached (LRU), and paused for a while if the server errors. The service worker (`sw.js`, production only) serves fonts and data from cache and keeps the game playable offline, and `vercel.json` sets long-lived HTTP caching for static files.
 - **Determinism.** The Daily Set seeds every random stream from the date, and gives each Echo spawn, request and boss remix its own seeded stream, so players who play differently still face the same content.
 
 ---

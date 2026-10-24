@@ -39,8 +39,20 @@ Everything is synthesized with the Web Audio API.
 ## 6. Song lookup and catalog
 
 - `CATALOG` — the Supabase URL and publishable key.
-- `loadCatalog()` — pages through `/rest/v1/songs` (1,000 rows per request), adds songs the game doesn't already know, reindexes, and updates the title-screen status. Times out after 6 s and falls back to the built-in list.
-- `localMatch(text)` — scores every catalog song against what was typed (exact, prefix, contains, typo distance). `identify(text)` returns the best match above a threshold, or nothing — in which case the entry is rejected with a screen shake.
+- `loadCatalog()` — loads `data/songs.json` and any rows in the small Supabase `songs` table, adds songs the game doesn't already know, reindexes, and updates the title screen. Times out and falls back to the built-in list.
+- `finishSong(s)` — computes each song's normalized title and artist once (`nt`, `na`, `nta`, word lists), so typing never re-normalizes the catalog.
+- `SongIndex` / `INDEX` — the search index over every known song:
+  - **word prefixes:** the first two letters of every word in "title artist" → songs (`candidates`)
+  - **trigrams:** every three-letter run → songs; intersecting posting lists finds substrings (`substring`) and counting shared trigrams finds typos (`fuzzy`)
+- `lev(a, b, max)` — edit distance on two reused typed-array rows; with `max` it stops as soon as the answer must exceed it.
+- `matchScore` / `localMatch(text)` / `identify(text)` — rank the index's candidates (exact, prefix, contains, typo distance) and return the best match above a threshold. Results are memoized.
+- **Big catalog** (`remoteSearch`) — when the built-in list doesn't know a song, `search_catalog()` is called on Supabase:
+  - while typing, only after a 160 ms pause and only when local results are thin (debounce); a newer keystroke cancels the request in flight (`AbortController`)
+  - answers are kept in an LRU cache of 200 queries; a query that found nothing short-circuits longer queries that start the same way
+  - a server error pauses lookups for 15–30 s; a missing function (404) turns them off for the session (circuit breaker)
+  - `rememberSong` keeps up to 500 played big-catalog songs in `localStorage` (`bside-found-v1`) and adds them to the index at startup
+  - on submit, the game keeps running while the lookup is pending; a stale answer (new game, newer submission) is dropped
+- Big-catalog songs never enter `LOCAL`, so Echoes, requests and the Daily Set stay the same for every player.
 
 ## 7. Requests
 

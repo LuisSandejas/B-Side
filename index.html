@@ -269,6 +269,9 @@ img.ic{width:18px;height:18px;image-rendering:pixelated;vertical-align:-4px}
 .ask input{flex:1 1 auto;min-width:0;background:rgba(16,15,28,.95);color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:10px 16px;font-family:var(--f-ui);font-size:19px;font-weight:600;letter-spacing:.02em;text-align:center}
 .ask input::placeholder{color:var(--dim);font-weight:500}
 .ask input:focus{border-color:var(--amber);outline:none;box-shadow:0 0 0 4px rgba(242,178,76,.15)}
+.ask input.busy{border-color:var(--amber);animation:ibusy 1s ease-in-out infinite}
+@keyframes ibusy{50%{border-color:var(--line)}}
+@media (prefers-reduced-motion:reduce){.ask input.busy{animation:none}}
 .ask input.reject{border-color:var(--bad);animation:ishake .35s steps(6)}
 .ask input.accept{border-color:var(--good)}
 @keyframes ishake{0%,100%{transform:none}25%{transform:translateX(-8px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
@@ -569,7 +572,14 @@ const fmtTime=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')
 const fmtNum=n=>Math.round(n).toLocaleString('en-US');
 const rS=()=>G&&G.rngS?G.rngS():Math.random();
 const rQ=()=>G&&G.rngQ?G.rngQ():Math.random();
-function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let prev=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){const cur=[i];for(let j=1;j<=n;j++)cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));prev=cur;}return prev[n];}
+/* edit distance; with `max` it gives up as soon as the answer must exceed it, and it reuses two typed rows instead of allocating per call */
+let levP=new Uint16Array(64),levC=new Uint16Array(64);
+function lev(a,b,max=Infinity){const m=a.length,n=b.length;if(Math.abs(m-n)>max)return max+1;if(!m)return n;if(!n)return m;
+  if(n+1>levP.length){levP=new Uint16Array(n+33);levC=new Uint16Array(n+33);}let prev=levP,cur=levC;for(let j=0;j<=n;j++)prev[j]=j;
+  for(let i=1;i<=m;i++){cur[0]=i;let low=i;const ca=a.charCodeAt(i-1);
+    for(let j=1;j<=n;j++){const v=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(ca===b.charCodeAt(j-1)?0:1));cur[j]=v;if(v<low)low=v;}
+    if(low>max)return max+1;const t=prev;prev=cur;cur=t;}
+  return prev[n];}
 
 /* ===================== pixel font ===================== */
 const FONT={A:'.x.x.xxxxx.xx.x',B:'xx.x.xxx.x.xxx.',C:'.xxx..x..x...xx',D:'xx.x.xx.xx.xxx.',E:'xxxx..xx.x..xxx',F:'xxxx..xx.x..x..',G:'.xxx..x.xx.x.xx',H:'x.xx.xxxxx.xx.x',I:'xxx.x..x..x.xxx',J:'..x..x..xx.x.x.',K:'x.xx.xxx.x.xx.x',L:'x..x..x..x..xxx',M:'x.xxxxxxxx.xx.x',N:'xx.x.xx.xx.xx.x',O:'.x.x.xx.xx.x.x.',P:'xx.x.xxx.x..x..',Q:'.x.x.xx.xxx..xx',R:'xx.x.xxx.x.xx.x',S:'.xxx...x...xxx.',T:'xxx.x..x..x..x.',U:'x.xx.xx.xx.xxxx',V:'x.xx.xx.xx.x.x.',W:'x.xx.xxxxxxxx.x',X:'x.xx.x.x.x.xx.x',Y:'x.xx.x.x..x..x.',Z:'xxx..x.x.x..xxx',
@@ -616,7 +626,7 @@ const RARITIES={
 };
 const rarityOf=s=>s.pop>=80?RARITIES.air:s.pop>=60?RARITIES.fan:s.pop>=40?RARITIES.dig:RARITIES.white;
 const HOOKS=[[0,2,4],[4,2,0],[0,4,7],[2,4,5],[0,1,2],[7,4,2],[0,4,2],[5,4,0],[0,2,7]];
-function finishSong(s){s.id=s.id||norm(s.title+' '+s.artist);const r=rng(hash(s.id));s.hook=HOOKS[Math.floor(r()*HOOKS.length)];s.key=(1+Math.floor(r()*12))+(s.mood>=.5?'B':'A');return s;}
+function finishSong(s){s.id=s.id||norm(s.title+' '+s.artist);s.nt=norm(s.title);s.na=norm(s.artist);s.nta=s.nt+' '+s.na;s.tw=s.nt.split(' ');s.aw=s.na.split(' ');s.words=s.tw.concat(s.aw);const r=rng(hash(s.id));s.hook=HOOKS[Math.floor(r()*HOOKS.length)];s.key=(1+Math.floor(r()*12))+(s.mood>=.5?'B':'A');return s;}
 /* Built-in songs. Years are real release years; popularity, energy and mood are estimates. */
 const RAW=[
 ['Bohemian Rhapsody','Queen','rock',1975,96,.7,.4],["Don't Stop Me Now",'Queen','rock',1978,92,.9,.9],['Another One Bites the Dust','Queen','rock',1980,88,.75,.6],['We Will Rock You','Queen','rock',1977,92,.8,.6],
@@ -701,10 +711,39 @@ const RAW=[
 ['Party Rock Anthem','LMFAO','electronic',2011,88,.9,.9],['Feel So Close','Calvin Harris','electronic',2011,82,.8,.7],['Married Life','Michael Giacchino','classical',2009,58,.3,.6],
 ];
 const LOCAL=RAW.map(([title,artist,genre,year,pop,energy,mood])=>finishSong({title,artist,genre,year,pop,energy,mood,source:'list'}));
-let ARTISTS=[],FAMOUS=[];
+/* ===================== song search index =====================
+   Typing never scans the whole catalog. Two inverted indexes point at candidate songs,
+   which are then ranked with the full scoring rules:
+   - word prefixes: the first two letters of every word in "title artist" -> songs
+   - trigrams: every three-letter run of "title artist" -> songs, for typos (fuzzy fallback) */
+const pushTo=(m,k,v)=>{const a=m.get(k);if(a)a.push(v);else m.set(k,[v]);};
+function trigrams(s){const p=' '+s+' ',g=new Set();for(let i=0;i+3<=p.length;i++)g.add(p.slice(i,i+3));return g;}
+class SongIndex{
+  constructor(){this.songs=[];this.byId=new Map();this.pre=new Map();this.tri=new Map();this.hits=new Uint16Array(0);}
+  add(s){const have=this.byId.get(s.id);if(have)return have;const i=this.songs.push(s)-1;this.byId.set(s.id,s);
+    for(const k of new Set(s.words.map(w=>w.slice(0,2))))if(k)pushTo(this.pre,k,i);
+    for(const g of trigrams(s.nta))pushTo(this.tri,g,i);return s;}
+  /* songs with a word starting like any word of the query */
+  candidates(q){const out=new Set();for(const w of new Set(q.split(' ')))for(const i of this.pre.get(w.slice(0,2))||[])out.add(this.songs[i]);return out;}
+  /* songs whose "title artist" contains q anywhere: intersect the trigram posting lists, shortest first, then confirm */
+  substring(q){if(q.length<3)return[];const gs=new Set();for(let i=0;i+3<=q.length;i++)gs.add(q.slice(i,i+3));
+    const lists=[...gs].map(g=>this.tri.get(g)||[]).sort((a,b)=>a.length-b.length);if(!lists[0].length)return[];
+    let cur=lists[0];for(let k=1;k<lists.length&&cur.length;k++){const l=new Set(lists[k]);cur=cur.filter(i=>l.has(i));}
+    const out=[];for(const i of cur){const s=this.songs[i];if(s.nta.includes(q))out.push(s);}return out;}
+  /* songs sharing the most trigrams with the query; a counting array avoids building per-song sets */
+  fuzzy(q,k=40){const gs=trigrams(q);if(gs.size<4)return[];if(this.hits.length<this.songs.length)this.hits=new Uint16Array(this.songs.length+256);
+    const h=this.hits,touched=[];for(const g of gs)for(const i of this.tri.get(g)||[])if(!h[i]++)touched.push(i);
+    const need=Math.max(2,Math.ceil(gs.size*.35));const res=touched.filter(i=>h[i]>=need).sort((x,y)=>h[y]-h[x]).slice(0,k).map(i=>this.songs[i]);
+    for(const i of touched)h[i]=0;return res;}
+}
+const INDEX=new SongIndex();LOCAL.forEach(s=>INDEX.add(s));
+const ALIASES={tupac:'2pac','tupac shakur':'2pac',jayz:'jay z',biggie:'notorious b i g','biggie smalls':'notorious b i g'};
+const akMemo=new Map();
+function artistKey(a){let k=akMemo.get(a);if(k===undefined){const n=norm(a);k=ALIASES[n]||ALIASES[n.replace(/ /g,'')]||n;if(akMemo.size>5000)akMemo.clear();akMemo.set(a,k);}return k;}
+let ARTISTS=[],FAMOUS=[],ARTIST_BY_KEY=new Map();
 /* artists and the Echo pool are derived from the catalog; rerun after songs are added */
 function indexCatalog(){const m=new Map();LOCAL.forEach(s=>{if(!m.has(s.artist))m.set(s.artist,{name:s.artist,genre:s.genre,songs:[]});m.get(s.artist).songs.push(s);});
-  ARTISTS=[...m.values()];ARTISTS.forEach(x=>x.fame=Math.max(...x.songs.map(s=>s.pop)));
+  ARTISTS=[...m.values()];ARTISTS.forEach(x=>{x.fame=Math.max(...x.songs.map(s=>s.pop));x.key=artistKey(x.name);});ARTIST_BY_KEY=new Map(ARTISTS.map(a=>[a.key,a]));
   /* the aliens only know the charts, so only household names march as Echoes */
   FAMOUS=ARTISTS.filter(a=>a.fame>=80);if(typeof hitCache!=='undefined')hitCache.clear();}
 indexCatalog();
@@ -715,8 +754,6 @@ function maskedLabel(m){const l=m.full;const idx=[];for(let i=0;i<l.length;i++)i
   const frac=clamp((m.y-SPAWN_Y)/(BREACH_Y-SPAWN_Y),0,1);const r=rng(m.id*7919);const order=shuffle(idx.slice(),r);const show=new Set(order.slice(0,Math.floor(idx.length*(.15+.7*frac))));
   return l.replace(/[A-Z0-9]/g,(c,i)=>i===0||l[i-1]===' '||show.has(i)?c:'_');}
 const shownName=m=>m.masked?maskedLabel(m):m.artist;
-const ALIASES={tupac:'2pac','tupac shakur':'2pac',jayz:'jay z',biggie:'notorious b i g','biggie smalls':'notorious b i g'};
-function artistKey(a){const n=norm(a);return ALIASES[n]||ALIASES[n.replace(/ /g,'')]||n;}
 function artistMatch(echoArtist,songArtist){const a=artistKey(echoArtist),b=artistKey(songArtist);if(!a||!b)return false;if(a===b)return true;
   if(b.length>=4&&(b.startsWith(a+' ')||a.startsWith(b+' ')))return true;
   const last=a.split(' ').pop();if(last.length>=5&&b.split(' ').pop()===last&&(a.split(' ').length>1||b.split(' ').length>1))return true;
@@ -729,8 +766,9 @@ const metaOf=a=>META[artistKey(a)]||null;
 const NATION={US:'American',UK:'British',CA:'Canadian',AU:'Australian',IE:'Irish',KR:'Korean',SE:'Swedish',FR:'French'};
 const PLACE={UK:'the UK',CA:'Canada',AU:'Australia',IE:'Ireland',KR:'South Korea',SE:'Sweden',FR:'France'};
 var hitCache=new Map();
-function artistHit(name,d){const key=artistKey(name)+'|'+d;if(hitCache.has(key))return hitCache.get(key);const a=ARTISTS.find(x=>artistKey(x.name)===artistKey(name));const v=!!a&&a.songs.some(s=>s.year>=d&&s.year<=d+9&&s.pop>=65);hitCache.set(key,v);return v;}
-function findArtist(text){const q=artistKey(text);if(!q||q.length<2)return null;let best=null,bd=9;for(const a of ARTISTS){const k=artistKey(a.name);if(k===q)return a;if(q.length>=5){const d=lev(q,k);if(d<bd&&d<=1){bd=d;best=a;}}}return best;}
+function artistHit(name,d){const key=artistKey(name)+'|'+d;if(hitCache.has(key))return hitCache.get(key);const a=ARTIST_BY_KEY.get(artistKey(name));const v=!!a&&a.songs.some(s=>s.year>=d&&s.year<=d+9&&s.pop>=65);hitCache.set(key,v);return v;}
+function findArtist(text){const q=artistKey(text);if(!q||q.length<2)return null;const exact=ARTIST_BY_KEY.get(q);if(exact)return exact;if(q.length<5)return null;
+  let best=null,bd=2;for(const a of ARTISTS){const d=lev(q,a.key,1);if(d<bd){bd=d;best=a;}}return best;}
 
 /* ===================== modifiers ===================== */
 const MODS=[
@@ -1116,24 +1154,60 @@ const CATALOG={url:'https://xrfgssobisrfuemvcqvs.supabase.co',key:'sb_publishabl
 let catalogReady=false;
 function setCatalogStatus(state,n){const dot=$('#aiDot'),txt=$('#aiText');if(!dot)return;dot.className='ai-dot '+(state==='online'||state==='local'?'on':state==='offline'?'off':'');
   txt.textContent=state==='loading'?'Loading the song catalog…':`${fmtNum(LOCAL.length)} songs in the catalog.`;}
-function fetchT(url,ms,opts={}){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);return fetch(url,Object.assign({signal:c.signal},opts)).finally(()=>clearTimeout(t));}
+function fetchT(url,ms,opts={}){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);if(opts.signal)opts.signal.addEventListener('abort',()=>c.abort(),{once:true});
+  return fetch(url,Object.assign({},opts,{signal:c.signal})).finally(()=>clearTimeout(t));}
 async function loadCatalog(){
   setCatalogStatus('loading');let added=0,online=false;const seen=new Set(LOCAL.map(s=>s.id));
   const num=(v,d)=>v!==null&&v!==undefined&&Number.isFinite(+v)?+v:d;
   const add=(rows,source)=>{for(const x of rows){if(!x||!x.title||!x.artist||!GENRES[x.genre])continue;
     const s=finishSong({title:String(x.title),artist:String(x.artist),genre:x.genre,year:x.year?+x.year:null,pop:clamp(num(x.popularity,50),0,100),energy:clamp(num(x.energy,.5),0,1),mood:clamp(num(x.mood,.5),0,1),source});
-    if(seen.has(s.id))continue;seen.add(s.id);LOCAL.push(s);added++;}};
+    if(seen.has(s.id))continue;seen.add(s.id);LOCAL.push(s);INDEX.add(s);added++;}};
   try{const r=await fetchT('data/songs.json',8000);if(r.ok)add((await r.json()).map(a=>({title:a[0],artist:a[1],genre:a[2],year:a[3],popularity:a[4],energy:a[5],mood:a[6]})),'list');}catch(e){}
   if(CATALOG.url&&CATALOG.key){try{const rows=[];for(let from=0;from<100000;from+=1000){const r=await fetchT(`${CATALOG.url}/rest/v1/songs?select=title,artist,genre,year,popularity,energy,mood&order=id&offset=${from}&limit=1000`,6000,{headers:{apikey:CATALOG.key}});
       if(!r.ok)throw new Error('catalog '+r.status);const page=await r.json();rows.push(...page);if(page.length<1000)break;}add(rows,'db');online=true;}catch(e){}}
   if(added)indexCatalog();setCatalogStatus(online?'online':'local',added);catalogReady=true;if(screen==='start')renderTitle();}
-const songCache={};
+/* how well typed text q (normalized) names song s: 100 exact … 55 loose, 0 no */
+function matchScore(q,s){const t=s.nt,ta=s.nta;
+  if(q===t||q===ta)return 100;if(q.startsWith(t+' ')&&ta.startsWith(q))return 95;if(q.startsWith(t)&&t.length>=3)return 82;if(t.startsWith(q)&&q.length>=4)return 70;if(q.includes(t)&&t.length>=5)return 55;
+  const tol=Math.max(1,Math.floor(t.length/7));return q.length>=5&&lev(q,t,tol)<=tol?60:0;}
+function bestMatch(q,songs){let best=null,score=0;for(const s of songs){const sc=matchScore(q,s);if(sc>score||(sc===score&&sc>0&&s.pop>best.pop)){score=sc;best=s;}}return{song:best,score};}
 function localMatch(text){const q=norm(text.replace(/\s+-\s+/,' '));if(!q)return{song:null,score:0};
-  let best=null,score=0;for(const s of LOCAL){const t=norm(s.title),ta=norm(s.title+' '+s.artist);let sc=0;
-    if(q===t||q===ta)sc=100;else if(q.startsWith(t+' ')&&ta.startsWith(q))sc=95;else if(q.startsWith(t)&&t.length>=3)sc=82;else if(t.startsWith(q)&&q.length>=4)sc=70;else if(q.includes(t)&&t.length>=5)sc=55;else if(q.length>=5&&lev(q,t)<=Math.max(1,Math.floor(t.length/7)))sc=60;
-    if(sc>score||(sc===score&&sc>0&&s.pop>best.pop)){score=sc;best=s;}}
-  return{song:best,score};}
-function identify(text){const key=norm(text);if(songCache[key])return{song:songCache[key]};const lm=localMatch(text);const song=lm.song&&lm.score>=55?lm.song:null;if(song)songCache[key]=song;return{song};}
+  let r=bestMatch(q,INDEX.candidates(q));if(r.score<60&&q.length>=5){const f=bestMatch(q,INDEX.fuzzy(q));if(f.score>r.score)r=f;}return r;}
+const songCache=new Map();
+function identify(text){const key=norm(text);const c=songCache.get(key);if(c)return{song:c};const lm=localMatch(text);const song=lm.song&&lm.score>=55?lm.song:null;
+  if(song){if(songCache.size>500)songCache.clear();songCache.set(key,song);}return{song};}
+
+/* ===================== full-catalog lookup =====================
+   Songs beyond the built-in list live in the Supabase `catalog` table (a few hundred thousand rows)
+   and are searched on the server, never downloaded:
+   - while typing, the server is asked only after a short pause and only when local results are thin (debounce)
+   - a newer keystroke cancels the request in flight (AbortController)
+   - answers sit in a small LRU cache; a query that found nothing short-circuits longer ones that start the same way
+   - if the server errors, lookups pause for a while instead of retrying on every key (circuit breaker)
+   - songs a player actually plays are remembered in localStorage, so they're recognized instantly, even offline, next time */
+const GENRE_ENERGY={rock:.75,electronic:.75,hiphop:.7,jazz:.45,classical:.35,pop:.65,rnb:.55};
+const FOUND_KEY='bside-found-v1',FOUND_MAX=500;
+const remote={lru:new Map(),misses:[],ctl:null,timer:0,down:0,tok:0};
+function lruGet(k){const v=remote.lru.get(k);if(v!==undefined){remote.lru.delete(k);remote.lru.set(k,v);}return v;}
+function lruSet(k,v){remote.lru.set(k,v);if(remote.lru.size>200)remote.lru.delete(remote.lru.keys().next().value);}
+const remoteOn=()=>!!(CATALOG.url&&CATALOG.key)&&remote.down<=Date.now();
+function catalogSong(x){const id=norm(x.title+' '+x.artist);const have=INDEX.byId.get(id);if(have)return have;const g=GENRES[x.genre]?x.genre:'pop';
+  return finishSong({id,title:String(x.title),artist:String(x.artist),genre:g,year:x.year?+x.year:null,pop:clamp(Math.round(+x.popularity||30),0,100),energy:GENRE_ENERGY[g],mood:.5,source:'big'});}
+async function remoteSearch(q,signal){
+  if(!remoteOn()||q.length<3)return null;
+  const hit=lruGet(q);if(hit)return hit;
+  if(remote.misses.some(m=>q.length>m.length&&q.startsWith(m)))return[];
+  try{const r=await fetchT(`${CATALOG.url}/rest/v1/rpc/search_catalog?q=${encodeURIComponent(q)}&lim=8`,2500,{headers:{apikey:CATALOG.key},signal});
+    if(!r.ok){remote.down=r.status===404?Infinity:Date.now()+30000;return null;}  // 404: the catalog isn't set up, so stop asking this session
+    const rows=(await r.json()).filter(x=>x&&x.title&&x.artist).map(catalogSong);lruSet(q,rows);
+    if(!rows.length){remote.misses.push(q);if(remote.misses.length>60)remote.misses.shift();}
+    return rows;
+  }catch(e){if(!(signal&&signal.aborted))remote.down=Date.now()+15000;return null;}}
+function loadFound(){try{const f=JSON.parse(localStorage.getItem(FOUND_KEY)||'{}');return f&&typeof f==='object'?f:{};}catch(e){return{};}}
+function rememberSong(s){if(s.source!=='big')return s;INDEX.add(s);const f=loadFound();f[s.id]=[s.title,s.artist,s.genre,s.year,s.pop,Date.now()];
+  const ids=Object.keys(f);if(ids.length>FOUND_MAX)ids.sort((a,b)=>f[a][5]-f[b][5]).slice(0,ids.length-FOUND_MAX).forEach(k=>delete f[k]);
+  try{localStorage.setItem(FOUND_KEY,JSON.stringify(f));}catch(e){}return s;}
+for(const[id,[title,artist,genre,year,pop]] of Object.entries(loadFound()))if(GENRES[genre])INDEX.add(finishSong({id,title,artist,genre,year,pop,energy:GENRE_ENERGY[genre],mood:.5,source:'big'}));
 
 /* ===================== requests ===================== */
 const COLOR_RE=/\b(red|blue|green|yellow|black|white|pink|purple|orange|gold|golden|silver|grey|gray|violet|scarlet)\b/i;
@@ -1379,9 +1453,17 @@ function submitSong(text){
       const any=a.songs.find(s=>!G.playedIds.has(s.id));if(!any){reject(`You've already played every ${esc(a.name)} song this set.`);return;}
       evaluate(any);return;}}
   const {song}=identify(text);
-  if(!song){const a=findArtist(text);reject(a?`To reclaim or play ${esc(a.name)}, type one of their songs.`:`“${esc(text)}” isn't in the song catalog. Check the spelling or pick a suggestion.`);return;}
-  evaluate(song);
+  if(song){evaluate(song);return;}
+  if(remoteOn()&&norm(text).length>=3){lookupThenEvaluate(text);return;}
+  rejectUnknown(text);
 }
+function rejectUnknown(text){const a=findArtist(text);reject(a?`To reclaim or play ${esc(a.name)}, type one of their songs.`:`“${esc(text)}” isn't in the song catalog. Check the spelling or pick a suggestion.`);}
+/* not in the built-in list: look it up in the full catalog while the game keeps running */
+function lookupThenEvaluate(text){const q=norm(text.replace(/\s+-\s+/,' '));const g=G,tok=++remote.tok;const inp=$('#songInput');
+  setFb('Searching the full catalog…','');inp.classList.add('busy');
+  remoteSearch(q).then(rows=>{if(tok===remote.tok)inp.classList.remove('busy');if(G!==g||G.over||tok!==remote.tok)return;
+    const m=rows&&rows.length?bestMatch(q,rows):{song:null,score:0};
+    if(m.song&&m.score>=55){songCache.set(norm(text),m.song);evaluate(rememberSong(m.song));}else rejectUnknown(text);});}
 function requestOK(song){return G.request.crits.every(c=>c.test(song));}
 function evaluate(song){
   if(G.playedIds.has(song.id)){reject(`You already played “${esc(song.title)}” this set. Pick a different song.`);return;}
@@ -1961,24 +2043,40 @@ let toastT=0;function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=
 
 /* ---------- autocomplete ---------- */
 let sugg=[],suggIdx=-1;
-function suggestScore(s,q,qt){const t=norm(s.title),a=norm(s.artist),ta=t+' '+a;let sc=0;
-  if(t.startsWith(q))sc=100;else if(t.split(' ').some(w=>w.startsWith(q)))sc=85;else if(qt.length>1&&qt.every(w=>ta.split(' ').some(x=>x.startsWith(w))))sc=80;else if(a.startsWith(q))sc=72;else if(a.split(' ').some(w=>w.startsWith(q)))sc=64;else if(ta.includes(q))sc=52;
-  else if(q.length>=4&&lev(t.slice(0,q.length+1),q)<=1)sc=44;else if(q.length>=5&&lev(a.slice(0,q.length),q)<=1)sc=40;
+function suggestScore(s,q,qt){const t=s.nt,a=s.na,ta=s.nta;let sc=0;
+  if(t.startsWith(q))sc=100;else if(s.tw.some(w=>w.startsWith(q)))sc=85;else if(qt.length>1&&qt.every(w=>s.words.some(x=>x.startsWith(w))))sc=80;else if(a.startsWith(q))sc=72;else if(s.aw.some(w=>w.startsWith(q)))sc=64;else if(ta.includes(q))sc=52;
+  else if(q.length>=4&&lev(t.slice(0,q.length+1),q,1)<=1)sc=44;else if(q.length>=5&&lev(a.slice(0,q.length),q,1)<=1)sc=40;
   return sc?sc+s.pop/40:0;}
 function updateSuggest(){
-  const v=$('#songInput').value;const q=norm(v);if(!G||q.length<2){hideSuggest();return;}
-  const qt=q.split(' ');const scored=[];for(const s of LOCAL){const sc=suggestScore(s,q,qt);if(sc)scored.push([sc-(G.playedIds.has(s.id)?60:0),s]);}
-  scored.sort((a,b)=>b[0]-a[0]);sugg=scored.slice(0,6).map(x=>x[1]);suggIdx=sugg.length?0:-1;
+  const v=$('#songInput').value;const q=norm(v);clearTimeout(remote.timer);if(remote.ctl&&remote.ctl.q!==q){remote.ctl.abort();remote.ctl=null;}
+  if(!G||q.length<2){hideSuggest();return;}
+  const qt=q.split(' ');const scored=[];const seen=new Set();
+  const consider=s=>{if(seen.has(s.id))return;seen.add(s.id);const sc=suggestScore(s,q,qt);if(sc)scored.push([sc-(G.playedIds.has(s.id)?60:0),s]);};
+  INDEX.candidates(q).forEach(consider);
+  if(q.length>=3&&scored.filter(x=>x[0]>=55).length<6)INDEX.substring(q).forEach(consider);
+  if(scored.length<6&&q.length>=4)INDEX.fuzzy(q).forEach(consider);
+  scored.sort((a,b)=>b[0]-a[0]);
+  /* thin or weak local results: top up from the full catalog (cached answers right away, otherwise after a pause) */
+  const thin=q.length>=3&&remoteOn()&&(scored.length<6||scored[0][0]<100);
+  const cached=thin?lruGet(q):null;
+  if(cached){cached.forEach(s=>{if(!seen.has(s.id)){seen.add(s.id);scored.push([(suggestScore(s,q,qt)||30+s.pop/40)-(G.playedIds.has(s.id)?60:0)-5,s]);}});scored.sort((a,b)=>b[0]-a[0]);}
+  else if(thin&&!remote.ctl){
+    remote.timer=setTimeout(()=>{const ctl=remote.ctl=new AbortController();ctl.q=q;remoteSearch(q,ctl.signal).finally(()=>{if(remote.ctl===ctl)remote.ctl=null;}).then(rows=>{if(rows&&!ctl.signal.aborted&&norm($('#songInput').value)===q)updateSuggest();});},160);}
+  renderSuggest(scored.slice(0,6).map(x=>x[1]),thin&&!cached);
+}
+function renderSuggest(list,searching){
+  const same=list.length===sugg.length&&list.every((s,i)=>s===sugg[i]);sugg=list;
+  if(!same||suggIdx<0)suggIdx=sugg.length?0:-1;
   const box=$('#suggest');box.innerHTML='';
   sugg.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.className='sg'+(i===suggIdx?' on':'')+(G.playedIds.has(s.id)?' played':'');b.style.setProperty('--gc',GENRES[s.genre].color);b.setAttribute('role','option');
     const onStage=G.echoes.some(m=>!m.masked&&artistMatch(m.artist,s.artist));
     b.innerHTML=`<span></span><small></small>${onStage?'<span class="tag">on stage</span>':''}`;b.children[0].textContent=s.title;b.children[1].textContent=s.artist;
-    b.addEventListener('mousedown',e=>e.preventDefault());b.addEventListener('click',()=>{$('#songInput').value='';hideSuggest();submitSong(`${s.title} - ${s.artist}`);});box.appendChild(b);});
-  if(!sugg.length)box.innerHTML='<span class="muted" style="font-size:13px">Not in the song catalog. Check the spelling or try another song.</span>';
+    b.addEventListener('mousedown',e=>e.preventDefault());b.addEventListener('click',()=>{$('#songInput').value='';hideSuggest();rememberSong(s);submitSong(`${s.title} - ${s.artist}`);});box.appendChild(b);});
+  if(!sugg.length)box.innerHTML=`<span class="muted" style="font-size:13px">${searching?'Searching the full catalog…':'Not in the song catalog. Check the spelling or try another song.'}</span>`;
   $('#fb').hidden=!!box.children.length;
 }
 function moveSuggest(d){if(!sugg.length)return;suggIdx=(suggIdx+d+sugg.length)%sugg.length;[...$('#suggest').querySelectorAll('.sg:not(.ask)')].forEach((b,i)=>b.classList.toggle('on',i===suggIdx));}
-function hideSuggest(){sugg=[];suggIdx=-1;$('#suggest').innerHTML='';$('#fb').hidden=false;}
+function hideSuggest(){clearTimeout(remote.timer);if(remote.ctl){remote.ctl.abort();remote.ctl=null;}sugg=[];suggIdx=-1;$('#suggest').innerHTML='';$('#fb').hidden=false;}
 
 /* ===================== title screen ===================== */
 let freeMod=PROF.freeMod||'none';
@@ -2011,7 +2109,7 @@ function start(opts){lastOpts=opts;audioInit();musicStart();songTo('A');showScre
 $('#dailyBtn').addEventListener('click',async()=>{uiSfx(sfxSelect);if(!catalogReady)await catalogLoading;start({daily:true});});
 $('#coachGo').addEventListener('click',()=>{PROF.coached=1;saveProfile();$('#coach').hidden=true;setPaused(false);});
 $('#freeBtn').addEventListener('click',()=>{uiSfx(sfxSelect);showModMenu();});
-$('#askForm').addEventListener('submit',e=>{e.preventDefault();const inp=$('#songInput');let v=inp.value;if(!v.trim()&&G&&G.hype>=100){djDrop();return;}if(suggIdx>=0&&sugg[suggIdx]&&norm(v).length>=2){const s=sugg[suggIdx];const lm=localMatch(v);if(!(lm.score>=95))v=`${s.title} - ${s.artist}`;}inp.value='';hideSuggest();submitSong(v);});
+$('#askForm').addEventListener('submit',e=>{e.preventDefault();const inp=$('#songInput');let v=inp.value;if(!v.trim()&&G&&G.hype>=100){djDrop();return;}if(suggIdx>=0&&sugg[suggIdx]&&norm(v).length>=2){const s=sugg[suggIdx],q=norm(v);const lm=localMatch(v);if(!(lm.score>=95)&&(suggestScore(s,q,q.split(' '))>=80||matchScore(q,s)>=55)){v=`${s.title} - ${s.artist}`;rememberSong(s);}}inp.value='';hideSuggest();submitSong(v);});
 $('#songInput').addEventListener('input',e=>{updateSuggest();if(A.ctx)sfx(()=>sfxType(!!(e.inputType&&e.inputType.startsWith('delete'))));});
 $('#songInput').addEventListener('keydown',e=>{if(e.key==='ArrowDown'||(e.key==='Tab'&&sugg.length&&!e.shiftKey)){e.preventDefault();moveSuggest(1);}else if(e.key==='ArrowUp'||(e.key==='Tab'&&e.shiftKey&&sugg.length)){e.preventDefault();moveSuggest(-1);}else if(e.key==='Escape'&&sugg.length){e.preventDefault();e.stopPropagation();hideSuggest();}});
 $('#songInput').addEventListener('blur',()=>setTimeout(()=>{if(document.activeElement!==$('#songInput'))hideSuggest();},120));
@@ -2056,6 +2154,8 @@ document.addEventListener('keydown',e=>{if(screen!=='game'||!G||!$('#results').h
   if(e.key==='Escape'){e.preventDefault();if($('#gameScreen').classList.contains('drawer'))setDrawer(false);else setPaused(!G.userPaused);return;}
   if(e.target!==$('#songInput')&&e.key.length===1&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&!G.paused){$('#songInput').focus();}});
 const AUTOTEST=/[?&]autotest\b/.test(location.search);
+/* offline support and instant repeat loads (production only: http://localhost never registers, so local edits always show) */
+if('serviceWorker' in navigator&&location.protocol==='https:'&&!AUTOTEST)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 document.addEventListener('visibilitychange',()=>{if(!AUTOTEST&&document.hidden&&G&&!G.over&&!G.userPaused&&screen==='game')setPaused(true);});
 /* ===================== daily missions ===================== */
 const MISSIONS=[
@@ -2133,7 +2233,7 @@ async function shareCard(){const cv=makeShareCard();if(!cv)return;const blob=awa
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='b-side-result.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('Saved your result card. Post it anywhere.');}
 
 $('#shareBtn').addEventListener('click',shareCard);
-let atBeat=0;if(AUTOTEST)window.__bside={step(sec){for(let t=0;t<sec;t+=.05){if(!G||G.over||G.paused)break;update(.05);const nb=atBeat+.05*2*tempoMult();if(Math.floor(nb)!==Math.floor(atBeat))onBeat(Math.floor(nb));atBeat=nb;}return G&&{t:G.t,hp:G.boss.hp,crowd:G.crowd,echoes:G.echoes.length,phase:G.boss.phase,score:G.score,req:G.request.type};},answer(){const r=G.request;if(r.theme)return null;const s=r.single||requestHint();return s?`${s.title} - ${s.artist}`:null;},req(){return G.request;},state(){return G;},fx(id){rarityFX(id,1);},card(){return makeShareCard();}};
+let atBeat=0;if(AUTOTEST)window.__bside={search:{localMatch,matchScore,suggestScore,INDEX,remote,remoteSearch,norm,lev,LOCAL},step(sec){for(let t=0;t<sec;t+=.05){if(!G||G.over||G.paused)break;update(.05);const nb=atBeat+.05*2*tempoMult();if(Math.floor(nb)!==Math.floor(atBeat))onBeat(Math.floor(nb));atBeat=nb;}return G&&{t:G.t,hp:G.boss.hp,crowd:G.crowd,echoes:G.echoes.length,phase:G.boss.phase,score:G.score,req:G.request.type};},answer(){const r=G.request;if(r.theme)return null;const s=r.single||requestHint();return s?`${s.title} - ${s.artist}`:null;},req(){return G.request;},state(){return G;},fx(id){rarityFX(id,1);},card(){return makeShareCard();}};
 const catalogLoading=loadCatalog();
 /* boot: a short welcome while fonts and songs load, then the home screen over the live demo */
 (async function boot(){const bar=$('#splashBar'),t0=performance.now();let shown=8;const tick=setInterval(()=>{shown=Math.min(88,shown+(92-shown)*.12);bar.style.width=shown+'%';},120);

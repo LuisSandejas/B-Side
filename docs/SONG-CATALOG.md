@@ -1,6 +1,11 @@
 # Song catalog
 
-The game knows a song only if it's in its catalog: the built-in list inside `index.html`, `data/songs.json`, and any rows in the Supabase `songs` table. Anything else a player types is rejected with a screen shake.
+The game has two catalogs:
+
+- **The curated list** (about 2,700 songs): the built-in list inside `index.html`, `data/songs.json`, and any rows in the Supabase `songs` table. Echoes, requests and the Daily Set only use these, so they stay recognizable and identical for everyone.
+- **The big catalog** (a few hundred thousand songs): the Supabase `catalog` table, searched on the server when a player types something the curated list doesn't know. See [The big catalog](#the-big-catalog) below.
+
+A song in neither is rejected with a screen shake.
 
 `data/songs.json` is an array of `[title, artist, genre, year, popularity, energy, mood]` rows. Years are real release years; popularity, energy and mood are hand estimates.
 
@@ -70,6 +75,38 @@ supabase db push
 **From a spreadsheet:** Table Editor → `songs` → Insert → Import data from CSV, with the column names above as headers.
 
 Duplicates are harmless: the game skips any song it already knows.
+
+## The big catalog
+
+Built from open data by `scripts/catalog/build_catalog.py`:
+
+1. **Songs** come from the [MusicBrainz canonical dump](https://data.metabrainz.org/pub/musicbrainz/canonical_data/), one row per distinct recording (remasters and duplicate releases already merged). The script streams the 7–8 GB CSV straight out of the compressed archive.
+2. **Popularity** comes from [ListenBrainz](https://listenbrainz.org) listener counts: artists below a listener cutoff are skipped, and each artist keeps their most-played songs (more for bigger artists).
+3. **Cleanup** drops live takes, remixes, remasters, skits, interludes, titles that can't be typed on an English keyboard, and titles with slurs.
+4. **Years and genres** come from ListenBrainz metadata (release year, plus recording, album and artist tags mapped onto the seven genres).
+5. **The 0–100 popularity score** is fitted against the hand-rated songs in the curated list: `popularity = a + b × log10(listeners)`.
+
+Both sources' data is CC0. ListenBrainz's listeners skew toward rock, indie and electronic fans, so mainstream pop, K-pop and Latin hits can score lower than their real fame.
+
+### Rebuilding and loading
+
+```bash
+# 1. download the newest dump (about 2.4 GB) into the cache folder
+mkdir -p ~/.cache/b-side-catalog && cd ~/.cache/b-side-catalog
+curl -LO https://data.metabrainz.org/pub/musicbrainz/canonical_data/<newest folder>/<file>.tar.zst
+
+# 2. build (about an hour; every API answer is cached, so it resumes if interrupted)
+cd ~/Documents/B-Side
+python3 scripts/catalog/build_catalog.py        # writes build/catalog.csv.gz (not committed)
+
+# 3. load: paste your secret key at the hidden prompt (Project Settings → API Keys)
+read -s "SUPABASE_SECRET_KEY?Supabase secret key: "; export SUPABASE_SECRET_KEY
+python3 scripts/catalog/load_catalog.py
+```
+
+The loader upserts in batches and deletes rows from older builds only at the end, so the live game never sees a half-empty table. Tune the size with `--min-artist-users` and `--min-song-users`.
+
+**Search:** `search_catalog(q, lim)` normalizes the query again on the server, then uses one GIN trigram index for both prefix matches (`LIKE 'q%'`) and typo-tolerant word similarity (`<%`). Browsers can only call this function; they can't read the table directly.
 
 ## Quality checklist
 
