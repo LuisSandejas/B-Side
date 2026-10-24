@@ -78,7 +78,7 @@ Endless can be played with a **modifier**: Decades Night, No Airplay, Double Tim
 ```
 index.html                    the entire game: markup, styles and script
 404.html                      themed "page not found" page
-assets/                       social preview image (og.png) and app icons
+assets/                       social preview image (og.png), app icons, fonts/ (self-hosted, OFL-licensed)
 favicon.ico, site.webmanifest browser tab icon and home-screen install info
 robots.txt, sitemap.xml       search-engine basics
 vercel.json                   security headers and caching for the live site

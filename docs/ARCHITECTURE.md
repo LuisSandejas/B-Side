@@ -1,6 +1,6 @@
 # Architecture
 
-B-SIDE is a single self-contained `index.html`: HTML for the screens, one `<style>` block, and one script wrapped in an IIFE. There are no dependencies besides two Google Fonts (Chakra Petch for UI, Pixelify Sans for pixel text).
+B-SIDE is a single self-contained `index.html`: HTML for the screens, one `<style>` block, and one script wrapped in an IIFE. There are no dependencies. The two fonts (Chakra Petch for UI, Pixelify Sans for pixel text) are self-hosted in `assets/fonts/` under the SIL Open Font License.
 
 This doc walks through the script in the order it's written.
 
