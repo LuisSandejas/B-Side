@@ -54,6 +54,14 @@ Everything is synthesized with the Web Audio API.
   - on submit, the game keeps running while the lookup is pending; a stale answer (new game, newer submission) is dropped
 - Big-catalog songs never enter `LOCAL`, so Echoes, requests and the Daily Set stay the same for every player.
 
+## 6b. 1v1
+
+- `V` is the match: units on a 100-unit runway, two stages, the current request, rounds and wins. `vsUpdate` is the only code that changes it, so there's one source of truth.
+- **Bot matches** run `vsUpdate` locally; `vsBot` answers after a level-dependent delay and sometimes steals.
+- **Online** uses Supabase Realtime directly over one WebSocket (`Realtime`, a small Phoenix-protocol client, so no extra library). The **host** runs the match and broadcasts a snapshot 5 times a second (`vsPack`); the **guest** sends only its answers (`act`) and draws the snapshots, extrapolating unit movement between them. Everything received is clamped and rendered with `textContent` (`vsUnpack`), never as HTML.
+- **Rooms:** private rooms are channels named by a 5-letter code (invite link `/?room=CODE`). Random matchmaking puts players in a lobby channel; the two longest-waiting players pair up on a room derived from both ids, the earlier one hosting.
+- Steals: a named unit switches sides when the other player plays a song by the same artist with lower popularity than the song that last claimed it; each steal lowers the bar, capped at 3.
+
 ## 7. Requests
 
 `REQ` holds one generator per request type. Each returns the HTML shown in the banner and a list of criteria (`C.*`), each with a `test(song)`. `makeRequest` picks a type by weight (`reqWeights`, which changes by phase and modifier), skips the last two types used, and only accepts a request that the catalog can actually answer. On the Daily Set each request uses its own seeded random stream so everyone gets the same sequence.

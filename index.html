@@ -24,6 +24,7 @@
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
+<link rel="preconnect" href="https://xrfgssobisrfuemvcqvs.supabase.co" crossorigin>
 <link rel="preload" href="/assets/fonts/pixelify-sans.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/chakra-petch-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/chakra-petch-600.woff2" as="font" type="font/woff2" crossorigin>
@@ -376,6 +377,38 @@ img.ic{width:18px;height:18px;image-rendering:pixelated;vertical-align:-4px}
 .incoming span{letter-spacing:.1em;text-transform:uppercase;font-size:11px}
 .incoming b{font-family:var(--f-px);font-weight:400;font-size:13px;color:var(--gc);border:1px solid var(--gc);padding:0 6px;line-height:18px;opacity:.9}
 .incoming b:first-of-type{opacity:1;box-shadow:0 0 8px var(--gc)}
+.vsscreen{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;gap:6px;padding:10px max(12px,calc(50vw - 330px)) 12px;background:radial-gradient(120% 70% at 50% 0%,#241d3d,#100f1a 70%);color:var(--ink)}
+body.invs #stage,body.invs #labels{visibility:hidden}
+.vs-head{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.vs-p{display:grid;gap:3px;font-size:13px}.vs-p b{font-family:var(--f-px);font-size:16px;font-weight:400}
+.vs-p.you{justify-items:end;text-align:right}
+.vs-bar{height:8px;background:rgba(255,255,255,.08);overflow:hidden}.vs-bar i{display:block;height:100%;width:100%;transition:width .25s}
+.them .vs-bar i{background:#ff5a4f}.you .vs-bar i{background:#3fe0ff;margin-left:auto}
+.vs-wins{letter-spacing:.2em;color:var(--gold)}
+.vs-mid{display:grid;justify-items:center;font-size:12px;color:var(--muted)}.vs-mid b{font-family:var(--f-px);font-size:22px;color:var(--ink);font-weight:400}
+.vs-req{border:1px solid var(--line);background:rgba(14,12,22,.8);padding:8px 12px;text-align:center}
+.vs-req p{margin:0 0 6px;font-size:clamp(15px,2.6vw,19px)}.vs-req em{color:var(--gold);font-style:normal}.vs-req small{color:var(--muted)}
+.vs-req .tbar{height:3px;background:rgba(255,255,255,.08)}.vs-req .tbar i{display:block;height:100%;background:var(--amber)}
+.vs-field{flex:1;position:relative;min-height:220px}
+.vs-field canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
+.vs-field.shake{animation:vsshake .32s steps(5)}
+@keyframes vsshake{25%{transform:translate(-4px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,1px)}}
+.vs-labels{position:absolute;inset:0;pointer-events:none}
+.vs-tag{position:absolute;left:0;top:0;display:grid;justify-items:center;font-family:var(--f-px);font-size:12px;line-height:1.1;padding:1px 6px;background:rgba(10,9,16,.92);border:1px solid;white-space:nowrap}
+.vs-tag small{font-family:inherit;font-size:9.5px;opacity:.8}.vs-tag.mine{border-color:#3fe0ff;color:#bff4ff}.vs-tag.theirs{border-color:#ff5a4f;color:#ffd0cb}
+.vs-banner{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%) rotate(-4deg);font-family:var(--f-px);font-size:clamp(22px,5vw,40px);color:var(--gold);text-shadow:0 0 18px rgba(255,212,107,.6);background:rgba(10,9,16,.8);border:3px solid var(--gold);padding:4px 14px;white-space:nowrap;pointer-events:none}
+.vs-banner.pop{animation:vsban .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes vsban{0%{transform:translate(-50%,-50%) rotate(-4deg) scale(2);opacity:0}100%{transform:translate(-50%,-50%) rotate(-4deg) scale(1);opacity:1}}
+.vs-fb{margin:0;min-height:1.3em;text-align:center;font-size:14px;color:var(--muted)}.vs-fb.good{color:var(--good)}.vs-fb.bad{color:#ff8a80}.vs-fb.them{color:#ffb4ad}
+.vs-ask{display:flex;gap:8px}.vs-ask input{flex:1;font:inherit;font-size:17px;color:var(--ink);background:rgba(255,255,255,.05);border:2px solid var(--line);padding:10px 12px;min-width:0}
+.vs-ask input:focus{outline:none;border-color:var(--amber)}.vs-ask input.reject{border-color:var(--bad);animation:ishake .35s steps(6)}
+.vs-foot{display:flex;justify-content:space-between}.vs-foot button{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:13px;padding:4px}
+.vs-opts{display:grid;gap:8px;margin:8px 0}.vs-opts .btn.alt,.vs-bots .btn{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.vs-join{display:flex;gap:8px}.vs-join input{flex:1;font:inherit;text-transform:uppercase;letter-spacing:.15em;color:var(--ink);background:rgba(255,255,255,.04);border:1px solid var(--line);padding:8px 10px;min-width:0}
+.vs-bots{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.vs-status{min-height:1.2em;font-size:13.5px;color:var(--gold);word-break:break-all}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){.vs-field.shake,.vs-banner.pop{animation:none}}
 .creator p{line-height:1.6}
 .suggest-form{display:grid;gap:6px;margin:6px 0 4px}
 .suggest-form label{font-size:13px;color:var(--muted)}
@@ -432,6 +465,7 @@ ol.coach b{color:var(--ink)}
     <nav class="mm" id="mainMenu" hidden aria-label="Main menu">
       <button class="mi" type="button" id="dailyBtn"><span class="mi-t">Daily Set</span><span class="mi-s" id="dailySub">Today's set</span></button>
       <button class="mi" type="button" id="freeBtn"><span class="mi-t">Endless</span><span class="mi-s" id="freeSub">How long can you last?</span></button>
+      <button class="mi" type="button" id="vsBtn"><span class="mi-t">1v1</span><span class="mi-s">Battle a friend, a stranger or a bot</span></button>
       <button class="mi" type="button" id="howBtn"><span class="mi-t">How to Play</span></button>
       <button class="mi" type="button" id="profileBtn"><span class="mi-t">Crate &amp; Rank</span><span class="mi-s" id="rankChip">Static</span></button>
       <button class="mi" type="button" id="creatorBtn"><span class="mi-t">Creator</span></button>
@@ -447,6 +481,31 @@ ol.coach b{color:var(--ink)}
   </aside>
 </section>
 
+<div class="modal sheet" id="vsModal" hidden>
+  <div class="mbox vsbox" role="dialog" aria-modal="true" aria-labelledby="vsTitle">
+    <div class="sheet-head"><h2 id="vsTitle">1v1</h2><button class="xbtn" type="button" data-close aria-label="Close">×</button></div>
+    <p>Answer requests to send units down the runway at your opponent's stage. Answer first for a full unit, or within 3 seconds after them for a half one. Every third unit carries its artist's name: <b>steal it</b> with a less popular song by the same artist. Best of three.</p>
+    <div class="vs-opts">
+      <button class="btn" type="button" id="vsRandom">Find an opponent</button>
+      <button class="btn alt" type="button" id="vsCreate">Create a private room</button>
+      <form class="vs-join" id="vsJoinForm"><label for="vsCodeIn" class="sr">Room code</label><input id="vsCodeIn" maxlength="7" placeholder="Room code" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="btn alt" type="submit">Join</button></form>
+      <div class="vs-bots"><span>Practice vs a bot:</span><button class="btn alt" type="button" data-bot="easy">Easy</button><button class="btn alt" type="button" data-bot="normal">Normal</button><button class="btn alt" type="button" data-bot="hard">Hard</button></div>
+    </div>
+    <p class="vs-status" id="vsStatus" role="status"></p>
+  </div>
+</div>
+<section class="vsscreen" id="vsScreen" hidden aria-label="B-SIDE 1v1">
+  <div class="vs-head">
+    <div class="vs-p them"><b id="vsThemName">Opponent</b><span class="vs-bar"><i id="vsThemHp"></i></span><span class="vs-wins" id="vsThemWins"></span></div>
+    <div class="vs-mid"><span id="vsRoundTxt">Round 1</span><b id="vsClock">2:00</b></div>
+    <div class="vs-p you"><b>You</b><span class="vs-bar"><i id="vsYouHp"></i></span><span class="vs-wins" id="vsYouWins"></span></div>
+  </div>
+  <div class="vs-req"><p id="vsReqText">Get ready…</p><div class="tbar"><i id="vsReqBar"></i></div></div>
+  <div class="vs-field"><canvas id="vsCv" aria-label="The runway"></canvas><div class="vs-labels" id="vsLabels"></div><div class="vs-banner" id="vsBanner" hidden></div></div>
+  <p class="vs-fb" id="vsFb" role="status"></p>
+  <form class="vs-ask" id="vsForm" autocomplete="off"><label for="vsInput" class="sr">Type a song</label><input id="vsInput" placeholder="Type a song…" enterkeyhint="send" spellcheck="false" autocapitalize="off"><button class="btn" type="submit">Play</button></form>
+  <div class="vs-foot"><button type="button" id="vsLeave">Leave</button><button type="button" id="vsAgain" hidden>Rematch</button></div>
+</section>
 <div class="modal sheet" id="creatorModal" hidden>
   <div class="mbox creator" role="dialog" aria-modal="true" aria-labelledby="creatorTitle">
     <div class="sheet-head"><h2 id="creatorTitle">Made by Luis Sandejas</h2><button class="xbtn" type="button" data-close aria-label="Close">×</button></div>
@@ -1881,6 +1940,7 @@ let vignette=null,lastMs=0,lastBeatSeen=-1;
 function frame(ms){
   requestAnimationFrame(frame);
   const dt=Math.min(.05,Math.max(0,(ms-lastMs)/1000));lastMs=ms;
+  if(screen==='vs'){vsFrame(ms,dt);return;}
   if(!G)return;
   if(!G.over&&!G.paused)update(dt*G.timeScale*(ms<hitStopUntil?.08:1));
   const{p,bi}=beatInfo(ms);if(bi!==lastBeatSeen){lastBeatSeen=bi;onBeat(bi);}
@@ -2215,7 +2275,7 @@ function renderTitle(){
 /* ===================== screens + controls ===================== */
 function ringHTML(){return RING.map(g=>`<span class="g" style="--gc:${GENRES[g].color}"><img class="ic" alt="" src="${iconURL(g)}">${GENRES[g].label}</span>`).join('<span class="arr">›</span>')+'<span class="arr">› back to Rock</span>';}
 $('#ringMenu').innerHTML=ringHTML();$('#ringGame').innerHTML=ringHTML();
-function showScreen(s){const prev=screen;screen=s;$('#startScreen').hidden=s!=='start';$('#gameScreen').hidden=s!=='game';document.body.classList.toggle('ingame',s==='game');setDrawer(false);closeSheets();if(s==='start'){renderTitle();if(prev==='game'&&A.running)songTo('intro');if(menuOpen){$('#modMenu').hidden=true;$('#mainMenu').hidden=false;}}if(s!=='game'&&!(G&&G.demo))startDemo();requestAnimationFrame(layout);}
+function showScreen(s){const prev=screen;screen=s;$('#startScreen').hidden=s!=='start';$('#gameScreen').hidden=s!=='game';$('#vsScreen').hidden=s!=='vs';document.body.classList.toggle('invs',s==='vs');document.body.classList.toggle('ingame',s==='game');setDrawer(false);closeSheets();if(s==='start'){renderTitle();if(prev==='game'&&A.running)songTo('intro');if(menuOpen){$('#modMenu').hidden=true;$('#mainMenu').hidden=false;}}if(s==='start'&&!(G&&G.demo))startDemo();requestAnimationFrame(layout);}
 function setPaused(v){if(!G||G.over)return;G.userPaused=v;if(!$('#modal').hidden)return;G.paused=v;muffle(v);$('#pausedOv').hidden=!v;$('#pauseBtn').textContent=v?'Resume':'Pause';$('#pauseBtn').setAttribute('aria-pressed',String(v));if(!v)$('#songInput').focus({preventScroll:true});}
 function setDrawer(open){const gs=$('#gameScreen');gs.classList.toggle('drawer',open);$('#detailsBtn').setAttribute('aria-expanded',String(open));if(G&&!G.over&&(L.narrow||$('#gameScreen').classList.contains('short'))){if(open&&!G.userPaused)setPaused(true);else if(!open&&G.userPaused&&setDrawer.paused)setPaused(false);setDrawer.paused=open;}}
 let lastOpts={};
@@ -2251,7 +2311,7 @@ function closeModMenu(){uiSfx(sfxBack);$('#modMenu').hidden=true;$('#mainMenu').
 $('#pressStart').addEventListener('click',openMenu);
 $('#startScreen').addEventListener('pointerdown',e=>{if(!menuOpen&&!e.target.closest('.today'))openMenu();});
 function openSheet(id){uiSfx(sfxSelect);renderTitle();$(id).hidden=false;const x=$(id).querySelector('[data-close]');x&&x.focus();}
-function closeSheets(){['#howModal','#profileModal','#creatorModal'].forEach(id=>$(id).hidden=true);}
+function closeSheets(){['#howModal','#profileModal','#creatorModal','#vsModal'].forEach(id=>$(id).hidden=true);}
 $('#howBtn').addEventListener('click',()=>openSheet('#howModal'));$('#creatorBtn').addEventListener('click',()=>openSheet('#creatorModal'));
 /* suggestions go to the Supabase `feedback` table (insert-only for visitors), with a cooldown so one person can't flood it */
 $('#suggestForm').addEventListener('submit',async e=>{e.preventDefault();const msg=$('#sgMsg').value.trim(),contact=$('#sgContact').value.trim(),st=$('#sgStatus');
@@ -2277,6 +2337,8 @@ document.addEventListener('keydown',e=>{if(screen!=='game'||!G||!$('#results').h
   if(e.target!==$('#songInput')&&e.key.length===1&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&!G.paused){$('#songInput').focus();}});
 const AUTOTEST=/[?&]autotest\b/.test(location.search);
 /* offline support and instant repeat loads (production only: http://localhost never registers, so local edits always show) */
+/* Vercel Web Analytics: page views only, no cookies; skipped locally and in test runs */
+if(location.protocol==='https:'&&!AUTOTEST&&!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)){const va=document.createElement('script');va.defer=true;va.src='/_vercel/insights/script.js';document.head.appendChild(va);}
 if('serviceWorker' in navigator&&location.protocol==='https:'&&!AUTOTEST)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 document.addEventListener('visibilitychange',()=>{if(!AUTOTEST&&document.hidden&&G&&!G.over&&!G.userPaused&&screen==='game')setPaused(true);});
 /* ===================== daily missions ===================== */
@@ -2356,7 +2418,267 @@ async function shareCard(){const cv=makeShareCard();if(!cv)return;const blob=awa
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='b-side-result.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('Saved your result card. Post it anywhere.');}
 
 $('#shareBtn').addEventListener('click',shareCard);
-let atBeat=0;if(AUTOTEST)window.__bside={game:()=>G,search:{localMatch,matchScore,suggestScore,INDEX,remote,remoteSearch,norm,lev,LOCAL},step(sec){for(let t=0;t<sec;t+=.05){if(!G||G.over||G.paused)break;update(.05);const nb=atBeat+.05*2*tempoMult();if(Math.floor(nb)!==Math.floor(atBeat))onBeat(Math.floor(nb));atBeat=nb;}return G&&{t:G.t,hp:G.boss.hp,crowd:G.crowd,echoes:G.echoes.length,phase:G.boss.phase,score:G.score,req:G.request.type};},answer(){const r=G.request;if(r.theme)return null;const s=r.single||requestHint();return s?`${s.title} - ${s.artist}`:null;},req(){return G.request;},state(){return G;},fx(id){rarityFX(id,1);},card(){return makeShareCard();}};
+/* ===================== 1v1 =====================
+   Two players, one runway. Answering a request summons a unit that walks toward the other player's stage
+   and fights whatever it meets in its lane. Every third unit carries its artist's name: the opponent can
+   steal it by playing a less popular song by the same artist. Best of three rounds, then sudden death.
+   One simulation runs per match: locally against a bot, or on the host's browser online. The guest sends
+   its answers and draws the host's snapshots. Nothing received from the other player is ever used as HTML. */
+const VS={LEN:100,SPEED:8,ROUND:120,BASE:20,REACH:5,DPS:5,GRACE:3,REQ:15,GAP:1.2,SNAP:200,STEALS:3};
+const VS_HP={air:10,fan:12,dig:15,white:18};
+const VS_LX=[42,75,108];
+const VS_BOT={easy:{delay:[7,12],acc:.6,steal:.2,name:'Bot · Easy'},normal:{delay:[4.5,9],acc:.8,steal:.4,name:'Bot · Normal'},hard:{delay:[2.5,6],acc:.92,steal:.65,name:'Bot · Hard'}};
+let V=null,vsS=null,vsNet=null,vsParts=[],vsLabelEls=new Map();
+const vsFoe=s=>s==='a'?'b':'a';
+const vsArtists=()=>ARTISTS.filter(a=>a.songs.length>=2&&a.fame>=70);
+/* requests: text parts, where an array is an emphasized word (rendered with textContent, never HTML) */
+const VS_REQS=[
+  r=>{const g=pick(RING,r);return{parts:['Play a ',[GENRES[g].label],' song.'],crits:[C.genre(g)]};},
+  r=>{const d=pick([1960,1970,1980,1990,2000,2010],r);return{parts:['Play a song from the ',[`${d}s`],'.'],crits:[C.decade(d)]};},
+  r=>{const v=pick(['upbeat','sad','slow','party'],r);return{parts:['Play something ',[v==='party'?'for a party':v],'.'],crits:[C.vibe(v)]};},
+  ()=>({parts:['Play any song from ',['2000 or later'],'.'],crits:[C.century()]}),
+  ()=>({parts:['Play a song released ',['before 1990'],'.'],crits:[C.before(1990)]}),
+  r=>{const L=pick('ABCDHLMSTW'.split(''),r);return{parts:['Play a song whose title starts with ',[L],'.'],crits:[C.tletter(L)]};},
+  r=>{const a=pick(vsArtists(),r);return{parts:['Play anything by ',[a.name],'.'],crits:[C.by(a.name)]};},
+  r=>{const p=shuffle(vsArtists().slice(),r).slice(0,3).map(a=>a.name);return{parts:['Play anything by ',[p[0]],', ',[p[1]],' or ',[p[2]],'.'],crits:[{test:s=>p.some(n=>artistMatch(n,s.artist))}]};},
+  ()=>({parts:['Play a song with ',['love, heart, kiss or baby'],' in the title.'],crits:[C.love()]}),
+  r=>{const g=pick(RING,r),d=pick([1980,1990,2000,2010],r);return{parts:['Play a ',[GENRES[g].label],' song from the ',[`${d}s`],'.'],crits:[C.genre(g),C.decade(d)]};},
+];
+
+/* ---------- the match (authoritative: bot games and the online host) ---------- */
+function vsNewMatch(mode,o={}){
+  const seed=o.seed>>>0||(Math.random()*2**32)>>>0;
+  V={mode,me:'a',seed,rng:rng(seed),round:1,wins:{a:0,b:0},used:new Set(),uid:0,reqN:0,fxQ:[],lastSnap:0,
+    names:{a:'You',b:o.foeName||'Opponent'},bot:mode==='bot'?{cfg:VS_BOT[o.level]||VS_BOT.normal,reqN:0,at:Infinity,seen:new Set(),steals:[]}:null};
+  vsNewRound();}
+function vsNewRound(){Object.assign(V,{t:0,base:{a:VS.BASE,b:VS.BASE},units:[],summons:{a:0,b:0},sudden:false,roundOver:false,roundWinner:null,pause:2.4,req:null,reqGap:0});}
+function vsNextReq(){for(let k=0;k<25;k++){const q=pick(VS_REQS,V.rng)(V.rng);
+    if(LOCAL.filter(s=>!V.used.has(s.id)&&q.crits.every(c=>c.test(s))).length>=4){V.req=Object.assign(q,{n:++V.reqN,left:VS.REQ,winner:null,second:null,graceUntil:0});return;}}
+  V.req=null;V.reqGap=VS.GAP;}
+function vsFx(f){if(!V)return;V.fxQ.push(f);vsPlayFx(f,V.me);}
+function vsSummon(side,song,half){let hp=VS_HP[rarityOf(song).id];if(half)hp=Math.ceil(hp/2);V.summons[side]++;
+  const load=[0,1,2].map(l=>V.units.filter(u=>u.side===side&&u.lane===l).length);const lane=load.indexOf(Math.min(...load));
+  const named=!half&&V.summons[side]%3===0;
+  V.units.push({id:++V.uid,side,lane,pos:side==='a'?0:VS.LEN,hp,max:hp,named,steals:0,minPop:song.pop,fight:false,
+    song:{id:song.id,title:song.title,artist:song.artist,genre:song.genre,pop:song.pop}});
+  vsFx({k:half?'half':'summon',side,lane,named,artist:named?song.artist:''});}
+const vsDist=(side,u)=>side==='a'?u.pos:VS.LEN-u.pos;
+/* one answer from either side; returns what to tell that player */
+function vsSubmit(side,song){
+  if(!V||V.over||V.pause>0)return{ok:false,msg:'Hold on, the round is about to start.'};
+  if(V.used.has(song.id))return{ok:false,msg:`“${song.title}” was already played this match.`};
+  let stealMsg='';
+  const targets=V.units.filter(u=>u.side===vsFoe(side)&&u.named&&artistMatch(u.song.artist,song.artist)).sort((x,y)=>vsDist(side,x)-vsDist(side,y));
+  if(targets.length){const u=targets[0];
+    if(u.steals>=VS.STEALS)stealMsg=`${u.song.artist} has been stolen ${VS.STEALS} times. Nobody can take it now.`;
+    else if(song.pop<u.minPop){V.used.add(song.id);u.side=side;u.steals++;u.minPop=song.pop;u.hp=Math.min(u.max+4,u.hp+4);u.max=Math.max(u.max,u.hp);u.fight=false;
+      u.song=Object.assign({},u.song,{title:song.title,pop:song.pop,genre:song.genre});
+      vsFx({k:'steal',side,lane:u.lane,artist:u.song.artist,genre:song.genre});
+      return{ok:true,kind:'steal',msg:`Stolen! “${song.title}” (popularity ${song.pop}) is a deeper cut.`};}
+    else stealMsg=`To steal ${u.song.artist}, play one of their songs under popularity ${u.minPop}. “${song.title}” is ${song.pop}.`;}
+  const q=V.req;
+  if(q&&q.crits.every(c=>c.test(song))){
+    if(!q.winner){q.winner=side;q.graceUntil=V.t+VS.GRACE;V.used.add(song.id);vsSummon(side,song,false);return{ok:true,kind:'summon',msg:`First! “${song.title}” is on its way.`};}
+    if(q.winner!==side&&!q.second&&V.t<=q.graceUntil){q.second=side;V.used.add(song.id);vsSummon(side,song,true);return{ok:true,kind:'half',msg:`Close second: “${song.title}” joins at half strength.`};}
+    return{ok:false,msg:q.winner===side?'You already answered this one.':'Too slow: that request was taken.'};}
+  return{ok:false,msg:stealMsg||(q?'That doesn’t fit the request.':'Wait for the next request.')};}
+function vsEndRound(w){V.wins[w]++;V.roundOver=true;V.roundWinner=w;V.pause=3.2;V.req=null;
+  if(V.wins[w]>=2){V.over=true;V.winner=w;}vsFx({k:V.over?'match':'round',w});}
+function vsUpdate(dt){
+  if(!V||V.over)return;
+  if(V.pause>0){V.pause-=dt;if(V.pause<=0&&V.roundOver){V.round++;vsNewRound();}return;}
+  V.t+=dt;
+  if(!V.req){V.reqGap-=dt;if(V.reqGap<=0)vsNextReq();}
+  else{const q=V.req;q.left-=dt;if(q.left<=0||(q.winner&&(q.second||V.t>q.graceUntil))){V.req=null;V.reqGap=VS.GAP;}}
+  if(V.bot)vsBot();
+  /* the front units of each lane fight when they meet; genre counters apply */
+  for(const u of V.units)u.fight=false;
+  for(let l=0;l<3;l++){const fa=V.units.filter(u=>u.lane===l&&u.side==='a').sort((x,y)=>y.pos-x.pos)[0],fb=V.units.filter(u=>u.lane===l&&u.side==='b').sort((x,y)=>x.pos-y.pos)[0];
+    if(fa&&fb&&fb.pos-fa.pos<=VS.REACH){fa.fight=fb.fight=true;fa.hp-=VS.DPS*counter(fb.song.genre,fa.song.genre)*dt;fb.hp-=VS.DPS*counter(fa.song.genre,fb.song.genre)*dt;}}
+  for(const u of [...V.units]){
+    if(u.hp<=0){V.units.splice(V.units.indexOf(u),1);vsFx({k:'kill',side:u.side,lane:u.lane,pos:u.pos,genre:u.song.genre});continue;}
+    const dir=u.side==='a'?1:-1;
+    if(!u.fight&&!V.units.some(o=>o!==u&&o.side===u.side&&o.lane===u.lane&&o.fight&&(o.pos-u.pos)*dir>0&&(o.pos-u.pos)*dir<4))u.pos+=dir*VS.SPEED*dt;
+    if((u.side==='a'&&u.pos>=VS.LEN)||(u.side==='b'&&u.pos<=0)){const foe=vsFoe(u.side),dmg=Math.max(1,Math.ceil(u.hp/4));
+      V.units.splice(V.units.indexOf(u),1);V.base[foe]=Math.max(0,V.base[foe]-dmg);vsFx({k:'hit',side:foe,lane:u.lane,dmg});
+      if(V.sudden||V.base[foe]<=0){vsEndRound(u.side);return;}}}
+  if(V.t>=VS.ROUND&&!V.sudden){if(V.base.a!==V.base.b)vsEndRound(V.base.a>V.base.b?'a':'b');else{V.sudden=true;vsFx({k:'sudden'});}}}
+/* the bot answers some requests after a human-ish delay and sometimes steals your named units */
+function vsBot(){const b=V.bot,q=V.req,cfg=b.cfg;
+  if(q&&b.reqN!==q.n){b.reqN=q.n;b.at=V.rng()<cfg.acc?V.t+cfg.delay[0]+V.rng()*(cfg.delay[1]-cfg.delay[0]):Infinity;}
+  if(q&&V.t>=b.at){b.at=Infinity;const opts=LOCAL.filter(s=>!V.used.has(s.id)&&s.pop>=50&&q.crits.every(c=>c.test(s)));if(opts.length)vsAct('b',pick(opts,V.rng));}
+  for(const u of V.units){const key=u.id+'|'+u.steals;if(u.side==='a'&&u.named&&!b.seen.has(key)){b.seen.add(key);if(V.rng()<cfg.steal)b.steals.push({u,at:V.t+2+V.rng()*3});}}
+  b.steals=b.steals.filter(x=>{if(V.t<x.at)return true;
+    if(x.u.side==='a'&&V.units.includes(x.u)){const s=LOCAL.filter(s=>!V.used.has(s.id)&&artistMatch(x.u.song.artist,s.artist)&&s.pop<x.u.minPop).sort((p,q)=>q.pop-p.pop)[0];if(s)vsAct('b',s);}
+    return false;});}
+/* apply an answer and tell whoever made it */
+function vsAct(side,song){const r=vsSubmit(side,song);
+  if(side===V.me)vsResult(r);
+  else if(V.mode==='host')vsNet&&vsNet.send(vsNet.room,'res',r);
+  else if(r.ok&&V.mode==='bot')vsSay(`${V.names.b} played “${song.title}” by ${song.artist}.`,'them');
+  return r;}
+
+/* ---------- feedback, sound and banners (both sides) ---------- */
+function vsSay(msg,cls){const f=$('#vsFb');f.textContent=msg;f.className='vs-fb '+(cls||'');}
+function vsResult(r){vsSay(r.msg,r.ok?'good':'bad');if(!r.ok){uiSfx(sfxReject);const i=$('#vsInput');i.classList.remove('reject');void i.offsetWidth;i.classList.add('reject');}}
+function vsBanner(text,ms=1600){const b=$('#vsBanner');b.textContent=text;b.hidden=false;b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');clearTimeout(vsBanner.t);vsBanner.t=setTimeout(()=>b.hidden=true,ms);}
+function vsXY(lane,pos,me){const my=me==='a'?pos:VS.LEN-pos;return{x:VS_LX[lane],y:220-(clamp(my,0,VS.LEN)/VS.LEN)*190};}
+function vsBurst(x,y,n,cols){for(let i=0;i<n;i++)vsParts.push({x,y,vx:(Math.random()-.5)*70,vy:-Math.random()*60,c:pick(cols),life:.7+Math.random()*.4});}
+function vsPlayFx(f,me){const mine=f.side===me;
+  if(f.k==='summon'||f.k==='half'){uiSfx(mine?sfxCorrect:sfxBlip);if(f.named)vsBanner(`${mine?'Named':'Steal it'}: ${f.artist}`,1400);}
+  else if(f.k==='steal'){uiSfx(()=>{duckMusic(1.2);const sk=SKILLS[f.genre];if(sk)sk.sound(now()+.01);});vsBanner(mine?`STOLEN! ${f.artist} is yours`:`${f.artist} got stolen!`,1500);}
+  else if(f.k==='kill'){uiSfx(sfxKill);const p=vsXY(f.lane,f.pos,me);vsBurst(p.x,p.y-8,14,[GENRES[f.genre].color,'#ffffff']);}
+  else if(f.k==='hit'){uiSfx(()=>mine?sfxBreach():sfxHit('big'));if(mine){const fld=$('#vsScreen .vs-field');fld.classList.remove('shake');void fld.offsetWidth;fld.classList.add('shake');}}
+  else if(f.k==='sudden'){uiSfx(sfxAlarm);vsBanner('SUDDEN DEATH: next hit wins',2400);}
+  else if(f.k==='round'||f.k==='match'){const won=f.w===me;uiSfx(won?sfxFanfare:sfxLose);vsBanner(f.k==='match'?(won?'YOU WIN THE MATCH!':'They win the match'):(won?'You take the round':'They take the round'),3000);
+    if(f.k==='match'){$('#vsAgain').hidden=false;}}}
+
+/* ---------- drawing ---------- */
+function vsDraw(S,me,ms,ext){
+  const cv=$('#vsCv'),r=cv.getBoundingClientRect();if(!r.width)return;const dpr=Math.min(2,devicePixelRatio||1),W=Math.round(r.width*dpr),H=Math.round(r.height*dpr);
+  if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+  const c=cv.getContext('2d');c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,W,H);c.imageSmoothingEnabled=false;
+  const LW=150,LH=240,sc=Math.min(r.width/LW,r.height/LH),ox=(r.width-LW*sc)/2,oy=(r.height-LH*sc)/2;c.setTransform(dpr*sc,0,0,dpr*sc,dpr*ox,dpr*oy);
+  const them=vsFoe(me),top=30,bot=220;
+  c.fillStyle='#17142a';c.fillRect(20,top,110,bot-top);
+  for(let l=0;l<3;l++){c.fillStyle=l===1?'#1f1b38':'#1b1832';c.fillRect(VS_LX[l]-16,top,32,bot-top);c.fillStyle='rgba(255,255,255,.06)';for(let y=top+((ms/60|0)%8);y<bot;y+=8)c.fillRect(VS_LX[l],y,1,3);}
+  /* stages: theirs at the top, yours at the bottom, with a health strip */
+  c.fillStyle='#3a1a28';c.fillRect(20,8,110,top-8);c.fillStyle='#ff5a4f';c.fillRect(20,top-3,Math.round(110*S.base[them]/VS.BASE),3);
+  c.fillStyle='#132c36';c.fillRect(20,bot,110,LH-bot-6);c.fillStyle='#3fe0ff';c.fillRect(20,bot,Math.round(110*S.base[me]/VS.BASE),3);
+  ptext(c,'THEIR STAGE',75-ptw('THEIR STAGE')/2,14,'#ff9a8f');ptext(c,'YOUR STAGE',75-ptw('YOUR STAGE')/2,bot+9,'#8fe8ff');
+  const seen=new Set(),layer=$('#vsLabels');
+  for(const u of S.units){const mine=u.side===me;let p=u.pos;if(ext&&!u.fight)p+=(u.side==='a'?1:-1)*VS.SPEED*ext;const {x,y}=vsXY(u.lane,p,me);
+    const sp=humanSprite(u.song,mine?'back':'front');const sx=Math.round(x-sp.w/2),sy=Math.round(y-sp.h+4);
+    if(u.named){c.fillStyle=mine?'rgba(63,224,255,.25)':'rgba(255,90,79,.25)';c.fillRect(sx-1,sy+sp.h-3,sp.w+2,3);}
+    c.drawImage(sp.canvas,sx,sy);
+    if(u.hp<u.max){const f=clamp(u.hp/u.max,0,1);c.fillStyle='#0e0c16';c.fillRect(x-8,y+5,16,3);c.fillStyle=mine?'#3fe0ff':'#ff5a4f';c.fillRect(x-7,y+6,Math.max(1,Math.round(14*f)),1);}
+    if(u.fight&&((ms/180|0)+u.id)%2===0){c.fillStyle=GENRES[u.song.genre].color;c.fillRect(x,y-sp.h/2+(mine?-6:6),1,3);}
+    if(u.named){seen.add(u.id);let el=vsLabelEls.get(u.id);if(!el){el=document.createElement('div');el.innerHTML='<b></b><small></small>';layer.appendChild(el);vsLabelEls.set(u.id,el);}
+      const cls='vs-tag '+(mine?'mine':'theirs');if(el.className!==cls)el.className=cls;el.children[0].textContent=u.song.artist;el.children[1].textContent=mine?`steal-proof under ${u.minPop}`:`steal under ${u.minPop}`;
+      el.style.transform=`translate(${Math.round(ox+x*sc)}px,${Math.round(oy+(sy-2)*sc)}px) translate(-50%,-100%)`;}}
+  for(const [id,el] of vsLabelEls)if(!seen.has(id)){el.remove();vsLabelEls.delete(id);}
+  const dt=1/60;vsParts=vsParts.filter(p=>{p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=160*dt;c.fillStyle=p.c;c.fillRect(Math.round(p.x),Math.round(p.y),1,1);return p.life>0;});}
+function vsHud(S,me){const them=vsFoe(me);
+  $('#vsYouHp').style.width=(100*S.base[me]/VS.BASE)+'%';$('#vsThemHp').style.width=(100*S.base[them]/VS.BASE)+'%';
+  const dots=n=>'●'.repeat(n)+'○'.repeat(Math.max(0,2-n));$('#vsYouWins').textContent=dots(S.wins[me]);$('#vsThemWins').textContent=dots(S.wins[them]);
+  $('#vsThemName').textContent=(V&&V.names&&V.names[them])||'Opponent';
+  $('#vsRoundTxt').textContent=S.sudden?'Sudden death':`Round ${S.round}`;$('#vsClock').textContent=S.sudden?'∞':fmtTime(Math.max(0,VS.ROUND-S.t));
+  const q=S.req,key=q?q.n+'|'+(q.winner||''):'p'+(S.pause>0?S.round:'');
+  if(vsHud.key!==key){vsHud.key=key;const p=$('#vsReqText');p.textContent='';
+    if(q){for(const part of q.parts){if(Array.isArray(part)){const em=document.createElement('em');em.textContent=String(part[0]);p.appendChild(em);}else p.appendChild(document.createTextNode(String(part)));}
+      if(q.winner){const s=document.createElement('small');s.textContent=q.winner===me?' · you got it first':' · taken! answer in 3s for a half unit';p.appendChild(s);}}
+    else p.textContent=S.over?'Match over.':S.pause>0?(S.roundOver?'Next round…':`Round ${S.round}: get ready…`):'Next request…';}
+  $('#vsReqBar').style.width=q?(100*clamp(q.left/VS.REQ,0,1))+'%':'0%';}
+function vsFrame(ms,dt){
+  if(V&&V.mode!=='guest'){vsUpdate(dt);vsDraw(V,'a',ms,0);vsHud(V,'a');
+    if(V.mode==='host'&&vsNet&&ms-V.lastSnap>=VS.SNAP){V.lastSnap=ms;vsNet.send(vsNet.room,'snap',vsPack());V.fxQ=[];}else if(V.mode==='bot')V.fxQ=[];}
+  else if(vsS){vsDraw(vsS,'b',ms,Math.min(.35,(performance.now()-vsS.at)/1000));vsHud(vsS,'b');}}
+
+/* ---------- snapshots (host -> guest) ---------- */
+function vsPack(){return{t:+V.t.toFixed(2),round:V.round,wins:V.wins,base:V.base,sudden:V.sudden,pause:+V.pause.toFixed(2),roundOver:V.roundOver,over:!!V.over,
+  req:V.req?{n:V.req.n,parts:V.req.parts,left:+V.req.left.toFixed(2),winner:V.req.winner}:null,
+  units:V.units.map(u=>[u.id,u.side,u.lane,+u.pos.toFixed(1),+u.hp.toFixed(1),u.max,u.named?1:0,u.song.artist,u.song.title,u.song.genre,u.minPop,u.fight?1:0]),fx:V.fxQ};}
+function vsUnpack(p){const num=(v,d=0)=>Number.isFinite(+v)?+v:d,side=v=>v==='b'?'b':'a',str=v=>String(v==null?'':v).slice(0,80);
+  const S={t:num(p.t),round:num(p.round,1),wins:{a:num(p.wins&&p.wins.a),b:num(p.wins&&p.wins.b)},base:{a:clamp(num(p.base&&p.base.a),0,VS.BASE),b:clamp(num(p.base&&p.base.b),0,VS.BASE)},
+    sudden:!!p.sudden,pause:num(p.pause),roundOver:!!p.roundOver,over:!!p.over,at:performance.now(),
+    req:p.req&&Array.isArray(p.req.parts)?{n:num(p.req.n),parts:p.req.parts.slice(0,12).map(x=>Array.isArray(x)?[str(x[0])]:str(x)),left:num(p.req.left),winner:p.req.winner?side(p.req.winner):null}:null,
+    units:(Array.isArray(p.units)?p.units:[]).slice(0,60).map(a=>{const genre=GENRES[a[9]]?a[9]:'pop',artist=str(a[7]),title=str(a[8]);
+      return{id:num(a[0]),side:side(a[1]),lane:clamp(num(a[2])|0,0,2),pos:clamp(num(a[3]),-5,VS.LEN+5),hp:num(a[4]),max:Math.max(1,num(a[5],1)),named:!!a[6],minPop:num(a[10]),fight:!!a[11],
+        song:{id:norm(title+' '+artist)||'x',title,artist,genre}};})};
+  return S;}
+
+/* ---------- a tiny Supabase Realtime client (Phoenix protocol over one WebSocket) ---------- */
+class Realtime{
+  constructor(){this.ws=null;this.ref=0;this.chans={};this.hb=0;this.onClose=null;}
+  open(){return new Promise((res,rej)=>{const ws=this.ws=new WebSocket(`${CATALOG.url.replace(/^http/,'ws')}/realtime/v1/websocket?apikey=${encodeURIComponent(CATALOG.key)}&vsn=1.0.0`);
+    const fail=setTimeout(()=>{rej(new Error('timeout'));try{ws.close();}catch(e){}},8000);
+    ws.onopen=()=>{clearTimeout(fail);this.hb=setInterval(()=>this.raw('phoenix','heartbeat',{}),25000);res();};
+    ws.onerror=()=>{clearTimeout(fail);rej(new Error('realtime'));};
+    ws.onclose=()=>{clearInterval(this.hb);if(this.onClose)this.onClose();};
+    ws.onmessage=e=>{let m;try{m=JSON.parse(e.data);}catch(x){return;}const ch=this.chans[m.topic];if(!ch)return;
+      if(m.event==='broadcast'&&m.payload)ch.onMsg&&ch.onMsg(m.payload.event,m.payload.payload||{});
+      else if(m.event==='presence_state'){ch.pres=m.payload||{};ch.onPresence&&ch.onPresence(ch.pres);}
+      else if(m.event==='presence_diff'){const d=m.payload||{};for(const k in d.joins||{})ch.pres[k]=d.joins[k];for(const k in d.leaves||{})delete ch.pres[k];ch.onPresence&&ch.onPresence(ch.pres);}
+      else if(m.event==='phx_reply'&&m.ref===ch.joinRef){ch.onJoin&&ch.onJoin(m.payload&&m.payload.status==='ok');}};});}
+  raw(topic,event,payload){const ref=String(++this.ref);if(this.ws&&this.ws.readyState===1)this.ws.send(JSON.stringify({topic,event,payload,ref}));return ref;}
+  join(name,key,h){const topic='realtime:'+name;const ch=this.chans[topic]=Object.assign({topic,pres:{}},h);
+    ch.joinRef=this.raw(topic,'phx_join',{config:{broadcast:{self:false,ack:false},presence:{key},private:false}});return ch;}
+  send(ch,event,payload){if(ch)this.raw(ch.topic,'broadcast',{type:'broadcast',event,payload});}
+  track(ch,meta){this.raw(ch.topic,'presence',{type:'presence',event:'track',payload:meta});}
+  leave(ch){if(!ch)return;this.raw(ch.topic,'phx_leave',{});delete this.chans[ch.topic];}
+  close(){this.onClose=null;clearInterval(this.hb);try{this.ws&&this.ws.close();}catch(e){}this.chans={};}}
+const VS_ME=Math.random().toString(36).slice(2,10);
+const vsCode=()=>{const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=A[Math.floor(Math.random()*A.length)];return s;};
+function vsStatus(t){$('#vsStatus').textContent=t;}
+async function vsConnect(){if(vsNet)vsNet.close();vsNet=new Realtime();await vsNet.open();
+  vsNet.onClose=()=>{if(screen==='vs'&&(V||vsS)&&!(V&&V.over))vsSay('Connection lost. The match is over.','bad');};return vsNet;}
+/* rooms: the host waits for a guest, then sends the seed; guests send answers, hosts send snapshots */
+async function vsRoom(code,role){
+  const net=vsNet;let started=false;
+  const room=net.join('bside-vs-'+code,VS_ME,{
+    onJoin:ok=>{if(!ok)vsStatus('Couldn’t open the room. Online play may be switched off for now.');},
+    onPresence:pres=>{const others=Object.keys(pres).filter(k=>k!==VS_ME);
+      if(role==='host'&&!started&&others.length){started=true;const seed=(Math.random()*2**32)>>>0;net.send(room,'start',{seed});vsBegin('host',{seed});}
+      if(started&&!others.length&&screen==='vs'&&!(V&&V.over)&&!(vsS&&vsS.over)){vsSay('Your opponent left. You win by default.','good');if(V)V.over=true;}},
+    onMsg:(ev,p)=>{
+      if(ev==='start'&&role==='guest'){started=true;vsBegin('guest',{seed:p.seed});}
+      else if(ev==='snap'&&role==='guest'&&screen==='vs'){vsS=vsUnpack(p);(Array.isArray(p.fx)?p.fx:[]).slice(0,20).forEach(f=>f&&typeof f==='object'&&vsPlayFx(Object.assign({},f,{genre:GENRES[f.genre]?f.genre:'pop',artist:String(f.artist||'').slice(0,60)}),'b'));
+        if(vsS.over)$('#vsAgain').hidden=false;}
+      else if(ev==='res'&&role==='guest')vsResult({ok:!!p.ok,msg:String(p.msg||'').slice(0,200)});
+      else if(ev==='act'&&role==='host'&&V&&p.song){const s=p.song,song={id:String(s.id||'').slice(0,120),title:String(s.title||'').slice(0,120),artist:String(s.artist||'').slice(0,120),genre:GENRES[s.genre]?s.genre:'pop',year:Number.isFinite(+s.year)?+s.year:null,pop:clamp(+s.pop||0,0,100),energy:clamp(+s.energy||.5,0,1),mood:clamp(+s.mood||.5,0,1)};
+        if(song.id&&song.title)vsAct('b',song);}
+      else if(ev==='rematch'&&role==='host'&&V&&V.over){const seed=(Math.random()*2**32)>>>0;net.send(room,'start',{seed});vsBegin('host',{seed});}}});
+  net.room=room;net.track(room,{role,t:Date.now()});}
+/* random matchmaking: everyone waiting sits in a lobby; the two longest-waiting pair up on a room derived from their ids */
+async function vsFindRandom(){vsStatus('Looking for an opponent…');
+  try{await vsConnect();}catch(e){vsStatus('Couldn’t reach the online server. Try a bot match instead.');return;}
+  const net=vsNet,t0=Date.now();let done=false;
+  const lobby=net.join('bside-lobby',VS_ME,{onPresence:pres=>{if(done)return;
+    const q=Object.entries(pres).map(([k,v])=>({k,t:(v&&v.metas&&v.metas[0]&&v.metas[0].t)||0})).sort((a,b)=>a.t-b.t||(a.k<b.k?-1:1));
+    const i=q.findIndex(x=>x.k===VS_ME);if(i<0)return;const j=i%2?i-1:i+1;if(!q[j])return;
+    done=true;const host=i%2?q[j].k:VS_ME,guest=i%2?VS_ME:q[j].k;const code='R'+(hash(host+'|'+guest)>>>0).toString(36).toUpperCase().slice(0,6);
+    net.leave(lobby);vsStatus('Opponent found! Connecting…');vsRoom(code,host===VS_ME?'host':'guest');}});
+  net.track(lobby,{t:t0});
+  setTimeout(()=>{if(!done&&!$('#vsModal').hidden)vsStatus('Still looking… nobody else is online right now. Try a bot while you wait, or send a friend a private room.');},20000);}
+async function vsCreateRoom(){const code=vsCode();vsStatus('Opening a room…');
+  try{await vsConnect();}catch(e){vsStatus('Couldn’t reach the online server. Try a bot match instead.');return;}
+  await vsRoom(code,'host');const link=`${location.origin}/?room=${code}`;
+  vsStatus(`Room ${code} is open. Send your friend the code or this link: ${link}`);
+  try{await navigator.clipboard.writeText(link);vsStatus(`Room ${code} is open. The invite link is copied: ${link}`);}catch(e){}}
+async function vsJoinRoom(code){code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,7);if(code.length<5){vsStatus('Enter the 5-letter room code.');return;}
+  vsStatus(`Joining room ${code}…`);try{await vsConnect();}catch(e){vsStatus('Couldn’t reach the online server.');return;}
+  await vsRoom(code,'guest');vsStatus(`In room ${code}. Waiting for the host to start…`);}
+
+/* ---------- screens ---------- */
+function vsBegin(mode,o={}){closeSheets();audioInit();musicStart();songTo('A');vsParts=[];vsS=null;vsHud.key='';
+  for(const el of vsLabelEls.values())el.remove();vsLabelEls.clear();
+  if(mode==='guest'){V={mode:'guest',me:'b',names:{a:'Host',b:'You'}};vsS=null;}
+  else vsNewMatch(mode,{seed:o.seed,level:o.level,foeName:mode==='bot'?VS_BOT[o.level||'normal'].name:'Guest'});
+  if(mode==='host')V.names.b='Opponent';if(mode==='guest')V.names.a='Opponent';
+  $('#vsAgain').hidden=true;vsSay(mode==='bot'?'Answer requests to send units. Steal named units with a less popular song by the same artist.':'Match on! Answer requests to send units.','');
+  showScreen('vs');setTimeout(()=>$('#vsInput').focus({preventScroll:true}),50);}
+function vsLeave(){if(vsNet){vsNet.close();vsNet=null;}V=null;vsS=null;for(const el of vsLabelEls.values())el.remove();vsLabelEls.clear();showScreen('start');}
+async function vsResolve(text){const {song,score}=identify(text);if(song&&score>=95)return song;
+  const q=norm(text.replace(/\s+-\s+/,' '));let best={song:song||null,score:song?score:0};
+  if(remoteOn()&&q.length>=3){const rows=await remoteSearch(q);if(rows&&rows.length){const m=bestMatch(q,rows);if(m.song&&m.score>=55&&m.score>best.score)best={song:rememberSong(m.song),score:m.score};}}
+  return best.song&&best.score>=55?best.song:null;}
+$('#vsForm').addEventListener('submit',async e=>{e.preventDefault();const inp=$('#vsInput'),text=inp.value.trim();if(!text||!V)return;inp.value='';
+  const song=await vsResolve(text);if(!V)return;
+  if(!song){vsResult({ok:false,msg:`“${text.slice(0,60)}” isn’t in the song catalog.`});return;}
+  if(V.mode==='guest'){if(vsNet)vsNet.send(vsNet.room,'act',{song:{id:song.id,title:song.title,artist:song.artist,genre:song.genre,year:song.year,pop:song.pop,energy:song.energy,mood:song.mood}});}
+  else vsAct('a',song);});
+$('#vsLeave').addEventListener('click',vsLeave);
+$('#vsAgain').addEventListener('click',()=>{if(!V)return;if(V.mode==='bot')vsBegin('bot',{level:Object.keys(VS_BOT).find(k=>VS_BOT[k]===V.bot.cfg)});
+  else if(V.mode==='guest'){vsNet&&vsNet.send(vsNet.room,'rematch',{});vsSay('Asked the host for a rematch…','');}
+  else if(V.mode==='host'&&vsNet){const seed=(Math.random()*2**32)>>>0;vsNet.send(vsNet.room,'start',{seed});vsBegin('host',{seed});}});
+$('#vsBtn').addEventListener('click',()=>{vsStatus('');openSheet('#vsModal');});
+document.querySelectorAll('#vsModal [data-bot]').forEach(b=>b.addEventListener('click',()=>vsBegin('bot',{level:b.dataset.bot})));
+$('#vsRandom').addEventListener('click',vsFindRandom);
+$('#vsCreate').addEventListener('click',vsCreateRoom);
+$('#vsJoinForm').addEventListener('submit',e=>{e.preventDefault();vsJoinRoom($('#vsCodeIn').value);});
+{const rm=new URLSearchParams(location.search).get('room');if(rm)setTimeout(()=>{openSheet('#vsModal');$('#vsCodeIn').value=rm.toUpperCase();vsJoinRoom(rm);},400);}
+
+let atBeat=0;if(AUTOTEST)window.__bside={game:()=>G,vs:()=>({V,vsS,vsSubmit,vsBegin,VS,step(sec){for(let t=0;t<sec;t+=.05){vsUpdate(.05);if(V&&V.mode==='bot')V.fxQ=[];}if(V.mode==='host'&&vsNet){vsNet.send(vsNet.room,'snap',vsPack());V.fxQ=[];}vsDraw(V,'a',performance.now(),0);vsHud(V,'a');},net:()=>vsNet}),search:{localMatch,matchScore,suggestScore,INDEX,remote,remoteSearch,norm,lev,LOCAL},step(sec){for(let t=0;t<sec;t+=.05){if(!G||G.over||G.paused)break;update(.05);const nb=atBeat+.05*2*tempoMult();if(Math.floor(nb)!==Math.floor(atBeat))onBeat(Math.floor(nb));atBeat=nb;}return G&&{t:G.t,hp:G.boss.hp,crowd:G.crowd,echoes:G.echoes.length,phase:G.boss.phase,score:G.score,req:G.request.type};},answer(){const r=G.request;if(r.theme)return null;const s=r.single||requestHint();return s?`${s.title} - ${s.artist}`:null;},req(){return G.request;},state(){return G;},fx(id){rarityFX(id,1);},card(){return makeShareCard();}};
 const catalogLoading=loadCatalog();
 /* boot: a short welcome while fonts and songs load, then the home screen over the live demo */
 (async function boot(){const bar=$('#splashBar'),t0=performance.now();let shown=8;const tick=setInterval(()=>{shown=Math.min(88,shown+(92-shown)*.12);bar.style.width=shown+'%';},120);

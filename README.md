@@ -48,6 +48,8 @@ Endless can be played with a **modifier**: Decades Night, No Airplay, Double Tim
 
 **Keeping it fresh.** Every set has a **Spotlight**, a genre or decade that the Echoes and some requests lean toward: the same for everyone on the Daily Set, random on every Endless run. Each day also brings **three daily missions** (for example "Reclaim 5 Echoes" or "Land a Crate Dig"), worth XP, that can be completed in either mode.
 
+**1v1.** Battle a friend (private room code or invite link), a random opponent, or a bot (Easy, Normal, Hard). Answering a request sends a unit down the runway at the other player's stage; answer first for a full unit, or within 3 seconds after them for a half one. Every third unit carries its artist's name, and the other player can **steal** it by playing a less popular song by the same artist (up to 3 steals per unit). Best of three 2-minute rounds, then sudden death.
+
 **After a set** you see where your score falls on a curve of other players' scores ("You beat 72% of players today"), plus a **result card** image to share. Until enough real scores exist, the curve is an estimate from test plays and says so.
 
 ---

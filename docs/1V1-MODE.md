@@ -1,6 +1,6 @@
 # 1v1 mode: design notes
 
-Status: idea, not built yet. Written down so the logistics are settled before any code.
+Status: built (bot, private rooms, random matchmaking). The notes below are the design it follows.
 
 ## The pitch
 
