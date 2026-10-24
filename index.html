@@ -96,6 +96,7 @@ img.ic{width:18px;height:18px;image-rendering:pixelated;vertical-align:-4px}
 .modchip{font-family:var(--f-ui);font-size:12.5px;padding:5px 10px;border:1px solid var(--line);background:var(--bg-2);color:var(--ink);cursor:pointer}
 .modchip[aria-pressed="true"]{border-color:var(--cyan);color:var(--cyan);background:rgba(63,224,255,.08)}
 .moddesc{font-size:13.5px;color:var(--muted);min-height:2.6em}
+@media (max-width:820px){#dailyDesc{min-height:3em}}
 .profile{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px;margin-bottom:16px}
 @media (max-width:820px){.profile{grid-template-columns:minmax(0,1fr)}}
 .rank{display:grid;gap:8px}
@@ -356,16 +357,16 @@ ol.coach b{color:var(--ink)}
     <article class="mode daily" aria-labelledby="dailyTitle">
       <p class="eyebrow" id="dailyEyebrow">Daily Set</p>
       <h2 id="dailyTitle">Today's modifier</h2>
-      <p class="desc" id="dailyDesc"></p>
-      <div class="row" id="dailyStats"></div>
-      <div class="row"><button class="btn" id="dailyBtn" type="button">Play today's set</button><span class="muted" id="dailyNote" style="font-size:13px"></span></div>
+      <p class="desc" id="dailyDesc">Loading today's modifier…</p>
+      <div class="row" id="dailyStats"><span class="stat"><b>0</b><span>Day streak</span></span><span class="stat"><b>—</b><span>Not played today</span></span></div>
+      <div class="row"><button class="btn" id="dailyBtn" type="button">Play today's set</button><span class="muted" id="dailyNote" style="font-size:13px">Same Echoes, requests and boss for everyone today: three tracks, then The Topline goes down. Your first run counts.</span></div>
     </article>
     <article class="mode free" aria-labelledby="freeTitle">
       <p class="eyebrow" style="color:var(--cyan)">Endless</p>
       <h2 id="freeTitle">How long can you hold the stage?</h2>
-      <div class="mods" id="modChips" role="group" aria-label="Modifier"></div>
-      <p class="moddesc" id="modDesc"></p>
-      <div class="row"><button class="btn" id="freeBtn" type="button" style="background:var(--cyan);color:#071418">Play endless</button><span class="muted" id="freeBest" style="font-size:13px"></span></div>
+      <div class="mods" id="modChips" role="group" aria-label="Modifier"><button type="button" class="modchip" aria-pressed="true">Standard Set</button><button type="button" class="modchip" aria-pressed="false">Decades Night</button><button type="button" class="modchip" aria-pressed="false">No Airplay</button><button type="button" class="modchip" aria-pressed="false">Double Time</button><button type="button" class="modchip" aria-pressed="false">Wordplay Night</button><button type="button" class="modchip" aria-pressed="false">Masquerade</button><button type="button" class="modchip" aria-pressed="false">Genre Takeover</button><button type="button" class="modchip" aria-pressed="false">No Safety Net</button></div>
+      <p class="moddesc" id="modDesc">The classic mix of requests, Echoes and fraud checks.</p>
+      <div class="row"><button class="btn" id="freeBtn" type="button" style="background:var(--cyan);color:#071418">Play endless</button><span class="muted" id="freeBest" style="font-size:13px">Every track cleared makes the next one faster. Play until the crowd forgets.</span></div>
     </article>
   </div>
   <div class="profile">
