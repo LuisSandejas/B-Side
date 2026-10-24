@@ -33,7 +33,7 @@ Any static file server works. From the repo root:
 python3 -m http.server 8000
 ```
 
-Then open <http://localhost:8000>. Click once anywhere to start the audio (browsers block sound until you interact).
+Then open <http://localhost:8000>. A short loading screen gives way to the home screen (a self-playing game in the background); click to start, which also switches on the audio (browsers block sound until you interact).
 
 ---
 
@@ -46,20 +46,31 @@ Then open <http://localhost:8000>. Click once anywhere to start the audio (brows
 
 Endless can be played with a **modifier**: Decades Night, No Airplay, Double Time, Wordplay Night, Masquerade, Genre Takeover or No Safety Net. The Daily Set picks one each day (never the two hardest).
 
+**Keeping it fresh.** Every set has a **Spotlight**, a genre or decade that the Echoes and some requests lean toward: the same for everyone on the Daily Set, random on every Endless run. Each day also brings **three daily missions** (for example "Reclaim 5 Echoes" or "Land a Crate Dig"), worth XP, that can be completed in either mode.
+
+**After a set** you see where your score falls on a curve of other players' scores ("You beat 72% of players today"), plus a **result card** image to share. Until enough real scores exist, the curve is an estimate from test plays and says so.
+
 ---
 
 ## How it plays
 
-**Requests.** Genre, decade, era, year window, exact year, title shapes ("a one-word title", "a color in the title"), title or artist first letter, songs by a named artist, "a different song by whoever made X", same decade as / older than / newer than a reference song, fill in the blank, unscramble, initials, and name-the-track clue cards. Single-answer requests are worth ×1.5; two-part requests ×1.4; answering in the first half of the timer ×1.25.
+**Requests.** Easy ones open each set and harder ones arrive in later tracks:
+- *Songs:* genre, decade, "2000 or later", vibe (upbeat, sad, slow, party), love-song titles, songs by a band, by a Grammy winner or by an artist from a given country, era, year window, exact year, title shapes ("a one-word title", "a color in the title"), first letters, songs by a named artist, "a different song by whoever made X", same decade as / older than / newer than a reference song.
+- *Name an artist:* a rapper, a pop star, a band, a duo, a British solo artist, an artist from Canada, a Grammy winner, an artist with a one-word name, an artist who had a hit in the 80s, and more. Typing just the artist's name counts; their best-known fitting song joins your squad.
+- *Wordplay:* fill in the blank (typing just the missing word counts), unscramble, initials, and name-the-track clue cards.
+
+Single-answer requests are worth ×1.5; two-part requests ×1.4; answering in the first half of the timer ×1.25.
 
 **Rarity.** Every song has a popularity score (0–100) that sets its rarity. The aliens only know the charts, so rarer songs hurt them more:
 
 | Tier | Popularity | Damage | Feel |
 |---|---|---|---|
 | ○ Airplay | 80+ | ×0.85 | small ring |
-| ◐ Fan Favorite | 50–79 | ×1 | ring and a stronger shake |
-| ● Crate Dig | 20–49 | ×1.25 | freeze-frame, shockwave, stamp |
-| ◆ White Label | under 20 | ×1.5 | long freeze-frame, gold rays, big stamp, choir hit |
+| ◐ Fan Favorite | 60–79 | ×1 | ring and a stronger shake |
+| ● Crate Dig | 40–59 | ×1.25 | freeze-frame, shockwave, stamp |
+| ◆ White Label | under 40 | ×1.5 | long freeze-frame, gold rays, big stamp, choir hit |
+
+When a song lands, a quick scan sweeps over the new squad member before its rarity is revealed.
 
 **Counter ring.** Rock › Electronic › Hip-hop › Jazz › Classical › Pop › R&B › back to Rock. Each genre beats the next one (×1.75) and is weak to the one before (×0.6). ★ Star Echoes only take damage from their counter.
 
@@ -77,6 +88,7 @@ Endless can be played with a **modifier**: Decades Night, No Airplay, Double Tim
 
 ```
 index.html                    the entire game: markup, styles and script
+data/songs.json               the main song catalog (about 2,400 songs; ~300 more are built into index.html)
 404.html                      themed "page not found" page
 assets/                       social preview image (og.png), app icons, fonts/ (self-hosted, OFL-licensed)
 favicon.ico, site.webmanifest browser tab icon and home-screen install info
@@ -86,6 +98,7 @@ supabase/
   migrations/
     20261024120000_create_songs.sql   songs table, indexes, read-only access policy
     20261024120100_seed_songs.sql     the songs that ship inside the game
+    20261025090000_create_scores.sql  anonymous scores + score_stats() for the end-of-set curve
 docs/
   ARCHITECTURE.md             how the game is put together
   SONG-CATALOG.md             catalog schema, rarity rules, adding songs
@@ -94,11 +107,13 @@ docs/
 
 ---
 
-## Song catalog (Supabase)
+## Song catalog and scores (Supabase)
 
-The game always has its built-in song list, so it works offline. On load it also fetches the `songs` table from Supabase and adds any songs it doesn't already know. If the database can't be reached, the title screen says so and the game carries on with the built-in list.
+The game knows about 2,700 songs: about 300 built into `index.html` (so it still works if nothing else loads) and the rest in `data/songs.json`, loaded while the splash screen shows. If the Supabase `songs` table has extra rows, those are added on top.
 
-The Supabase project URL and **publishable** key are set near the top of the script in `index.html` (`const CATALOG=…`). The publishable key is designed to be public; row-level security only lets visitors *read* songs.
+Supabase also stores **anonymous scores** for the end-of-set curve. Anyone can submit a score, but nobody can read individual rows; the game only asks `score_stats()` for a histogram and how many scores sit below yours. Scores are never submitted from `localhost` or from `?autotest` runs, so testing doesn't pollute the data.
+
+The Supabase project URL and **publishable** key are set near the top of the script in `index.html` (`const CATALOG=…`). The publishable key is designed to be public; row-level security only lets visitors read songs and submit scores.
 
 > Never put the database password or a secret/service-role key in `index.html` or anywhere else in this repo.
 
@@ -113,7 +128,7 @@ supabase link --project-ref xrfgssobisrfuemvcqvs
 supabase db push
 ```
 
-`supabase init` may ask about editor settings; either answer is fine. `supabase link` asks for the database password — type it into the prompt, don't save it in a file. `supabase db push` creates the `songs` table and seeds it. After that, the title screen should say the songs are ready with no "couldn't be reached" warning.
+`supabase init` may ask about editor settings; either answer is fine. `supabase link` asks for the database password — type it into the prompt, don't save it in a file. `supabase db push` creates the `songs` and `scores` tables and seeds the songs. Until then the game still works; the end-of-set curve just stays an estimate.
 
 To add songs, see [docs/SONG-CATALOG.md](docs/SONG-CATALOG.md).
 
@@ -133,8 +148,8 @@ It's a static site, so any static host works.
 
 ## Development notes
 
-- **Test hook.** Open `index.html?autotest` to expose `window.__bside` for scripted play-testing: `step(seconds)` advances the game, `answer()` returns a valid answer to the current request, `state()` returns the live game state. It also disables the auto-pause when the tab is hidden.
-- **Saved data** lives in the browser's `localStorage` under `bside-profile-v2` (rank, streak, daily results, crate, best endless run).
+- **Test hook.** Open `index.html?autotest` to expose `window.__bside` for scripted play-testing: `step(seconds)` advances the game, `answer()` returns a valid answer to the current request, `state()` returns the live game state, `card()` renders the share card. It also disables the auto-pause when the tab is hidden.
+- **Saved data** lives in the browser's `localStorage` under `bside-profile-v2` (rank, XP, streak, daily results, missions, crate, best endless run, whether the first-run tips were shown). That's how the game remembers a returning player: it's per browser and per device, so clearing site data or switching devices starts fresh. Syncing across devices needs player accounts (see the roadmap).
 - **Determinism.** The Daily Set seeds every random stream from the date, and gives each Echo spawn, request and boss remix its own seeded stream, so players who play differently still face the same content.
 
 ---

@@ -6,8 +6,11 @@
 - [x] Procedural pixel art, genre-themed arenas, rarity effects
 - [x] Live-generated, reactive music
 - [x] Song catalog table in Supabase, with the built-in list as an offline fallback
-- [ ] Push the catalog migrations (`supabase db push`)
-- [ ] Deploy on Vercel and share with friends for playtesting
+- [x] Deploy on Vercel with auto-deploys from GitHub
+- [x] Home screen, daily missions, Spotlight, score curve and share card
+- [x] ~2,700-song catalog with rarity tiers and "name an artist" cards
+- [ ] Push the database migrations (`supabase db push`) so real scores feed the curve
+- [ ] Share with friends for playtesting
 
 ## Next: a much bigger catalog
 

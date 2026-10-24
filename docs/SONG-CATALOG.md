@@ -1,6 +1,8 @@
 # Song catalog
 
-The game knows a song only if it's in its catalog: the built-in list inside `index.html`, plus every row in the Supabase `songs` table. Anything else a player types is rejected.
+The game knows a song only if it's in its catalog: the built-in list inside `index.html`, `data/songs.json`, and any rows in the Supabase `songs` table. Anything else a player types is rejected with a screen shake.
+
+`data/songs.json` is an array of `[title, artist, genre, year, popularity, energy, mood]` rows. Years are real release years; popularity, energy and mood are hand estimates.
 
 ## Schema
 
@@ -25,9 +27,9 @@ Row-level security is on. Anyone can read; only the project owner can write (Sup
 | Popularity | Tier |
 |---|---|
 | 80+ | Airplay |
-| 50–79 | Fan Favorite |
-| 20–49 | Crate Dig |
-| under 20 | White Label |
+| 60–79 | Fan Favorite |
+| 40–59 | Crate Dig |
+| under 40 | White Label |
 
 Artists whose most popular song is 80+ can also appear as **Echoes**, so keep those to genuine household names.
 
@@ -43,7 +45,14 @@ Map sub-genres onto the seven buckets:
 - **jazz:** swing, bebop, bossa nova
 - **pop:** K-pop, dance-pop, synth-pop, country-pop, bedroom pop
 
+## Artist facts
+
+The "name an artist" cards use a small table near the top of the script (`META_RAW`): each artist's home country, whether they're a solo artist, band or duo, and a flag for a competitive Grammy win. Only mark a Grammy win you're sure of. Artists missing from the table still work everywhere else; they just don't count for country, band/duo or Grammy cards.
+
 ## Adding songs
+
+**Into the static catalog:** add rows to `data/songs.json` and redeploy (push to `main`).
+
 
 **One or two songs:** Supabase dashboard → Table Editor → `songs` → Insert row.
 

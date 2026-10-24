@@ -36,9 +36,9 @@
 @font-face{font-family:'Pixelify Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(/assets/fonts/pixelify-sans.woff2) format('woff2')}
 /* Layout: title screen = daily set + free play + profile. Game = full-screen typing game: HUD on top, request banner, centered arena, squad strip, and a typing bar fixed at the bottom. Side rails (last played / math) appear on wide screens and in a Details drawer on narrow ones. */
 :root{
-  --bg:#12141c; --bg-2:#181b26; --panel:#1d2130; --panel-2:#262b3d; --line:#363c55;
-  --ink:#ece8df; --muted:#a3a2b4; --dim:#6f7088;
-  --amber:#f2b24c; --red:#ff5a4f; --cyan:#3fe0ff; --good:#8fdc8a; --bad:#ff6b5f; --violet:#c79bff; --gold:#ffd46b;
+  --bg:#100f1a; --bg-2:#17162a; --panel:rgba(28,26,48,.86); --panel-2:#2b2946; --line:rgba(255,255,255,.1);
+  --ink:#f1ece4; --muted:#b3aec6; --dim:#7a7692;
+  --amber:#f6b75a; --red:#ff6b6b; --cyan:#5fd9f0; --good:#8fdc9a; --bad:#ff7b72; --violet:#c3a1ff; --gold:#ffd77a;
   --f-ui:"Chakra Petch","Segoe UI",system-ui,sans-serif;
   --f-px:"Pixelify Sans",ui-monospace,monospace;
   color-scheme:dark;
@@ -46,91 +46,127 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{background:var(--bg);margin:0}
-body{color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.5;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px);background-size:100% 4px}
+body{color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body{overflow:hidden}
 body.ingame{overflow:hidden}
 h1,h2,h3{margin:0;font-weight:600;text-wrap:balance}
-h2{font-size:15px;letter-spacing:.08em;text-transform:uppercase}
+h2{font-size:15px;letter-spacing:.04em}
 p{margin:0}
 .muted{color:var(--muted)}
-.eyebrow{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);font-weight:600}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);font-weight:600}
 button{font-family:inherit}
 :focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
 img.ic{width:18px;height:18px;image-rendering:pixelated;vertical-align:-4px}
-.btn{font-family:var(--f-ui);font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;border:0;cursor:pointer;color:#1a1408;background:var(--amber);padding:11px 20px;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+.btn{font-family:var(--f-ui);font-weight:700;font-size:15px;letter-spacing:.03em;border:0;cursor:pointer;color:#1b1424;background:var(--amber);padding:11px 20px;border-radius:12px}
+.btn.cyan{background:var(--cyan);color:#06222a}
 .btn:hover{filter:brightness(1.08)}
 .btn:active{transform:translateY(1px)}
 .btn:disabled{background:var(--panel-2);color:var(--dim);cursor:not-allowed;filter:none}
-.btn.ghost{background:var(--panel-2);color:var(--ink)}
+.btn.ghost{background:rgba(255,255,255,.08);color:var(--ink)}
 .btn.small{font-size:12px;padding:7px 12px}
-.icon-btn{font-family:var(--f-ui);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--panel-2);color:var(--ink);border:1px solid var(--line);padding:5px 9px;cursor:pointer}
+.icon-btn{font-family:var(--f-ui);font-size:12.5px;font-weight:600;letter-spacing:.02em;background:rgba(255,255,255,.07);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 11px;cursor:pointer}
 .icon-btn[aria-pressed="true"]{color:var(--cyan);border-color:#2a5b66}
-.panel{background:var(--panel);border:1px solid var(--line);padding:14px}
-.bar{height:10px;background:#0c0e14;border:1px solid var(--line);position:relative;overflow:hidden}
-.bar i{position:absolute;inset:0 auto 0 0;background:var(--red);transition:width .25s steps(5)}
-.chip{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;padding:3px 7px;background:var(--panel-2);border:1px solid var(--line);white-space:nowrap;font-variant-numeric:tabular-nums}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+.bar{height:10px;background:rgba(0,0,0,.35);border-radius:99px;position:relative;overflow:hidden}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--red);border-radius:99px;transition:width .3s ease}
+.chip{font-size:12px;letter-spacing:.02em;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);white-space:nowrap;font-variant-numeric:tabular-nums}
 .chip.win{color:var(--good);border-color:#3e6b44}
-.chip.warn{color:var(--bad);border-color:#7a3530;animation:blink .6s steps(2) infinite}
+.chip.warn{color:var(--bad);border-color:rgba(255,123,114,.5);animation:pulse 1.2s ease-in-out infinite}
 .chip.score{color:var(--gold);border-color:#6b5a2a;font-family:var(--f-px);letter-spacing:.02em;font-size:14px;padding:2px 9px}
-.chip.combo{color:#071418;background:var(--cyan);border-color:var(--cyan)}
+.chip.combo{color:#06222a;background:var(--cyan);border-color:var(--cyan)}
 .chip.mod{color:var(--violet);border-color:#4e3a7a}
 @keyframes blink{50%{opacity:.35}}
+@keyframes pulse{50%{opacity:.55}}
 @keyframes rise{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
 
-/* ---------- title screen ---------- */
-.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:22px 56px}
-.hero{display:grid;justify-items:center;text-align:center;gap:10px;margin-bottom:22px}
-.logo{font-family:var(--f-px);font-size:clamp(60px,12vw,120px);line-height:.85;font-weight:700;letter-spacing:.02em;color:var(--ink);text-shadow:4px 4px 0 #6a2b3a,8px 8px 0 #2a1c2c}
-.logo span{color:var(--red)}
-.premise{max-width:62ch;color:var(--muted);font-size:16px}
-.modes{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
-@media (max-width:820px){.modes{grid-template-columns:minmax(0,1fr)}}
-.mode{position:relative;background:var(--panel);border:1px solid var(--line);padding:18px;display:grid;gap:10px;align-content:start}
-.mode.daily{border-top:4px solid var(--amber);background-image:radial-gradient(circle at 100% 0,rgba(242,178,76,.12),transparent 55%)}
-.mode.free{border-top:4px solid var(--cyan)}
-.mode h2{font-size:clamp(22px,3vw,28px);line-height:1.1;letter-spacing:normal;text-transform:none}
-.mode .desc{color:var(--muted)}
-.mode .row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:14px}
-.stat b{font-family:var(--f-px);font-size:20px;font-weight:500;color:var(--ink);display:block;line-height:1}
-.stat span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+/* ---------- front screens: splash, home, menu ---------- */
+.splash{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,#231d3a 0,#100f1a 70%);transition:opacity .6s ease}
+.splash.out{opacity:0;pointer-events:none}
+.splash-in{display:grid;justify-items:center;gap:18px}
+.disc{width:84px;height:84px;border-radius:50%;background:radial-gradient(circle,#100f1a 0 4px,var(--red) 5px 15px,#141320 16px 18px,#232138 19px 21px,#141320 22px 25px,#232138 26px 28px,#141320 29px 32px,#232138 33px 35px,#141320 36px);box-shadow:0 0 40px rgba(255,107,107,.18);animation:spin 1.6s linear infinite}
+.splash-logo{font-family:var(--f-px);font-weight:700;font-size:40px;line-height:1;letter-spacing:.04em}
+.splash-logo span,.menu-logo span,.logo span{color:var(--red)}
+.splash-bar{width:min(240px,60vw);height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.splash-bar i{display:block;height:100%;width:8%;border-radius:99px;background:linear-gradient(90deg,var(--violet),var(--cyan));transition:width .35s ease}
+.splash-txt{color:var(--muted);font-size:14px;letter-spacing:.04em}
+
+.home,.menu{position:fixed;inset:0;z-index:20}
+.home{display:grid;place-items:center;text-align:center;padding:24px 16px;background:radial-gradient(ellipse at 50% 46%,rgba(16,15,26,.35) 0,rgba(16,15,26,.78) 70%);cursor:pointer}
+.home-in{display:grid;justify-items:center;gap:14px;animation:homeIn .9s cubic-bezier(.2,1,.3,1) both}
+@keyframes homeIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.logo{font-family:var(--f-px);font-size:clamp(64px,13vw,150px);line-height:.85;font-weight:700;letter-spacing:.03em;color:var(--ink);text-shadow:0 4px 0 #5a2a3a,0 10px 40px rgba(255,107,107,.25)}
+.home-tag{font-size:clamp(17px,2.4vw,22px);color:var(--ink);opacity:.92;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+.start-btn{margin-top:18px;font-family:var(--f-px);font-size:clamp(20px,2.6vw,26px);font-weight:600;letter-spacing:.06em;color:#1b1424;background:var(--amber);border:0;border-radius:999px;padding:14px 34px;cursor:pointer;box-shadow:0 0 0 0 rgba(246,183,90,.5);animation:breathe 2.4s ease-in-out infinite}
+.start-btn:hover{filter:brightness(1.07)}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(246,183,90,.35);transform:scale(1)}50%{box-shadow:0 0 0 14px rgba(246,183,90,0);transform:scale(1.03)}}
+.home-foot{color:var(--muted);font-size:14px}
+.home-foot b{color:var(--ink);font-weight:600}
+
+.menu{display:grid;align-content:safe center;overflow-y:auto;background:linear-gradient(180deg,rgba(16,15,26,.55),rgba(16,15,26,.82));backdrop-filter:blur(2px);padding:max(18px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px))}
+.menu-in{max-width:980px;margin:0 auto;display:grid;gap:22px;animation:homeIn .5s ease both}
+.menu-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.menu-logo{font-family:var(--f-px);font-weight:700;font-size:30px;line-height:1;letter-spacing:.03em}
+.menu-links{display:flex;gap:8px;flex-wrap:wrap}
+.pill{font-family:var(--f-ui);font-size:14px;font-weight:600;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer;backdrop-filter:blur(6px)}
+.pill:hover{border-color:rgba(255,255,255,.22)}
+.pill b{color:var(--amber);font-weight:600}
+.modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:760px){.modes{grid-template-columns:minmax(0,1fr)}}
+.mode{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px;display:grid;gap:12px;align-content:start;backdrop-filter:blur(8px);box-shadow:0 18px 50px rgba(0,0,0,.28)}
+.mode.daily{background-image:radial-gradient(circle at 100% 0,rgba(246,183,90,.16),transparent 60%)}
+.mode.free{background-image:radial-gradient(circle at 100% 0,rgba(95,217,240,.14),transparent 60%)}
+.mode h2{font-size:clamp(24px,3vw,30px);line-height:1.1;letter-spacing:normal;text-transform:none}
+.mode .desc{color:var(--muted);font-size:15.5px}
+.mode .row{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font-size:14px}
+.mode .btn{font-size:16px;padding:13px 24px}
+.stat b{font-family:var(--f-px);font-size:22px;font-weight:500;color:var(--ink);display:block;line-height:1}
+.stat span{font-size:12px;color:var(--muted)}
+.missions{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.missions li{display:flex;align-items:center;gap:10px;font-size:14.5px;color:var(--ink);background:rgba(255,255,255,.04);border-radius:12px;padding:8px 12px}
+.missions li i{flex:0 0 18px;height:18px;border-radius:6px;border:2px solid var(--line);display:grid;place-items:center;font-style:normal;font-size:12px;line-height:1}
+.missions li.done{color:var(--muted);text-decoration:line-through}
+.missions li.done i{background:var(--good);border-color:var(--good);color:#10301a}
+.missions li small{display:inline-block;margin-left:auto;padding-left:8px;color:var(--amber);font-size:12.5px;white-space:nowrap}
+.spot{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#1b1424;background:var(--gold);border-radius:999px;padding:3px 10px;justify-self:start}
+details.modpick summary{list-style:none;cursor:pointer;font-size:14.5px;color:var(--muted)}
+details.modpick summary::-webkit-details-marker{display:none}
+details.modpick summary b{color:var(--cyan);font-weight:600}
+details.modpick summary::after{content:" ▾";color:var(--dim)}
+details.modpick[open] summary{margin-bottom:10px}
 .mods{display:flex;flex-wrap:wrap;gap:6px}
-.modchip{font-family:var(--f-ui);font-size:12.5px;padding:5px 10px;border:1px solid var(--line);background:var(--bg-2);color:var(--ink);cursor:pointer}
-.modchip[aria-pressed="true"]{border-color:var(--cyan);color:var(--cyan);background:rgba(63,224,255,.08)}
-.moddesc{font-size:13.5px;color:var(--muted);min-height:2.6em}
-@media (max-width:820px){#dailyDesc{min-height:3em}}
-.profile{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px;margin-bottom:16px}
-@media (max-width:820px){.profile{grid-template-columns:minmax(0,1fr)}}
+.modchip{font-family:var(--f-ui);font-size:13px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);color:var(--ink);cursor:pointer}
+.modchip[aria-pressed="true"]{border-color:var(--cyan);color:var(--cyan);background:rgba(95,217,240,.1)}
+.moddesc{font-size:14px;color:var(--muted);margin-top:8px}
 .rank{display:grid;gap:8px}
 .rank .title{font-family:var(--f-px);font-size:28px;line-height:1;color:var(--amber)}
 .rank .bar i{background:var(--amber)}
 .stats{display:flex;flex-wrap:wrap;gap:14px 26px}
 .crate{display:grid;gap:8px}
-.gbars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px 12px}
+.gbars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 12px}
 @media (max-width:480px){.gbars{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.gb{display:grid;gap:2px;font-size:12px;color:var(--muted)}
+.gb{display:grid;gap:3px;font-size:12.5px;color:var(--muted)}
 .gb .bar{height:6px}
 .gb .bar i{background:var(--gc)}
 .finds{display:flex;flex-wrap:wrap;gap:6px}
-.find{font-size:12.5px;padding:2px 8px;border-left:3px solid var(--gc);background:var(--bg-2)}
+.find{font-size:13px;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
 .find em{font-style:normal;color:var(--rc)}
-.ring{display:flex;flex-wrap:wrap;align-items:center;gap:4px 2px;font-size:12.5px}
-.ring .g{display:inline-flex;align-items:center;gap:4px;padding:2px 6px;background:var(--bg-2);border-bottom:2px solid var(--gc)}
+.ring{display:flex;flex-wrap:wrap;align-items:center;gap:6px 4px;font-size:13px}
+.ring .g{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.05);border-bottom:2px solid var(--gc)}
 .ring .arr{color:var(--dim);padding:0 1px}
-details.how{color:var(--muted)}
-details summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
-details summary::-webkit-details-marker{display:none}
-details summary::after{content:"+";font-family:var(--f-px);color:var(--muted);font-size:18px}
-details[open] summary::after{content:"–"}
-details[open] > summary{margin-bottom:10px}
-.how ol{margin:0;padding-left:20px;display:grid;gap:7px}
+.how ol{margin:0;padding-left:20px;display:grid;gap:9px;color:var(--muted)}
 .how b{color:var(--ink)}
-.ai-status{display:flex;gap:8px;align-items:flex-start;font-size:14px;color:var(--ink)}
-.ai-dot{width:10px;height:10px;margin-top:5px;flex:0 0 10px;background:var(--dim)}
+.ai-status{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;color:var(--muted)}
+.ai-dot{width:9px;height:9px;margin-top:6px;flex:0 0 9px;border-radius:50%;background:var(--dim)}
 .ai-dot.on{background:var(--good)}
 .ai-dot.off{background:var(--amber)}
+.sheet .mbox{border-top:0;gap:16px}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sheet-head h2{font-size:20px;letter-spacing:normal;text-transform:none}
+.xbtn{border:0;background:rgba(255,255,255,.07);color:var(--ink);border-radius:999px;width:34px;height:34px;font-size:18px;cursor:pointer}
 
 /* ---------- game: the stage fills the screen, everything else floats over it ---------- */
-#gameScreen{position:fixed;inset:0;z-index:10;overflow:hidden;background:#12131d;--s:2;--hudw:280px;--bantop:80px;--banw:640px;--railtop:110px;--railbot:130px}
-#stage{position:absolute;inset:0}
+#gameScreen{position:fixed;inset:0;z-index:10;overflow:hidden;background:transparent;--s:2;--hudw:280px;--bantop:80px;--banw:640px;--railtop:110px;--railbot:130px}
+#stage{position:fixed;inset:0;z-index:0;background:var(--bg)}
 #stage.shake{animation:ashake .35s steps(7)}
 @keyframes ashake{0%,100%{transform:none}20%{transform:translate(-6px,2px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-4px,1px)}80%{transform:translate(3px,0)}}
 #arena{position:absolute;left:0;top:0;display:block;image-rendering:crisp-edges;image-rendering:pixelated}
@@ -139,16 +175,16 @@ details[open] > summary{margin-bottom:10px}
 .paused{position:absolute;inset:0;z-index:30;display:grid;place-items:center;background:rgba(8,8,14,.6);pointer-events:none;font-family:var(--f-px);font-size:40px;letter-spacing:.1em;color:var(--ink);line-height:1.2}
 
 /* echo name tags */
-.elabel{position:absolute;left:0;top:0;font-family:var(--f-px);font-weight:600;font-size:clamp(12px,calc(var(--s)*5.4px),21px);line-height:1.05;color:#fff;background:rgba(14,12,20,.9);border-bottom:2px solid var(--gc);padding:1px 6px 2px;white-space:nowrap;max-width:calc(var(--s)*96px);overflow:hidden;text-overflow:ellipsis;letter-spacing:.02em;will-change:transform}
+.elabel{position:absolute;left:0;top:0;border-radius:6px;font-family:var(--f-px);font-weight:600;font-size:clamp(12px,calc(var(--s)*5.4px),21px);line-height:1.05;color:#fff;background:rgba(14,12,20,.9);border-bottom:2px solid var(--gc);padding:1px 6px 2px;white-space:nowrap;max-width:calc(var(--s)*96px);overflow:hidden;text-overflow:ellipsis;letter-spacing:.02em;will-change:transform}
 .elabel.masked{letter-spacing:.08em;color:var(--gold)}
 .elabel.star{color:var(--gold);border-color:var(--gold)}
 .elabel.gold{background:rgba(70,52,10,.95);color:var(--gold);border-color:var(--gold)}
-.elabel.near{background:rgba(150,26,26,.95);animation:blink .4s steps(2) infinite}
+.elabel.near{background:rgba(170,40,48,.95)}
 
 /* squad name tags under each member */
-.pad{position:absolute;pointer-events:auto;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:rgba(14,12,20,.86);border:1px dashed rgba(236,232,223,.3);color:var(--ink);padding:0 4px;overflow:hidden;cursor:pointer}
+.pad{position:absolute;pointer-events:auto;border-radius:8px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:rgba(14,12,20,.86);border:1px dashed rgba(236,232,223,.3);color:var(--ink);padding:0 4px;overflow:hidden;cursor:pointer}
 .pad .pc{font-family:var(--f-px);font-weight:600;font-size:max(10px,calc(var(--s)*4.4px));line-height:1.1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pad .pd{position:absolute;right:2px;top:1px;width:6px;height:6px;background:var(--red);animation:blink .8s steps(2) infinite}
+.pad .pd{position:absolute;right:3px;top:3px;width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1.4s ease-in-out infinite}
 .pad .fr{position:absolute;left:0;bottom:0;height:2px;background:var(--good)}
 .pad.filled{border-style:solid;border-color:var(--gc);border-bottom-width:0}
 .pad.head{box-shadow:0 0 0 1px var(--amber),0 0 14px rgba(242,178,76,.35)}
@@ -174,7 +210,7 @@ details[open] > summary{margin-bottom:10px}
 .col>*{pointer-events:auto}
 .col-l{left:max(10px,env(safe-area-inset-left,0px))}
 .col-r{right:max(10px,env(safe-area-inset-right,0px))}
-.hud{display:grid;gap:5px;background:rgba(14,13,22,.82);border:1px solid rgba(54,60,85,.8);padding:8px 10px;backdrop-filter:blur(3px);flex:0 0 auto}
+.hud{display:grid;gap:6px;background:rgba(20,18,34,.8);border:1px solid var(--line);border-radius:16px;padding:9px 12px;backdrop-filter:blur(3px);flex:0 0 auto}
 .meter{display:grid;gap:3px;min-width:0}
 .meter .lbl{display:flex;justify-content:space-between;gap:8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .meter .lbl span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -185,7 +221,7 @@ details[open] > summary{margin-bottom:10px}
 .hud-r .hudrow{justify-content:flex-end}
 
 /* the request the UFO transmits: a speech panel beside the ship on wide screens, hanging under it on narrow ones */
-.request{position:relative;flex:0 0 auto;background:rgba(12,12,22,.9);border:1px solid rgba(63,224,255,.4);border-top:2px solid var(--red);box-shadow:0 0 0 1px rgba(0,0,0,.5),0 0 34px rgba(63,224,255,.16);padding:7px 14px 9px;display:grid;gap:4px;text-align:left;transform-origin:100% 0;background-image:repeating-linear-gradient(0deg,rgba(63,224,255,.04) 0 2px,transparent 2px 4px)}
+.request{position:relative;flex:0 0 auto;background:rgba(18,16,32,.92);border:1px solid rgba(95,217,240,.35);border-radius:16px;box-shadow:0 0 0 1px rgba(0,0,0,.5),0 0 34px rgba(63,224,255,.16);padding:7px 14px 9px;display:grid;gap:4px;text-align:left;transform-origin:100% 0;}
 .request::before{content:"";position:absolute;right:-13px;top:10px;width:13px;height:18px;background:rgba(63,224,255,.55);clip-path:polygon(0 0,100% 0,0 100%)}
 .request.fresh{animation:spitSide .5s cubic-bezier(.2,1.5,.4,1)}
 @keyframes spitSide{0%{transform:scale(.2);opacity:0}100%{transform:none;opacity:1}}
@@ -196,8 +232,8 @@ details[open] > summary{margin-bottom:10px}
 #gameScreen .request.fresh{animation:spit .5s cubic-bezier(.2,1.5,.4,1)}
 @keyframes spit{0%{transform:translateX(-50%) scaleY(.08) scaleX(.4);opacity:0}100%{transform:translateX(-50%);opacity:1}}
 .live{display:flex;align-items:center;justify-content:center;gap:8px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700}
-.live i{width:7px;height:7px;background:var(--red);animation:blink 1s steps(2) infinite}
-.live .rtype{color:var(--ink);background:var(--bg-2);border:1px solid var(--line);padding:0 6px;letter-spacing:.12em}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 1.6s ease-in-out infinite}
+.live .rtype{color:var(--ink);background:rgba(255,255,255,.07);border-radius:999px;padding:0 8px;letter-spacing:.06em}
 .live .tleft{font-family:var(--f-px);letter-spacing:0;font-size:13px;color:var(--ink);min-width:3ch}
 .tbar{height:3px;background:#0c0e14;position:relative;overflow:hidden}
 .tbar i{position:absolute;inset:0 auto 0 0;background:var(--amber)}
@@ -225,21 +261,21 @@ details[open] > summary{margin-bottom:10px}
 .suggest:empty{display:none}
 .suggest::-webkit-scrollbar{display:none}
 .suggest>*{flex:0 0 auto}
-.sg{display:inline-flex;align-items:baseline;gap:6px;max-width:320px;font-family:var(--f-ui);font-size:13.5px;background:rgba(29,33,48,.95);color:var(--ink);border:1px solid var(--line);border-left:3px solid var(--gc);padding:4px 10px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sg{display:inline-flex;align-items:baseline;gap:6px;max-width:320px;font-family:var(--f-ui);font-size:14px;background:rgba(36,33,60,.95);color:var(--ink);border:1px solid var(--line);border-left:3px solid var(--gc);border-radius:999px;padding:5px 12px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sg small{color:var(--muted);font-size:12px}
 .sg.on{border-color:var(--amber);background:#2a2618}
 .sg.played{opacity:.45;text-decoration:line-through}
 .sg .tag{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
 .sg.ask{border-left-color:var(--good);color:var(--good)}
 .ask{display:flex;gap:8px}
-.ask input{flex:1 1 auto;min-width:0;background:rgba(10,11,18,.95);color:var(--ink);border:2px solid var(--line);padding:10px 16px;font-family:var(--f-ui);font-size:19px;font-weight:600;letter-spacing:.02em;text-align:center}
+.ask input{flex:1 1 auto;min-width:0;background:rgba(16,15,28,.95);color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:10px 16px;font-family:var(--f-ui);font-size:19px;font-weight:600;letter-spacing:.02em;text-align:center}
 .ask input::placeholder{color:var(--dim);font-weight:500}
 .ask input:focus{border-color:var(--amber);outline:none;box-shadow:0 0 0 4px rgba(242,178,76,.15)}
 .ask input.reject{border-color:var(--bad);animation:ishake .35s steps(6)}
 .ask input.accept{border-color:var(--good)}
 @keyframes ishake{0%,100%{transform:none}25%{transform:translateX(-8px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
 .ask .btn{padding-inline:20px}
-.btn.drop{background:var(--cyan);color:#071418;animation:blink .6s steps(2) infinite}
+.btn.drop{background:var(--cyan);color:#06222a;animation:breathe 1.4s ease-in-out infinite}
 .tfoot{display:flex;align-items:center;gap:12px;font-size:12.5px;color:var(--muted)}
 .tfoot .hype{flex:1;display:flex;align-items:center;gap:8px;min-width:0}
 .tfoot .hype .bar{flex:1;height:5px;min-width:40px}
@@ -249,7 +285,7 @@ details[open] > summary{margin-bottom:10px}
 
 /* side rails */
 .rail{flex:1 1 auto;min-height:0;overflow-y:auto;display:grid;gap:8px;align-content:start;scrollbar-color:var(--line) transparent}
-.rail .panel,.rail .lc,.rail .lp{background:rgba(22,24,36,.86);backdrop-filter:blur(3px)}
+.rail .panel,.rail .lc,.rail .lp{background:rgba(24,22,40,.86);backdrop-filter:blur(3px);border-radius:14px}
 .rail .panel{padding:10px}
 .rail .closeX{display:none}
 #gameScreen:not(.narrow):not(.short) #detailsBtn{display:none}
@@ -302,13 +338,13 @@ details[open] > summary{margin-bottom:10px}
 .log li:first-child{color:var(--ink)}
 
 .modal{position:fixed;inset:0;z-index:60;background:rgba(6,7,11,.8);display:grid;place-items:center;padding:16px}
-.mbox{width:min(580px,100%);max-height:calc(100dvh - 32px);overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--amber);padding:22px;display:grid;gap:14px;animation:rise .25s ease-out}
-.mbox.fraud{border-top-color:var(--red);text-align:center}
+.mbox{width:min(580px,100%);max-height:calc(100dvh - 32px);overflow-y:auto;background:#1c1a30;border:1px solid var(--line);border-radius:20px;padding:22px;display:grid;gap:14px;animation:rise .25s ease-out}
+.mbox.fraud{border-top:3px solid var(--red);text-align:center}
 .fraud-title{font-family:var(--f-px);font-size:clamp(26px,6vw,40px);line-height:1;color:var(--red);text-shadow:3px 3px 0 #3a1420}
 .mbox h3{font-size:21px;line-height:1.25}
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media (max-width:440px){.opts{grid-template-columns:1fr}}
-.opt{text-align:center;font-family:var(--f-ui);font-size:15px;background:var(--bg-2);color:var(--ink);border:1px solid var(--line);padding:11px 12px;cursor:pointer}
+.opt{text-align:center;font-family:var(--f-ui);font-size:15px;background:rgba(255,255,255,.05);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:11px 12px;cursor:pointer}
 .opt kbd{font-family:var(--f-px);color:var(--muted);margin-right:6px}
 .opt:hover:not(:disabled){border-color:var(--amber)}
 .opt.right{border-color:var(--good);color:var(--good)}
@@ -341,6 +377,10 @@ details[open] > summary{margin-bottom:10px}
 @keyframes bump{0%{transform:scale(1.35);color:#fff}100%{transform:none}}
 ol.coach{margin:0;padding-left:20px;display:grid;gap:8px;color:var(--muted)}
 ol.coach b{color:var(--ink)}
+.dist{display:grid;gap:8px;background:rgba(255,255,255,.04);border-radius:14px;padding:12px 12px 10px}
+.dist canvas{width:100%;height:auto;display:block}
+.dist-txt{font-size:14.5px;color:var(--muted)}
+.dist-txt b{color:var(--gold);font-size:17px}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:1ms!important;animation-iteration-count:1!important}}
 </style>
 </head>
@@ -348,68 +388,98 @@ ol.coach b{color:var(--ink)}
 <noscript><p style="margin:0;padding:14px 16px;background:#3a1420;color:#ece8df;font:15px system-ui,sans-serif;text-align:center">B-SIDE is a game and needs JavaScript turned on to play.</p></noscript>
 
 <!-- ======== TITLE ======== -->
-<div class="wrap" id="startScreen">
-  <header class="hero">
-    <h1 class="logo">B<span>-</span>SIDE</h1>
-    <p class="premise">2189. The Topline broadcast nothing but chart hits until the city forgot real music, and its Echoes, cheap copies of real artists, are marching on the last crowd that remembers. Type songs fast and prove you know your music.</p>
-  </header>
-  <div class="modes">
-    <article class="mode daily" aria-labelledby="dailyTitle">
-      <p class="eyebrow" id="dailyEyebrow">Daily Set</p>
-      <h2 id="dailyTitle">Today's modifier</h2>
-      <p class="desc" id="dailyDesc">Loading today's modifier…</p>
-      <div class="row" id="dailyStats"><span class="stat"><b>0</b><span>Day streak</span></span><span class="stat"><b>—</b><span>Not played today</span></span></div>
-      <div class="row"><button class="btn" id="dailyBtn" type="button">Play today's set</button><span class="muted" id="dailyNote" style="font-size:13px">Same Echoes, requests and boss for everyone today: three tracks, then The Topline goes down. Your first run counts.</span></div>
-    </article>
-    <article class="mode free" aria-labelledby="freeTitle">
-      <p class="eyebrow" style="color:var(--cyan)">Endless</p>
-      <h2 id="freeTitle">How long can you hold the stage?</h2>
-      <div class="mods" id="modChips" role="group" aria-label="Modifier"><button type="button" class="modchip" aria-pressed="true">Standard Set</button><button type="button" class="modchip" aria-pressed="false">Decades Night</button><button type="button" class="modchip" aria-pressed="false">No Airplay</button><button type="button" class="modchip" aria-pressed="false">Double Time</button><button type="button" class="modchip" aria-pressed="false">Wordplay Night</button><button type="button" class="modchip" aria-pressed="false">Masquerade</button><button type="button" class="modchip" aria-pressed="false">Genre Takeover</button><button type="button" class="modchip" aria-pressed="false">No Safety Net</button></div>
-      <p class="moddesc" id="modDesc">The classic mix of requests, Echoes and fraud checks.</p>
-      <div class="row"><button class="btn" id="freeBtn" type="button" style="background:var(--cyan);color:#071418">Play endless</button><span class="muted" id="freeBest" style="font-size:13px">Every track cleared makes the next one faster. Play until the crowd forgets.</span></div>
-    </article>
+<div class="splash" id="splash" role="status" aria-live="polite">
+  <div class="splash-in">
+    <div class="disc" aria-hidden="true"></div>
+    <p class="splash-logo">B<span>-</span>SIDE</p>
+    <div class="splash-bar" aria-hidden="true"><i id="splashBar"></i></div>
+    <p class="splash-txt" id="splashTxt">Tuning in…</p>
   </div>
-  <div class="profile">
-    <section class="panel rank" aria-labelledby="rankTitle">
-      <h2 id="rankTitle">Your rank</h2>
+</div>
+
+<div id="stage">
+  <canvas id="arena" width="192" height="304" role="img" aria-label="The street: the alien ship at the top sends Echoes down three lanes toward your squad at the bottom"></canvas>
+  <div id="labels" aria-hidden="true"></div>
+  <div id="padLayer"></div>
+  <div id="pops" aria-hidden="true"></div>
+</div>
+
+<section class="home" id="home" hidden aria-label="B-SIDE home">
+  <div class="home-in">
+    <h1 class="logo">B<span>-</span>SIDE</h1>
+    <p class="home-tag">Name real songs. Fight the charts.</p>
+    <button class="start-btn" id="startBtn" type="button">Click to start</button>
+    <p class="home-foot" id="homeFoot">A new Daily Set every day</p>
+  </div>
+</section>
+
+<div class="menu" id="startScreen" hidden>
+  <div class="menu-in">
+    <header class="menu-top">
+      <p class="menu-logo">B<span>-</span>SIDE</p>
+      <nav class="menu-links" aria-label="More">
+        <button class="pill" id="howBtn" type="button">How to play</button>
+        <button class="pill" id="profileBtn" type="button"><b id="rankChip">Static</b> · Your crate</button>
+        <button class="pill" id="soundBtn" type="button" aria-pressed="false">Sound on</button>
+      </nav>
+    </header>
+    <div class="modes">
+      <article class="mode daily" aria-labelledby="dailyTitle">
+        <p class="eyebrow" id="dailyEyebrow">Daily Set</p>
+        <h2 id="dailyTitle">Today's set</h2>
+        <span class="spot" id="dailySpot">Spotlight</span>
+        <p class="desc" id="dailyDesc">The same Echoes, requests and boss for everyone today.</p>
+        <ul class="missions" id="missions" aria-label="Today's missions"></ul>
+        <div class="row"><button class="btn" id="dailyBtn" type="button">Play today's set</button><span class="muted" id="dailyNote"></span></div>
+        <div class="row" id="dailyStats"><span class="stat"><b>0</b><span>Day streak</span></span><span class="stat"><b>—</b><span>Not played today</span></span></div>
+      </article>
+      <article class="mode free" aria-labelledby="freeTitle">
+        <p class="eyebrow" style="color:var(--cyan)">Endless</p>
+        <h2 id="freeTitle">How long can you last?</h2>
+        <p class="desc" id="freeBest">Every track cleared makes the next one faster. Play until the crowd forgets.</p>
+        <details class="modpick"><summary>Modifier: <b id="modName">Standard Set</b></summary><div class="mods" id="modChips" role="group" aria-label="Modifier"></div><p class="moddesc" id="modDesc">The classic mix of requests, Echoes and fraud checks.</p></details>
+        <div class="row"><button class="btn cyan" id="freeBtn" type="button">Play endless</button></div>
+      </article>
+    </div>
+  </div>
+</div>
+
+<div class="modal sheet" id="howModal" hidden>
+  <div class="mbox how" role="dialog" aria-modal="true" aria-labelledby="howTitle">
+    <div class="sheet-head"><h2 id="howTitle">How to play</h2><button class="xbtn" type="button" data-close aria-label="Close">×</button></div>
+    <ol>
+      <li><b>Type a song that answers the request</b> the UFO beams down (a genre, a decade, finish the title, name an artist, and more). That hits The Topline.</li>
+      <li><b>Or type any song by an artist walking toward you.</b> That reclaims them on the spot.</li>
+      <li><b>Accepted songs join your squad</b> and fight on the beat. Rarer songs hit harder, and songs go stale the longer they stay on stage.</li>
+      <li><b>Don't let Echoes reach your squad.</b> Each one that breaks through makes the crowd forget a little. When the crowd forgets everything, the set is over.</li>
+      <li><b>Genres counter each other:</b> each beats the next one in this ring. The middle squad slot is your Headliner; if it counters the boss's genre, it blocks the boss's attacks.</li>
+    </ol>
+    <div class="ring" id="ringMenu" aria-label="Counter ring"></div>
+  </div>
+</div>
+
+<div class="modal sheet" id="profileModal" hidden>
+  <div class="mbox" role="dialog" aria-modal="true" aria-labelledby="profTitle">
+    <div class="sheet-head"><h2 id="profTitle">Your rank and crate</h2><button class="xbtn" type="button" data-close aria-label="Close">×</button></div>
+    <section class="rank" aria-label="Rank">
       <span class="title" id="rankName">Static</span>
       <div class="bar"><i id="rankBar"></i></div>
       <span class="muted" style="font-size:13px" id="rankNext"></span>
       <div class="stats" id="profStats"></div>
     </section>
-    <section class="panel crate" aria-labelledby="crateTitle">
-      <div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap"><h2 id="crateTitle">Your crate</h2><span class="muted" style="font-size:13px" id="crateCount"></span></div>
-      <p class="muted" style="font-size:13px">Every song you get accepted is collected here. Fill out each genre and hunt for White Labels.</p>
+    <section class="crate" aria-label="Crate">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap"><b>Your crate</b><span class="muted" style="font-size:13px" id="crateCount"></span></div>
+      <p class="muted" style="font-size:13.5px">Every song you get accepted is collected here. Fill out each genre and hunt for White Labels.</p>
       <div class="gbars" id="gbars"></div>
       <div class="finds" id="finds"></div>
     </section>
-  </div>
-  <details class="panel how" id="howBox">
-    <summary><h2>How to play</h2></summary>
-    <ol>
-      <li><b>Echoes march down three lanes in real time</b>, faster and faster. If one reaches your squad, the crowd forgets.</li>
-      <li><b>Type a song in the bar at the bottom.</b> It only counts if it <b>answers the request</b> the UFO beams down (genre, decade, finish the title, unscramble, initials, name the track, and more), which hits the boss, or if it's <b>by an artist walking toward you</b>, which reclaims that Echo on the spot. Anything else is rejected.</li>
-      <li><b>Accepted songs join your squad</b>, first in, first out, and shoot the Echo in their lane on the beat. <b>Songs go stale</b> the longer they're on stage, so keep the set fresh.</li>
-      <li><b>Genres counter each other</b> (ring below). <b>★ Star</b> Echoes only take damage from a counter genre. Masked Echoes reveal more letters as they get closer. <b>Golden</b> Echoes pay big.</li>
-      <li><b>The middle slot is your Headliner.</b> It sets the beat, and if its genre beats the boss's broadcast, it blocks the boss's attacks. Tap two squad cards to swap them.</li>
-      <li><b>Chain accepted songs</b> for a combo, and <b>prove you ain't a fraud</b> when everything freezes for a quiz on a song you played. Press 1–4 to answer.</li>
-    </ol>
-    <div class="ring" id="ringMenu" aria-label="Counter ring" style="margin-top:10px"></div>
-  </details>
-  <section class="panel" style="display:grid;gap:8px;margin-top:16px" aria-label="Song catalog">
     <div class="ai-status"><span class="ai-dot" id="aiDot"></span><span id="aiText">Loading the song catalog…</span></div>
-    <p class="muted" style="font-size:13.5px">Suggestions appear as you type. Pick one, or type the title (adding the artist helps). Songs that aren't in the catalog get bounced.</p>
-  </section>
+    <p class="muted" style="font-size:12.5px">Your rank, crate and streak are saved in this browser. Clearing your browser data or switching devices starts fresh.</p>
+  </div>
 </div>
 
 <!-- ======== GAME ======== -->
 <section id="gameScreen" hidden aria-label="B-SIDE game">
-  <div id="stage">
-    <canvas id="arena" width="192" height="304" role="img" aria-label="The street: the alien ship at the top sends Echoes down three lanes toward your squad at the bottom"></canvas>
-    <div id="labels" aria-hidden="true"></div>
-    <div id="padLayer"></div>
-    <div id="pops" aria-hidden="true"></div>
-  </div>
 
   <div class="col col-l" id="colL">
   <header class="hud hud-l" id="hudL">
@@ -472,6 +542,7 @@ ol.coach b{color:var(--ink)}
   <div class="mbox" role="dialog" aria-modal="true" aria-labelledby="rTitle">
     <p class="eyebrow" id="rEyebrow">Set complete</p>
     <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap"><span class="grade" id="rGrade">A</span><div style="flex:1 1 220px;display:grid;gap:4px"><h3 id="rTitle"></h3><span class="bigscore" id="rScore">0</span><span class="muted" style="font-size:13px" id="rScoreNote"></span></div></div>
+    <div class="dist"><canvas id="distCv" width="640" height="170" aria-label="Where your score falls among other players"></canvas><p class="dist-txt" id="distTxt">Comparing with other players…</p></div>
     <div class="scores">
       <div class="score"><span class="muted" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase">Rarity score</span><span class="n" id="rRar">0</span><div class="bar"><i id="rRarBar"></i></div><span class="muted" style="font-size:12.5px" id="rRarTxt"></span></div>
       <div class="score mus"><span class="muted" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase">Musicality score</span><span class="n" id="rMus">0</span><div class="bar"><i id="rMusBar"></i></div><span class="muted" style="font-size:12.5px" id="rMusTxt"></span></div>
@@ -479,7 +550,7 @@ ol.coach b{color:var(--ink)}
     <div class="xpline"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:14px"><span id="rRank"></span><span class="muted" id="rXp"></span></div><div class="bar"><i id="rXpBar"></i></div><span class="muted" style="font-size:12.5px" id="rCrate"></span></div>
     <div style="display:grid;gap:6px"><span class="muted" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase">Share it</span><pre class="share" id="rShare"></pre></div>
     <details class="panel" style="padding:12px"><summary><span class="muted" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase">Set list and stats</span></summary><div style="display:grid;gap:10px"><ul class="setlist" id="rSet"></ul><dl class="rstats" id="rStats"></dl></div></details>
-    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="copyBtn" type="button">Copy result</button><button class="btn ghost" id="againBtn" type="button">Play again</button><button class="btn ghost" id="titleBtn" type="button">Title screen</button></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="shareBtn" type="button">Share result card</button><button class="btn ghost" id="copyBtn" type="button">Copy text</button><button class="btn ghost" id="againBtn" type="button">Play again</button><button class="btn ghost" id="titleBtn" type="button">Title screen</button></div>
   </div>
 </div>
 <div class="modal" id="coach" hidden>
@@ -562,7 +633,7 @@ const RARITIES={
   dig:{id:'dig',label:'Crate Dig',note:'the aliens barely know it',mult:1.25,pts:80,color:'#c79bff',sym:'●'},
   white:{id:'white',label:'White Label',note:'the aliens have never heard it',mult:1.5,pts:100,color:'#ffd46b',sym:'◆'},
 };
-const rarityOf=s=>s.pop>=80?RARITIES.air:s.pop>=50?RARITIES.fan:s.pop>=20?RARITIES.dig:RARITIES.white;
+const rarityOf=s=>s.pop>=80?RARITIES.air:s.pop>=60?RARITIES.fan:s.pop>=40?RARITIES.dig:RARITIES.white;
 const HOOKS=[[0,2,4],[4,2,0],[0,4,7],[2,4,5],[0,1,2],[7,4,2],[0,4,2],[5,4,0],[0,2,7]];
 function finishSong(s){s.id=s.id||norm(s.title+' '+s.artist);const r=rng(hash(s.id));s.hook=HOOKS[Math.floor(r()*HOOKS.length)];s.key=(1+Math.floor(r()*12))+(s.mood>=.5?'B':'A');return s;}
 /* Built-in songs. Years are real release years; popularity, energy and mood are estimates. */
@@ -654,7 +725,7 @@ let ARTISTS=[],FAMOUS=[];
 function indexCatalog(){const m=new Map();LOCAL.forEach(s=>{if(!m.has(s.artist))m.set(s.artist,{name:s.artist,genre:s.genre,songs:[]});m.get(s.artist).songs.push(s);});
   ARTISTS=[...m.values()];ARTISTS.forEach(x=>x.fame=Math.max(...x.songs.map(s=>s.pop)));
   /* the aliens only know the charts, so only household names march as Echoes */
-  FAMOUS=ARTISTS.filter(a=>a.fame>=80);}
+  FAMOUS=ARTISTS.filter(a=>a.fame>=80);if(typeof hitCache!=='undefined')hitCache.clear();}
 indexCatalog();
 const LABEL_OVERRIDES={'Grandmaster Flash and the Furious Five':'GRANDMASTER','Art Blakey & The Jazz Messengers':'ART BLAKEY','The Dave Brubeck Quartet':'BRUBECK','Marvin Gaye & Tammi Terrell':'MARVIN GAYE','Swedish House Mafia':'SWEDISH HM','The Sugarhill Gang':'SUGARHILL','Earth, Wind & Fire':'EARTH WIND','The Notorious B.I.G.':'BIGGIE','My Chemical Romance':'MCR','The Rolling Stones':'THE STONES'};
 const echoLabel=a=>{if(LABEL_OVERRIDES[a])return LABEL_OVERRIDES[a];const u=a.normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase();if(u.length<=12)return u;return u.split(' ').pop().slice(0,12);};
@@ -669,6 +740,16 @@ function artistMatch(echoArtist,songArtist){const a=artistKey(echoArtist),b=arti
   if(b.length>=4&&(b.startsWith(a+' ')||a.startsWith(b+' ')))return true;
   const last=a.split(' ').pop();if(last.length>=5&&b.split(' ').pop()===last&&(a.split(' ').length>1||b.split(' ').length>1))return true;
   return false;}
+
+/* artist facts for the "name an artist" cards: home country, solo (s) / band (b) / duo (d), and 1 for a competitive Grammy win */
+const META_RAW={"*NSYNC":"US,b","2 Unlimited":"NL,d","21 Savage":",s,1","24kGoldn":"US,s","2Pac":"US,s","3 Doors Down":"US,b","50 Cent":"US,s,1","A Tribe Called Quest":"US,b","a-ha":"NO,b","ABBA":"SE,b","AC/DC":"AU,b,1","Adele":"UK,s,1","Aerosmith":"US,b,1","aespa":"KR,b","Al Green":"US,s,1","Alan Walker":"NO,s","Alex Warren":"US,s","Alexandra Stan":"RO,s","Alice Deejay":"NL,b","Alice in Chains":"US,b","Alicia Keys":"US,s,1","Amy Winehouse":"UK,s,1","Antonio Vivaldi":"IT,s","Aqua":"DK,b","Arctic Monkeys":"UK,b","Aretha Franklin":"US,s,1","Ariana Grande":"US,s,1","Ava Max":"US,s","Avicii":"SE,s","Avril Lavigne":"CA,s","Axwell & Ingrosso":"SE,d","B.o.B":"US,s","Backstreet Boys":"US,b","Bad Bunny":"PR,s,1","Bastille":"UK,b","Bee Gees":",b,1","Belinda Carlisle":"US,s","Ben E. King":"US,s","Benny Benassi":"IT,s,1","Benson Boone":"US,s","Beyoncé":"US,s,1","Big Shaq":"UK,s","Bill Withers":"US,s,1","Billie Eilish":"US,s,1","Billy Joel":"US,s,1","Black Sabbath":"UK,b,1","BLACKPINK":"KR,b","Blackstreet":"US,b,1","Blink-182":"US,b","Blondie":"US,b","Blue Öyster Cult":"US,b","Blur":"UK,b","Bob Dylan":"US,s,1","Bobby Darin":"US,s,1","Bomfunk MC's":"FI,b","Bon Jovi":"US,b,1","Bonnie Tyler":"UK,s","Boston":"US,b","Boyz II Men":"US,b,1","Britney Spears":"US,s,1","Bruce Springsteen":"US,s,1","Bruno Mars":"US,s,1","Bryson Tiller":"US,s","BTS":"KR,b","Burna Boy":"NG,s,1","BØRNS":"US,s","C+C Music Factory":"US,b","C418":"DE,s","Calvin Harris":"UK,s,1","Cardi B":"US,s,1","Carl Orff":"DE,s","Carly Rae Jepsen":"CA,s","Carrie Underwood":"US,s,1","Central Cee":"UK,s","Chaka Khan":"US,s,1","Chappell Roan":"US,s,1","Cher":"US,s,1","Chic":"US,b","Childish Gambino":"US,s,1","Chris Brown":"US,s,1","Chris Stapleton":"US,s,1","Christina Aguilera":"US,s,1","Chuck Berry":"US,s","CKay":"NG,s","Claude Debussy":"FR,s","Clean Bandit":"UK,b,1","Colbie Caillat":"US,s,1","Coldplay":"UK,b,1","Commodores":"US,b,1","Coolio":"US,s,1","Corinne Bailey Rae":"UK,s,1","Corona":"IT,b","Counting Crows":"US,b","Creedence Clearwater Revival":"US,b","Culture Club":"UK,b,1","Cyndi Lauper":"US,s,1","Cypress Hill":"US,b","Céline Dion":"CA,s,1","DaBaby":"US,s","Daddy Yankee":"PR,s","Daft Punk":"FR,d,1","Daniel Caesar":"CA,s,1","Darius Rucker":"US,s,1","Darude":"FI,s","Dave":"UK,s","David Bowie":"UK,s,1","David Guetta":"FR,s,1","Dean Martin":"US,s","Deee-Lite":"US,b","Deep Purple":"UK,b","Def Leppard":"UK,b","Depeche Mode":"UK,b","Desiigner":"US,s","Destiny's Child":"US,b,1","Dexys Midnight Runners":"UK,b","Diana Ross":"US,s","Disclosure":"UK,d","Disturbed":"US,b","DJ Snake":"FR,s","DMX":"US,s","Doja Cat":"US,s,1","Dolly Parton":"US,s,1","Don Omar":"PR,s","Donna Summer":"US,s,1","Dr. Dre":"US,s,1","Drake":"CA,s,1","Dua Lipa":"UK,s,1","Duffy":"UK,s,1","Duke Dumont":"UK,s","Duran Duran":"UK,b,1","Eagles":"US,b,1","Earth, Wind & Fire":"US,b,1","Echosmith":"US,b","Ed Sheeran":"UK,s,1","Edvard Grieg":"NO,s","Edward Elgar":"UK,s","Eiffel 65":"IT,b","Electric Light Orchestra":"UK,b","Ella Mai":"UK,s,1","Ellie Goulding":"UK,s","Elton John":"UK,s,1","Elvis Presley":"US,s,1","Eminem":"US,s,1","Ennio Morricone":"IT,s,1","Enrique Iglesias":"ES,s,1","Eric Prydz":"SE,s","Etta James":"US,s,1","Europe":"SE,b","Eurythmics":"UK,d,1","Evanescence":"US,b,1","Fall Out Boy":"US,b","Fatboy Slim":"UK,s","Felix Mendelssohn":"DE,s","Fleetwood Mac":"UK,b,1","Flo Rida":"US,s","Florence + the Machine":"UK,b","Florida Georgia Line":"US,d","Flume":"AU,s,1","Foo Fighters":"US,b,1","Foster the People":"US,b","Four Tops":"US,b","Frank Ocean":"US,s,1","Frank Sinatra":"US,s,1","Frankie Goes to Hollywood":"UK,b","Franz Ferdinand":"UK,b","Franz Schubert":"AT,s","Frédéric Chopin":"PL,s","Fugees":"US,b,1","Future":"US,s,1","Gala":"IT,s","Garth Brooks":"US,s,1","George Ezra":"UK,s","George Frideric Handel":"DE,s","George Gershwin":"US,s","George Michael":"UK,s,1","Georges Bizet":"FR,s","Giacomo Puccini":"IT,s","Gigi D'Agostino":"IT,s","Ginuwine":"US,s","Gioachino Rossini":"IT,s","Glass Animals":"UK,b","Glenn Miller":"US,s","Gloria Gaynor":"US,s,1","Gnarls Barkley":"US,d,1","Goo Goo Dolls":"US,b","Gorillaz":"UK,b,1","Gotye":"AU,s,1","Green Day":"US,b,1","Grover Washington Jr.":"US,s,1","Guns N' Roses":"US,b","Haddaway":",s","Hans Zimmer":"DE,s,1","Harry Styles":"UK,s,1","House of Pain":"US,b","Howard Shore":"CA,s,1","Hozier":"IE,s","Ice Cube":"US,s","Iggy Azalea":"AU,s","Imagine Dragons":"US,b,1","J Balvin":"CO,s","J. Cole":"US,s,1","Jack Ü":"US,d,1","James Bay":"UK,s","James Brown":"US,s,1","James Hype":"UK,s","Jason Mraz":"US,s,1","Jay-Z":"US,s,1","Jeff Buckley":"US,s","Jelly Roll":"US,s","Jessie J":"UK,s","Jimi Hendrix":"US,s","Jimin":"KR,s","Jimmy Eat World":"US,b","Joan Jett & the Blackhearts":"US,b","Joe Hisaishi":"JP,s","Johann Pachelbel":"DE,s","Johann Sebastian Bach":"DE,s","Johann Strauss II":"AT,s","Johannes Brahms":"DE,s","John Denver":"US,s,1","John Legend":"US,s,1","John Mayer":"US,s,1","John Williams":"US,s,1","Johnny Cash":"US,s,1","Joji":"JP,s","Journey":"US,b","Joy Division":"UK,b","Juice WRLD":"US,s","Jung Kook":"KR,s","Justice":"FR,d,1","Justin Bieber":"CA,s,1","Justin Timberlake":"US,s,1","JVKE":"US,s","K'naan":"CA,s","K-Ci & JoJo":"US,d","Kanye West":"US,s,1","Karol G":"CO,s,1","Kate Bush":"UK,s","Katrina and the Waves":"UK,b","Katy Perry":"US,s","Keane":"UK,b","Kelly Clarkson":"US,s,1","Kendrick Lamar":"US,s,1","Kenny Loggins":"US,s,1","Kenny Rogers":"US,s,1","Khalid":"US,s","Kid Cudi":"US,s,1","Kings of Leon":"US,b,1","Klaus Badelt":"DE,s","Kool & the Gang":"US,b,1","Korn":"US,b,1","Kris Kross":"US,d","Kygo":"NO,s","Kylie Minogue":"AU,s,1","Lady A":"US,b,1","Lady Gaga":"US,s,1","Lana Del Rey":"US,s","Laufey":"IS,s,1","Lauryn Hill":"US,s,1","Led Zeppelin":"UK,b,1","Liam Payne":"UK,s","Lil Dicky":"US,s","Lil Jon & the East Side Boyz":"US,b","Lil Nas X":"US,s,1","Lil Tecca":"US,s","Lil Uzi Vert":"US,s","Lil Wayne":"US,s,1","Limp Bizkit":"US,b","Linkin Park":"US,b,1","Lionel Richie":"US,s,1","Lipps Inc.":"US,b","Lisa":"TH,s","Little Mix":"UK,b","Lizzo":"US,s,1","LL Cool J":"US,s,1","LMFAO":"US,d","Lola Young":"UK,s","Lorde":"NZ,s,1","Los del Río":"ES,d","Lou Bega":"DE,s","Louis Armstrong":"US,s,1","Ludovico Einaudi":"IT,s","Ludwig van Beethoven":"DE,s","Luis Fonsi":"PR,s","Luke Combs":"US,s","Lynyrd Skynyrd":"US,b","M83":"FR,b","Macklemore & Ryan Lewis":"US,d,1","Madonna":"US,s,1","Major Lazer":"US,b","Maluma":"CO,s","Mariah Carey":"US,s,1","Mark Morrison":"UK,s","Mark Ronson":"UK,s,1","Maroon 5":"US,b,1","Marshmello":"US,s","Martha and the Vandellas":"US,b","Martin Garrix":"NL,s","Marvin Gaye":"US,s,1","Mary J. Blige":"US,s,1","Maurice Ravel":"FR,s","MC Hammer":"US,s,1","Megan Thee Stallion":"US,s,1","Meghan Trainor":"US,s,1","Metallica":"US,b,1","Metro Boomin":"US,s","Michael Bublé":"CA,s,1","Michael Jackson":"US,s,1","Migos":"US,b","Miguel":"US,s,1","Miley Cyrus":"US,s,1","Missy Elliott":"US,s,1","Modjo":"FR,d","Morgan Wallen":"US,s","Mumford & Sons":"UK,b,1","Muse":"UK,b,1","My Chemical Romance":"US,b","N.W.A":"US,b","Nat King Cole":"US,s,1","Natalie Imbruglia":"AU,s","Neil Diamond":"US,s,1","Neil Young":"CA,s,1","Nelly":"US,s,1","New Order":"UK,b","NewJeans":"KR,b","Niall Horan":"IE,s","Nickelback":"CA,b","Nicki Minaj":"TT,s","Nicky Jam":"US,s","Nikolai Rimsky-Korsakov":"RU,s","Nina Simone":"US,s","Nirvana":"US,b,1","Norah Jones":"US,s,1","O-Zone":"MD,b","Oasis":"UK,b","Of Monsters and Men":"IS,b","Olivia Rodrigo":"US,s,1","One Direction":"UK,b","OneRepublic":"US,b","Otis Redding":"US,s,1","OutKast":"US,d,1","Owl City":"US,s","Ozzy Osbourne":"UK,s,1","P!nk":"US,s,1","Papa Roach":"US,b","Paramore":"US,b,1","Pat Benatar":"US,s,1","Paul Simon":"US,s,1","Pearl Jam":"US,b,1","Peggy Lee":"US,s,1","Pet Shop Boys":"UK,d","Peter Bjorn and John":"SE,b","Pharrell Williams":"US,s,1","Pink Floyd":"UK,b,1","Plain White T's":"US,b","Pop Smoke":"US,s","Porter Robinson":"US,s","Portishead":"UK,b","Portugal. The Man":"US,b,1","Post Malone":"US,s","Prince":"US,s,1","PSY":"KR,s","Pyotr Ilyich Tchaikovsky":"RU,s","Queen":"UK,b","R.E.M.":"US,b,1","Radiohead":"UK,b,1","Rae Sremmurd":"US,d","Ramin Djawadi":"DE,s","Ramones":"US,b","Ravyn Lenae":"US,s","Ray Charles":"US,s,1","Red Hot Chili Peppers":"US,b,1","Rema":"NG,s","Richard Strauss":"DE,s","Richard Wagner":"DE,s","Rick Astley":"UK,s","Rick James":"US,s,1","Rick Springfield":"AU,s,1","Ricky Martin":"PR,s,1","Rihanna":"BB,s,1","Ritchie Valens":"US,s","Robert Miles":"IT,s","Roberta Flack":"US,s,1","Robin S.":"US,s","Robyn":"SE,s","Roddy Ricch":"US,s,1","Rosé":",s","Run-DMC":"US,b","Ryan Gosling":"CA,s","Sabrina Carpenter":"US,s,1","Salt-N-Pepa":"US,b,1","Sam Cooke":"US,s","Sam Hunt":"US,s","Sam Smith":"UK,s,1","Santana":"US,b,1","Scorpions":"DE,b","Seal":"UK,s,1","Sergei Prokofiev":"RU,s","Shaboozey":"US,s","Shakira":"CO,s,1","Shania Twain":"CA,s,1","Shawn Mendes":"CA,s","Sheck Wes":"US,s","Sia":"AU,s","Silk Sonic":"US,d,1","Simon & Garfunkel":"US,d,1","Simple Minds":"UK,b","Sinéad O'Connor":"IE,s,1","Sister Sledge":"US,b","Skrillex":"US,s,1","Slipknot":"US,b,1","Snap!":"DE,b","Snoop Dogg":"US,s","Snow Patrol":"UK,b","Soft Cell":"UK,d","Sophie Ellis-Bextor":"UK,s","Soulja Boy":"US,s","Soundgarden":"US,b,1","Spice Girls":"UK,b","Stan Getz":"US,s,1","Steppenwolf":"US,b","Stevie Wonder":"US,s,1","Sting":"UK,s,1","Stone Temple Pilots":"US,b,1","Sum 41":"CA,b","Surfaces":"US,d","Survivor":"US,b,1","Swedish House Mafia":"SE,b","System of a Down":"US,b,1","SZA":"US,s,1","Taio Cruz":"UK,s","Talking Heads":"US,b","Tate McRae":"CA,s","Taylor Swift":"US,s,1","Tears for Fears":"UK,d","Technotronic":"BE,b","Teddy Swims":"US,s","The 1975":"UK,b","The All-American Rejects":"US,b","The Animals":"UK,b","The Beatles":"UK,b,1","The Black Eyed Peas":"US,b,1","The Black Keys":"US,b,1","The Chainsmokers":"US,d,1","The Clash":"UK,b","The Cranberries":"IE,b","The Cure":"UK,b","The Doors":"US,b","The Fratellis":"UK,b","The Game":"US,s","The Human League":"UK,b","The Jackson 5":"US,b","The Jacksons":"US,b","The Kid LAROI":"AU,s","The Killers":"US,b","The Kinks":"UK,b","The Lumineers":"US,b","The Mamas & the Papas":"US,b,1","The Neighbourhood":"US,b","The Notorious B.I.G.":"US,s","The Police":"UK,b,1","The Prodigy":"UK,b","The Rolling Stones":"UK,b,1","The Script":"IE,b","The Smashing Pumpkins":"US,b,1","The Smiths":"UK,b","The Strokes":"US,b,1","The Supremes":"US,b","The Temptations":"US,b,1","The Verve":"UK,b","The Weeknd":"CA,s,1","The White Stripes":"US,d,1","The Who":"UK,b","Tiësto":"NL,s,1","TLC":"US,b,1","Toby Fox":"US,s","Toto":"US,b,1","Tove Lo":"SE,s","Tracy Chapman":"US,s,1","Train":"US,b,1","Travis Scott":"US,s","TV Girl":"US,b","Twenty One Pilots":"US,d,1","Tyla":"ZA,s,1","U2":"IE,b,1","Usher":"US,s,1","Van Morrison":"UK,s,1","Vance Joy":"AU,s","Vanilla Ice":"US,s","Village People":"US,b","Walk the Moon":"US,b","Warren G":"US,s","Wham!":"UK,d","Whitesnake":"UK,b","Whitney Houston":"US,s,1","Wiz Khalifa":"US,s","Wizkid":"NG,s,1","Wolfgang Amadeus Mozart":"AT,s","Wu-Tang Clan":"US,b","XXXTENTACION":"US,s","Yann Tiersen":"FR,s","Yiruma":"KR,s","Yolanda Be Cool":"AU,d","Zayn":"UK,s","Zedd":"DE,s,1","Zombie Nation":"DE,s","Édith Piaf":"FR,s","Stardust":"FR,b","Fisher":"AU,s","Massive Attack":"UK,b","Nujabes":"JP,s","Jinsang":"US,s","Petit Biscuit":"FR,s","Bonobo":"UK,s","Four Tet":"UK,s","J Dilla":"US,s","Miles Davis":"US,s,1","John Coltrane":"US,s,1","The Dave Brubeck Quartet":"US,b","Art Blakey & The Jazz Messengers":"US,b","Erroll Garner":"US,s","Benny Goodman":"US,s","Duke Ellington":"US,s,1","Billie Holiday":"US,s","Herbie Hancock":"US,s,1","Grandmaster Flash and the Furious Five":"US,b","Public Enemy":"US,b","Mobb Deep":"US,d","The Sugarhill Gang":"US,b","Michael Giacchino":"US,s,1","Samuel Barber":"US,s","Erik Satie":"FR,s","Nas":"US,s,1","Wu-Tang":"US,b","Marvin Gaye & Tammi Terrell":"US,d"};
+const META={};for(const k in META_RAW){const [c,kind,g]=META_RAW[k].split(',');META[artistKey(k)]={c,k:kind,g:g==='1'};}
+const metaOf=a=>META[artistKey(a)]||null;
+const NATION={US:'American',UK:'British',CA:'Canadian',AU:'Australian',IE:'Irish',KR:'Korean',SE:'Swedish',FR:'French'};
+const PLACE={UK:'the UK',CA:'Canada',AU:'Australia',IE:'Ireland',KR:'South Korea',SE:'Sweden',FR:'France'};
+var hitCache=new Map();
+function artistHit(name,d){const key=artistKey(name)+'|'+d;if(hitCache.has(key))return hitCache.get(key);const a=ARTISTS.find(x=>artistKey(x.name)===artistKey(name));const v=!!a&&a.songs.some(s=>s.year>=d&&s.year<=d+9&&s.pop>=65);hitCache.set(key,v);return v;}
+function findArtist(text){const q=artistKey(text);if(!q||q.length<2)return null;let best=null,bd=9;for(const a of ARTISTS){const k=artistKey(a.name);if(k===q)return a;if(q.length>=5){const d=lev(q,k);if(d<bd&&d<=1){bd=d;best=a;}}}return best;}
 
 /* ===================== modifiers ===================== */
 const MODS=[
@@ -692,7 +773,10 @@ let PROF=loadProfile();
 function rankOf(xp){let i=0;RANKS.forEach((r,k)=>{if(xp>=r[0])i=k;});const cur=RANKS[i],nxt=RANKS[i+1];return{name:cur[1],floor:cur[0],next:nxt?nxt[0]:null,nextName:nxt?nxt[1]:null,pct:nxt?(xp-cur[0])/(nxt[0]-cur[0]):1};}
 function dayKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function dayNumber(d=new Date()){const a=new Date(2026,0,1),b=new Date(d.getFullYear(),d.getMonth(),d.getDate());return Math.round((b-a)/86400000)+1;}
-function dailySpec(){const key=dayKey();const seed=hash('bside-daily|'+key);const r=rng(seed);const mod=pick(MODS.filter(m=>!['speed','nohints'].includes(m.id)),r);return{key,num:dayNumber(),seed,mod:mod.id,genre:pick(RING,r)};}
+/* every set has a Spotlight (a genre or decade the Echoes and requests lean toward), so no two days feel the same */
+const SPOTS=[...['rock','electronic','hiphop','jazz','pop','rnb'].map(v=>({k:'genre',v})),...[1960,1970,1980,1990,2000,2010,2020].map(v=>({k:'decade',v}))];
+const spotLabel=sp=>sp?(sp.k==='genre'?GENRES[sp.v].label:`the ${sp.v}s`):'';
+function dailySpec(){const key=dayKey();const seed=hash('bside-daily|'+key);const r=rng(seed);const mod=pick(MODS.filter(m=>!['speed','nohints'].includes(m.id)),r);const genre=pick(RING,r);return{key,num:dayNumber(),seed,mod:mod.id,genre,spot:pick(SPOTS,r)};}
 
 /* ===================== keys ===================== */
 const parseKey=k=>({n:parseInt(k,10),m:k.slice(-1)});
@@ -800,7 +884,7 @@ function impulse(sec,decay){const ctx=A.ctx,len=Math.floor(ctx.sampleRate*sec),b
 function muffle(on){if(A.musicFilter)A.musicFilter.frequency.setTargetAtTime(on?520:18000,A.ctx.currentTime,.08);}
 const now=()=>A.ctx?A.ctx.currentTime:performance.now()/1000;
 function withBus(bus,fn){if(!A.ctx)return;const prev=A.bus;A.bus=bus;try{fn();}finally{A.bus=prev;}}
-const sfx=fn=>withBus(A.sfxBus,fn);
+const sfx=fn=>{if(G&&G.demo)return;withBus(A.sfxBus,fn);};
 function Gn(v=0){const g=A.ctx.createGain();g.gain.value=v;return g;}
 function env(g,t,a,peak,dec){g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(peak,.0002),t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+Math.max(dec,.01));}
 function Osc(type,f,t,dur,dest,det=0){const o=A.ctx.createOscillator();o.type=type;o.frequency.setValueAtTime(f,t);if(det)o.detune.setValueAtTime(det,t);o.connect(dest);o.start(t);o.stop(t+dur+.1);return o;}
@@ -933,7 +1017,7 @@ function playStep(s,t,B){
   if(st.lead&&B.head&&lv>=1&&(Ly>=3||B.dropping)&&(lv===2||Ly>=3||B.section%2===1)&&on(st.leadPat)){const hk=B.head.song.hook;const k=st.leadPat.slice(0,s).split('x').length-1;
     const n=st.lead==='arp'?B.tones[k%B.tones.length]+12+(k%8>=4?12:0):toneFor(B,hk[k%3]+(k>=3?1:0))+12;INST.lead[st.lead](n,t,sd,lv===2?1.1:.8);}
   // counter-melodies from the side slots
-  if(lv>=1&&G&&!G.over)[G.slots[0],G.slots[2]].forEach((sup,i)=>{if(!sup)return;const steps=i===0?[3,5,7]:[11,13,15];const barOk=i===0?(B.idx%2===1):(B.idx%2===0);if(!barOk)return;const k=steps.indexOf(s);if(k<0)return;
+  if(lv>=1&&G&&!G.over&&screen==='game')[G.slots[0],G.slots[2]].forEach((sup,i)=>{if(!sup)return;const steps=i===0?[3,5,7]:[11,13,15];const barOk=i===0?(B.idx%2===1):(B.idx%2===0);if(!barOk)return;const k=steps.indexOf(s);if(k<0)return;
     INST.lead[VOICE[sup.song.genre]||'bell'](toneFor(B,sup.song.hook[k])+(i===0?12:24),t,sd*1.5,.45);});
   // the alien broadcast leaking in when you're losing
   // danger pulse while an Echo is about to break through
@@ -982,19 +1066,18 @@ function sfxLose(){const t=now()+.02;const g=Gn();env(g,t,.01,.12,1.4);const f=F
 const CATALOG={url:'https://xrfgssobisrfuemvcqvs.supabase.co',key:'sb_publishable_aeh9jHyyysSY3cbG7O4kdg_6oBw-kYC'}; // publishable key: safe to ship in the browser
 let catalogReady=false;
 function setCatalogStatus(state,n){const dot=$('#aiDot'),txt=$('#aiText');if(!dot)return;dot.className='ai-dot '+(state==='online'||state==='local'?'on':state==='offline'?'off':'');
-  txt.textContent=state==='loading'?'Loading the song catalog…':state==='online'?`${LOCAL.length} songs ready${n?`, including ${n} from the online catalog`:''}.`:state==='offline'?`${LOCAL.length} built-in songs ready. The online catalog couldn't be reached, so some songs may be missing.`:`${LOCAL.length} songs ready.`;}
+  txt.textContent=state==='loading'?'Loading the song catalog…':`${fmtNum(LOCAL.length)} songs in the catalog.`;}
+function fetchT(url,ms,opts={}){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);return fetch(url,Object.assign({signal:c.signal},opts)).finally(()=>clearTimeout(t));}
 async function loadCatalog(){
-  if(!CATALOG.url||!CATALOG.key){setCatalogStatus('local');catalogReady=true;return;}
-  setCatalogStatus('loading');const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),6000);
-  try{const rows=[];for(let from=0;from<100000;from+=1000){const r=await fetch(`${CATALOG.url}/rest/v1/songs?select=title,artist,genre,year,popularity,energy,mood&order=id&offset=${from}&limit=1000`,{headers:{apikey:CATALOG.key},signal:ctl.signal});
-      if(!r.ok)throw new Error('catalog '+r.status);const page=await r.json();rows.push(...page);if(page.length<1000)break;}
-    const seen=new Set(LOCAL.map(s=>s.id));let added=0;
-    for(const x of rows){if(!x||!x.title||!x.artist||!GENRES[x.genre])continue;const num=(v,d)=>Number.isFinite(+v)&&v!==null?+v:d;
-      const s=finishSong({title:String(x.title),artist:String(x.artist),genre:x.genre,year:x.year?+x.year:null,pop:clamp(num(x.popularity,50),0,100),energy:clamp(num(x.energy,.5),0,1),mood:clamp(num(x.mood,.5),0,1),source:'db'});
-      if(seen.has(s.id))continue;seen.add(s.id);LOCAL.push(s);added++;}
-    if(added)indexCatalog();setCatalogStatus('online',added);}
-  catch(e){setCatalogStatus('offline');}
-  clearTimeout(to);catalogReady=true;if(screen==='start')renderTitle();}
+  setCatalogStatus('loading');let added=0,online=false;const seen=new Set(LOCAL.map(s=>s.id));
+  const num=(v,d)=>v!==null&&v!==undefined&&Number.isFinite(+v)?+v:d;
+  const add=(rows,source)=>{for(const x of rows){if(!x||!x.title||!x.artist||!GENRES[x.genre])continue;
+    const s=finishSong({title:String(x.title),artist:String(x.artist),genre:x.genre,year:x.year?+x.year:null,pop:clamp(num(x.popularity,50),0,100),energy:clamp(num(x.energy,.5),0,1),mood:clamp(num(x.mood,.5),0,1),source});
+    if(seen.has(s.id))continue;seen.add(s.id);LOCAL.push(s);added++;}};
+  try{const r=await fetchT('data/songs.json',8000);if(r.ok)add((await r.json()).map(a=>({title:a[0],artist:a[1],genre:a[2],year:a[3],popularity:a[4],energy:a[5],mood:a[6]})),'list');}catch(e){}
+  if(CATALOG.url&&CATALOG.key){try{const rows=[];for(let from=0;from<100000;from+=1000){const r=await fetchT(`${CATALOG.url}/rest/v1/songs?select=title,artist,genre,year,popularity,energy,mood&order=id&offset=${from}&limit=1000`,6000,{headers:{apikey:CATALOG.key}});
+      if(!r.ok)throw new Error('catalog '+r.status);const page=await r.json();rows.push(...page);if(page.length<1000)break;}add(rows,'db');online=true;}catch(e){}}
+  if(added)indexCatalog();setCatalogStatus(online?'online':'local',added);catalogReady=true;if(screen==='start')renderTitle();}
 const songCache={};
 function localMatch(text){const q=norm(text.replace(/\s+-\s+/,' '));if(!q)return{song:null,score:0};
   let best=null,score=0;for(const s of LOCAL){const t=norm(s.title),ta=norm(s.title+' '+s.artist);let sc=0;
@@ -1033,7 +1116,22 @@ const C={
   newer:ref=>({chip:`Newer than ${ref.title}`,label:`newer than ${ref.title}`,test:s=>!!s.year&&s.year>ref.year}),
   exact:ref=>({chip:'Exact song',label:`the song “${ref.title}”`,test:s=>norm(cleanTitle(s.title))===norm(cleanTitle(ref.title))}),
   words:n=>({chip:`${n}-word title`,label:`a ${n}-word title`,test:s=>titleWords(s.title).length===n}),
+  kind:k=>({chip:k==='b'?'Band':k==='d'?'Duo':'Solo artist',label:k==='b'?'a band or group':k==='d'?'a duo':'a solo artist',test:s=>{const m=metaOf(s.artist);return!!m&&m.k===k;}}),
+  from:c=>({chip:NATION[c],label:`a ${NATION[c]} artist`,test:s=>{const m=metaOf(s.artist);return!!m&&m.c===c;}}),
+  notUSUK:()=>({chip:'Not US or UK',label:'an artist from outside the US and UK',test:s=>{const m=metaOf(s.artist);return!!m&&!!m.c&&m.c!=='US'&&m.c!=='UK';}}),
+  grammy:()=>({chip:'Grammy winner',label:'a Grammy-winning artist',test:s=>{const m=metaOf(s.artist);return!!m&&m.g;}}),
+  oneName:()=>({chip:'One-word name',label:'an artist with a one-word name',test:s=>!/\s/.test(s.artist.replace(/^The\s+/i,'').trim())}),
+  hitIn:d=>({chip:`Hit in the ${d}s`,label:`an artist with a hit in the ${d}s`,test:s=>artistHit(s.artist,d)}),
+  vibe:v=>({chip:VIBES[v].chip,label:VIBES[v].label,test:VIBES[v].test}),
+  century:()=>({chip:'2000 or later',label:'released in 2000 or later',test:s=>!!s.year&&s.year>=2000}),
+  love:()=>({chip:'Love song title',label:'love, heart, kiss or baby in the title',test:s=>/\b(love|lovers?|heart|kiss|baby)\b/i.test(s.title)}),
 };
+const VIBES={
+  upbeat:{chip:'Upbeat',label:'an upbeat, happy song',html:'Play me something <em>upbeat and happy</em>.',test:s=>s.energy>=.7&&s.mood>=.6},
+  sad:{chip:'Sad',label:'a sad song',html:'Play me a <em>sad</em> song.',test:s=>s.mood<=.3},
+  slow:{chip:'Slow',label:'a slow song',html:'Play me a <em>slow</em> song.',test:s=>s.energy<=.35},
+  party:{chip:'Party',label:'a party starter',html:'Play me a song that <em>gets the party going</em>.',test:s=>s.energy>=.85}};
+const ARTIST_PHRASE={rock:'a <em>rock</em> band or rock star',electronic:'a <em>DJ or electronic</em> act',hiphop:'a <em>rapper</em> or hip-hop act',jazz:'a <em>jazz</em> musician or singer',classical:'a <em>classical composer</em>',pop:'a <em>pop star</em>',rnb:'an <em>R&amp;B or soul</em> singer'};
 function answers(crits){return LOCAL.filter(s=>(G.pure||!G.playedIds.has(s.id))&&crits.every(c=>c.test(s)));}
 const decadePick=()=>pick([1960,1970,1980,1990,2000,2010],rQ);
 const unplayed=f=>LOCAL.filter(s=>(G.pure||!G.playedIds.has(s.id))&&(!f||f(s)));
@@ -1058,24 +1156,43 @@ const REQ={
   fillTitle:()=>{const ph=G.boss.phase;const s=pick(unplayed(x=>titleWords(x.title).length>=2&&x.pop>=55),rQ);if(!s)return null;const words=cleanTitle(s.title).split(/\s+/);const cand=words.map((w,i)=>i).filter(i=>words[i].replace(/[^\w]/g,'').length>=3);if(!cand.length)return null;
     let blanks=[pick(cand,rQ)];if(ph>=2&&cand.length>=3&&rQ()<.5)blanks.push(pick(cand.filter(i=>i!==blanks[0]),rQ));
     const shown=words.map((w,i)=>blanks.includes(i)?w.replace(/[A-Za-z0-9]/g,'_'):w).join(' ');const hint=ph>=3&&rQ()<.5?`${GENRES[s.genre].label} · ${decadeOf(s.year)}s`:s.artist;
-    return{label:'Finish the title',crits:[C.exact(s)],html:`Finish the title: <em>${esc(shown)}</em> <small>(${esc(hint)})</small>`,single:s,need:1};},
+    return{label:'Finish the title',crits:[C.exact(s)],html:`Finish the title: <em>${esc(shown)}</em> <small>(${esc(hint)})</small>`,single:s,need:1,missing:blanks.slice().sort((a,b)=>a-b).map(i=>words[i]).join(' ')};},
   scramble:()=>{const s=pick(unplayed(x=>{const w=titleWords(x.title);return x.pop>=60&&w.length===1&&w[0].replace(/[^\w]/g,'').length>=4&&w[0].length<=8;}),rQ);if(!s)return null;
     const hint=G.boss.phase>=3?`${GENRES[s.genre].label} · ${decadeOf(s.year)}s`:s.artist;return{label:'Unscramble',crits:[C.exact(s)],html:`Unscramble the title: <span class="mono">${esc(scrambleWord(titleWords(s.title)[0]))}</span> <small>(${esc(hint)})</small>`,single:s,need:1};},
   initials:()=>{const s=pick(unplayed(x=>titleWords(x.title).length>=3&&x.pop>=60),rQ);if(!s)return null;const ini=titleWords(s.title).map(w=>w[0].toUpperCase()).join('. ')+'.';
     return{label:'Initials',crits:[C.exact(s)],html:`Initials <span class="mono">${esc(ini)}</span> <small>(${esc(s.artist)} · ${decadeOf(s.year)}s)</small>`,single:s,need:1};},
   clueCard:()=>{for(let k=0;k<20;k++){const s=pick(unplayed(x=>x.pop>=60),rQ);const n=titleWords(s.title).length;const crits=[C.by(s.artist),C.year(s.year),C.words(n)];if(answers(crits).length===1)return{label:'Name the track',crits,html:`Name the track: <em>${esc(s.artist)}</em> · <em>${s.year}</em> · <em>${n}-word title</em>`,single:s,need:1};}return null;},
+  vibe:()=>{const v=pick(['upbeat','sad','slow','party'],rQ);return{label:'Vibe',crits:[C.vibe(v)],html:VIBES[v].html};},
+  century:()=>({label:'This century',crits:[C.century()],html:'Play me any song from <em>2000 or later</em>.'}),
+  love:()=>({label:'Love songs',crits:[C.love()],html:'Play me a song with <em>love</em>, <em>heart</em>, <em>kiss</em> or <em>baby</em> in the title.'}),
+  bandSong:()=>({label:'Bands',crits:[C.kind('b')],html:'Play me a song by a <em>band</em>.'}),
+  nationSong:()=>{const c=pick(['UK','CA','AU','IE'],rQ);return{label:'Around the world',crits:[C.from(c)],html:`Play me a song by a <em>${NATION[c]}</em> artist.`};},
+  grammySong:()=>({label:'Grammy winners',crits:[C.grammy()],html:'Play me a song by a <em>Grammy winner</em>.'}),
+  nameGenre:()=>{const g=pick(RING,rQ);return{label:'Name an artist',artistCard:true,crits:[C.genre(g)],html:`Name ${ARTIST_PHRASE[g]}.`};},
+  nameBand:()=>({label:'Name an artist',artistCard:true,crits:[C.kind('b')],html:'Name a <em>band or group</em>.'}),
+  nameDuo:()=>({label:'Name an artist',artistCard:true,crits:[C.kind('d')],html:'Name a <em>duo</em>.'}),
+  nameSolo:()=>{const c=pick(['US','UK'],rQ);return{label:'Name an artist',artistCard:true,crits:[C.kind('s'),C.from(c)],html:`Name a <em>${NATION[c]} solo artist</em>.`,two:true};},
+  nameNation:()=>{const c=pick(['UK','CA','AU','IE','KR','SE','FR'],rQ);return{label:'Name an artist',artistCard:true,crits:[C.from(c)],html:`Name an artist from <em>${PLACE[c]}</em>.`};},
+  nameAbroad:()=>({label:'Name an artist',artistCard:true,crits:[C.notUSUK()],html:'Name an artist from <em>outside the US and UK</em>.'}),
+  nameGrammy:()=>({label:'Name an artist',artistCard:true,crits:[C.grammy()],html:'Name an artist who has <em>won a Grammy</em>.'}),
+  nameLetter:()=>{const L=pick('ABCDEFGHJKLMNPRSTW'.split(''),rQ);return{label:'Name an artist',artistCard:true,crits:[C.letter(L)],html:`Name an artist whose name starts with <em>${L}</em>.`};},
+  nameOneWord:()=>({label:'Name an artist',artistCard:true,crits:[C.oneName()],html:'Name an artist with a <em>one-word name</em>.'}),
+  nameHitDecade:()=>{const d=pick([1960,1970,1980,1990,2000,2010,2020],rQ);return{label:'Name an artist',artistCard:true,crits:[C.hitIn(d)],html:`Name an artist who had a hit in the <em>${d}s</em>.`};},
+  spot:()=>{const sp=G.spot;if(!sp)return null;return sp.k==='genre'?{label:'Spotlight',crits:[C.genre(sp.v)],html:`Spotlight: play me a <em>${GENRES[sp.v].label}</em> song.`}:{label:'Spotlight',crits:[C.decade(sp.v)],html:`Spotlight: play me a song from the <em>${sp.v}s</em>.`};},
+  spotName:()=>{const sp=G.spot;if(!sp)return null;return sp.k==='genre'?{label:'Spotlight',artistCard:true,crits:[C.genre(sp.v)],html:`Spotlight: name ${ARTIST_PHRASE[sp.v]}.`}:{label:'Spotlight',artistCard:true,crits:[C.hitIn(sp.v)],html:`Spotlight: name an artist who had a hit in the <em>${sp.v}s</em>.`};},
 };
-function reqWeights(){const ph=G.boss.phase,mod=G.mod;
-  if(mod==='decades')return{decade:3,genreDecade:3,era:2,window:2,exactYear:2,sameDecadeAs:3,olderNewer:3};
+function reqWeights(){const w=baseWeights();if(G.spot&&G.mod!=='wordplay'){w.spot=3;w.spotName=1;}return w;}
+function baseWeights(){const ph=G.boss.phase,mod=G.mod;
+  if(mod==='decades')return{decade:3,genreDecade:3,era:2,window:2,exactYear:2,sameDecadeAs:3,olderNewer:3,nameHitDecade:2,century:1};
   if(mod==='wordplay')return{fillTitle:5,scramble:4,initials:3,clueCard:3,byArtist:1};
-  const w={genre:2,decade:2,fillTitle:3,byArtist:2,titleShape:2,scramble:2,clueCard:1,artistLetter:1,era:1};
-  if(ph>=2)Object.assign(w,{genre:1,genreDecade:3,sameArtistAs:2,sameDecadeAs:2,olderNewer:2,sameGenreAs:1,initials:2,exactYear:1,genreLetter:1,window:1});
-  if(ph>=3)Object.assign(w,{decade:1,titleShape:1,genreDecade:3,fillTitle:3,initials:2,scramble:2,sameArtistAs:2,clueCard:2,exactYear:2});
+  const w={genre:3,decade:2,vibe:3,century:2,love:1,fillTitle:3,byArtist:2,titleShape:1,scramble:1,nameGenre:3,nameLetter:2,nameOneWord:1,nameGrammy:1,nameBand:1,bandSong:1,grammySong:1,nationSong:1,artistLetter:1,clueCard:1,era:1};
+  if(ph>=2)Object.assign(w,{genre:1,vibe:1,century:1,genreDecade:3,sameArtistAs:2,sameDecadeAs:2,olderNewer:2,sameGenreAs:1,initials:2,exactYear:1,genreLetter:1,window:1,nameHitDecade:2,nameDuo:1,nameSolo:1,nameNation:2,nameAbroad:1});
+  if(ph>=3)Object.assign(w,{decade:1,titleShape:1,genreDecade:3,fillTitle:3,initials:2,scramble:2,sameArtistAs:2,clueCard:2,exactYear:2,nameHitDecade:2});
   return w;}
 function makeRequest(depth=0){
   /* each request has its own seeded stream: everyone on the daily gets the same requests in the same order */
   const first=G.reqN===0;G.rngQ=rng((G.seed^hash('req|'+(G.reqN++)))>>>0);G.pure=!!G.daily;
-  const w=first?{genre:2,decade:1}:reqWeights();let r=null;const recent=G.recentReq||[];
+  const w=first?{genre:2,decade:1,vibe:1,nameGenre:1}:reqWeights();let r=null;const recent=G.recentReq||[];
   for(let tries=0;tries<50&&!r;tries++){let keys=Object.keys(w).filter(k=>!recent.includes(k));if(!keys.length)keys=Object.keys(w);const tot=keys.reduce((a,k)=>a+w[k],0);let x=rQ()*tot,type=keys[0];for(const k of keys){x-=w[k];if(x<=0){type=k;break;}}
     const cand=REQ[type]();if(!cand)continue;const need=cand.need!=null?cand.need:cand.two?2:3;if(need>0&&answers(cand.crits).length<need)continue;cand.type=type;r=cand;}
   if(!r)r=Object.assign(REQ.genre(),{type:'genre'});
@@ -1091,23 +1208,24 @@ const W=192,H=304,LANES=[47,96,145],SQUAD_Y=214,BREACH_Y=172,SPAWN_Y=40;
 const SLOT_NAMES=['Left','Headliner','Right'];
 const PHASES=['','Top 40 Countdown','The Remix','Total Rotation'];
 function newGame(opts){
-  const daily=!!opts.daily;const spec=daily?dailySpec():null;const bar1=daily?BAR_D:barEndless(1);const mod=daily?spec.mod:opts.mod||'none';
+  const daily=!!opts.daily,demo=!!opts.demo;const spec=daily?dailySpec():null;const bar1=daily?BAR_D:barEndless(1);const mod=daily?spec.mod:opts.mod||'none';
   const seed=daily?spec.seed:(Date.now()>>>0);const rngS=rng(seed^0x51ed),rngQ=rng(seed^0x9e37);
-  let g0=daily?spec.genre:pick(RING);const takeover=mod==='takeover'?pick(RING,rng(seed^7)):null;if(takeover)g0=takeover;
+  const spot=demo?null:daily?spec.spot:pick(SPOTS,rng(seed^0x5b07));let g0=daily?spec.genre:pick(RING);if(spot&&spot.k==='genre')g0=spot.v;const takeover=mod==='takeover'?pick(RING,rng(seed^7)):null;if(takeover)g0=takeover;
   G={t:0,daily,dayKey:daily?spec.key:null,dayNum:daily?spec.num:null,counted:daily&&!PROF.daily[spec.key],mod,takeover,rngS,rngQ,
-    seed,reqN:0,remixN:0,echoI:0,takeI:0,echoOrder:shuffle(FAMOUS.slice(),rng(seed^0xec40)),echoTake:takeover?shuffle(FAMOUS.filter(a=>a.genre===takeover),rng(seed^0x7a4e)):null,
+    seed,reqN:0,remixN:0,echoI:0,takeI:0,echoOrder:shuffle(FAMOUS.slice(),rng(seed^0xec40)),echoTake:takeover?shuffle(FAMOUS.filter(a=>a.genre===takeover),rng(seed^0x7a4e)):null,spot,spotI:0,echoSpot:spot?shuffle(FAMOUS.filter(a=>spot.k==='genre'?a.genre===spot.v:artistHit(a.name,spot.v)),rng(seed^0x5907)):null,
     crowd:60,crowdMax:60,boss:{hp:bar1,max:bar1,phase:1,genre:g0,next:pick(RING.filter(g=>g!==g0),rngS),y:-110,hitUntil:0,beamUntil:0,dead:0},
     echoes:[],slots:[null,null,null],request:null,recentReq:[],hype:0,buffUntil:0,swing:0,over:false,paused:false,userPaused:false,timeScale:1,lookupPending:false,
     spawned:0,phaseSpawned:0,breakUntil:0,kchain:0,klast:-9,nextSpawn:1.6,nextBroadcast:16,nextRemix:32,tempoTier:0,tempoUp:0,events:[],anim:[0,0,0],linkFx:null,lastStrike:null,lastPlayed:null,
     played:[],playedIds:new Set(),newFinds:0,lastFraud:-100,selSlot:null,usedArtists:new Set(),lookups:0,uiT:0,score:0,combo:0,bestCombo:0,
-    stats:{tracks:0,attempts:0,rejects:0,filled:0,fast:0,reclaims:0,golden:0,squadHits:0,counters:0,weak:0,blocked:0,linked:0,dmg:0,dmgBoss:0,kills:0,breaches:0,fraudPass:0,fraudTotal:0,timeouts:0,perSong:{}}};
+    stats:{artistCards:0,tracks:0,attempts:0,rejects:0,filled:0,fast:0,reclaims:0,golden:0,squadHits:0,counters:0,weak:0,blocked:0,linked:0,dmg:0,dmgBoss:0,kills:0,breaches:0,fraudPass:0,fraudTotal:0,timeouts:0,perSong:{}}};
   $('#log').innerHTML='';particles=[];projectiles=[];$('#lastPlayed').hidden=true;setFb('Type a song that answers the request, or one by an artist walking toward you.','');$('#pausedOv').hidden=true;
   $('#hintBtn').hidden=$('#skipBtn').hidden=mod==='nohints';
-  $('#modChip').textContent=(daily?`Daily #${G.dayNum} · `:'')+modOf(mod).name;
+  $('#modChip').textContent=(daily?`Daily #${G.dayNum} · `:'')+modOf(mod).name+(spot?` · Spotlight: ${spotLabel(spot)}`:'');
+  G.demo=demo;G.demoT=2;if(demo){G.crowd=G.crowdMax=999;}
   G.request=makeRequest();
   log(`${daily?`Daily Set #${G.dayNum}${G.counted?'':' (practice run)'}`:'Endless'} · ${modOf(mod).name}. The Topline descends, broadcasting ${GENRES[G.boss.genre].label}.`);
-  labelEls.forEach(e=>e.remove());labelEls.clear();moodNow=null;moodParts=[];rings=[];layout();renderAll();flashRequest();setTimeout(()=>{if(screen==='game')$('#songInput').focus({preventScroll:true});},60);
-  if(!PROF.coached&&!AUTOTEST){G.paused=G.userPaused=true;$('#coach').hidden=false;setTimeout(()=>$('#coachGo').focus(),50);}
+  labelEls.forEach(e=>e.remove());labelEls.clear();moodNow=null;moodParts=[];rings=[];scans=[];layout();renderAll();flashRequest();setTimeout(()=>{if(screen==='game')$('#songInput').focus({preventScroll:true});},60);
+  if(!PROF.coached&&!AUTOTEST&&!G.demo){G.paused=G.userPaused=true;$('#coach').hidden=false;setTimeout(()=>$('#coachGo').focus(),50);}
 }
 const modSpeed=()=>(G.mod==='speed'?1.3:1)*(G.daily?.9:1);
 /* a set is three tracks; each one is a boss bar. Pressure ramps within a track and starts a notch higher on the next. */
@@ -1124,7 +1242,7 @@ function spawnEcho(){
   /* every spawn draws from its own seeded stream, so the daily lineup is the same for everyone */
   const r=rng((G.seed^hash('echo|'+G.spawned))>>>0);
   const counts=[0,1,2].map(l=>G.echoes.filter(m=>m.lane===l).length);const minC=Math.min(...counts);let lane=Math.floor(r()*3);if(counts[lane]>minC+1)lane=counts.indexOf(minC);
-  let art=null;for(let k=0;k<FAMOUS.length&&!art;k++){const a=G.echoTake&&r()<.75?G.echoTake[G.takeI++%G.echoTake.length]:G.echoOrder[G.echoI++%G.echoOrder.length];if(!G.echoes.some(e=>e.artist===a.name))art=a;}
+  let art=null;for(let k=0;k<FAMOUS.length&&!art;k++){const rr=r();const a=G.echoTake&&rr<.75?G.echoTake[G.takeI++%G.echoTake.length]:G.echoSpot&&G.echoSpot.length&&rr<.33?G.echoSpot[G.spotI++%G.echoSpot.length]:G.echoOrder[G.echoI++%G.echoOrder.length];if(!G.echoes.some(e=>e.artist===a.name))art=a;}
   if(!art)art=G.echoOrder[0];
   const ph=G.boss.phase,tp=Math.min(ph,4),rt=r();const type=G.spawned<2?'normal':rt<.03+.01*tp?'golden':rt<.15+.07*tp?'star':rt<.27+.07*tp?'fast':'normal';
   const mr=r();const masked=G.spawned>=2&&(G.mod==='masked'?mr<.6:G.spawned>=3&&mr<.06+.04*tp);
@@ -1139,10 +1257,17 @@ function spawnEcho(){
 const shipBottom=()=>G.boss.y+44;
 function frontEcho(lane){let f=null;for(const m of G.echoes)if(m.lane===lane&&m.hp>0&&(!f||m.y>f.y))f=m;return f;}
 const freshness=c=>clamp(1-(G.t-c.joined)/70,.3,1);
+/* attract mode: the menu sits on top of a game that plays itself */
+function startDemo(){newGame({demo:true});}
+function demoMove(){let s=null;const near=G.echoes.filter(m=>m.y>70&&!m.masked).sort((a,b)=>b.y-a.y)[0];
+  if(near&&Math.random()<.55){const a=ARTISTS.find(x=>artistMatch(near.artist,x.name));if(a)s=a.songs.find(x=>!G.playedIds.has(x.id));}
+  if(!s){const r=G.request;s=r.single&&!G.playedIds.has(r.single.id)?r.single:requestHint();}
+  if(s&&!G.playedIds.has(s.id))evaluate(s);}
 function addScore(n){if(n<=0)return;G.score+=Math.round(n*(1+.05*Math.min(G.combo,10)));}
 
 /* ---------- update loop (real time) ---------- */
 function update(dt){
+  if(G.demo){G.demoT-=dt;if(G.demoT<=0){G.demoT=2+Math.random()*2.2;demoMove();}if(G.t>210){startDemo();return;}}
   G.t+=dt;G.boss.y+=(L.shipY-G.boss.y)*Math.min(1,dt*2.5);
   if(G.t<G.breakUntil){G.events=G.events.filter(e=>{if(G.t>=e.at){e.fn();return false;}return true;});G.uiT-=dt;if(G.uiT<=0){G.uiT=.2;renderTimers();}return;}
   G.nextSpawn-=dt;if(G.nextSpawn<=0){spawnEcho();G.nextSpawn=spawnInterval();}
@@ -1178,17 +1303,17 @@ function calcLane(slot,card,echo){
 function killEcho(m,reclaimed){G.echoes=G.echoes.filter(x=>x!==m);if(G.t-G.klast>3)G.kchain=0;G.kchain++;G.klast=G.t;G.stats.kills++;G.swing+=.04;G.hype=Math.min(100,G.hype+(reclaimed?12:4));
   const sp=alienSprite(m.genre);sp.pixels.forEach((q,k)=>{if(k%2)return;particles.push({x:LANES[m.lane]-9+q.x,y:m.y+q.y,vx:(Math.random()-.5)*80,vy:-Math.random()*70-10,g:190,c:(reclaimed||m.type==='golden')&&k%3===0?'#ffd46b':q.c,life:.8+Math.random()*.6,max:1.4,s:1});});
   if(!reclaimed){sfx(()=>sfxKill());if(G.kchain>=3)pop(`STREAK ×${G.kchain}`,LANES[m.lane],m.y-10,G.kchain>=8?'gold':'cyan');}lineupDirty=true;renderOrSoon();}
-function breach(m){G.echoes=G.echoes.filter(x=>x!==m);const d=3+Math.min(G.boss.phase,5)+(m.type==='star'?2:0);G.crowd=Math.max(0,G.crowd-d);G.stats.breaches++;G.swing-=.2;
+function breach(m){G.echoes=G.echoes.filter(x=>x!==m);if(G.demo)return;const d=3+Math.min(G.boss.phase,5)+(m.type==='star'?2:0);G.crowd=Math.max(0,G.crowd-d);G.stats.breaches++;G.swing-=.2;
   if(G.combo>=3)pop('COMBO LOST',96,200,'bad');G.combo=0;
   pop(`-${d} MEMORY`,LANES[m.lane],SQUAD_Y-8,'bad');burstAt(LANES[m.lane],SQUAD_Y-6,18,['#ff5a4f','#a9c2b0']);shake(300,3);sfx(()=>sfxBreach());
   log(`The ${m.masked?'masked':m.artist.replace(/^The /,'')} Echo broke through. The crowd forgot ${d}.`);renderMeters();renderOrSoon();if(G.crowd<=0)finish(false);}
-function bossAttack(){const d=1+Math.min(G.boss.phase,4);const head=G.slots[1];
+function bossAttack(){if(G.demo)return;const d=1+Math.min(G.boss.phase,4);const head=G.slots[1];
   if(head&&counter(head.song.genre,G.boss.genre)>1){G.boss.beamUntil=performance.now()+250;sfx(()=>sfxHit('counter'));pop('DROWNED OUT',96,248,'counter');G.swing+=.08;G.hype=Math.min(100,G.hype+8);addScore(20);log(`${head.song.title} drowned out the ${GENRES[G.boss.genre].label} broadcast.`);return;}
   G.crowd=Math.max(0,G.crowd-d);G.boss.beamUntil=performance.now()+600;sfx(()=>sfxBoss());pop(`-${d} MEMORY`,96,284,'bad');shake(250,2);
   log(`The Topline broadcast a chart hit at the crowd. They forgot ${d}.`);renderMeters();if(G.crowd<=0)finish(false);}
 function remix(){const rr=rng((G.seed^hash('remix|'+(G.remixN++)))>>>0);G.boss.genre=G.boss.next;G.boss.next=pick(RING.filter(g=>g!==G.boss.genre),rr);sfx(()=>sfxRemix());
   pop(`REMIX: ${GENRES[G.boss.genre].short}`,96,70,'big');log(`Remix! The Topline now broadcasts ${GENRES[G.boss.genre].label}. A ${GENRES[weakTo(G.boss.genre)].label} Headliner drowns it out.`);renderBroadcast();}
-function requestTimeout(){G.crowd=Math.max(0,G.crowd-2);G.stats.timeouts++;G.combo=0;pop('TOO SLOW -2',96,90,'bad');sfx(()=>sfxAlarm());
+function requestTimeout(){if(G.demo){G.request=makeRequest();return;}G.crowd=Math.max(0,G.crowd-2);G.stats.timeouts++;G.combo=0;pop('TOO SLOW -2',96,90,'bad');sfx(()=>sfxAlarm());
   const r=G.request;const ans=r.single?r.single:requestHint();log(`Too slow.${ans?` One answer: ${ans.title} by ${ans.artist}.`:''} The crowd forgot 2.`);if(ans)setFb(`Too slow. One answer was “${esc(ans.title)}” by ${esc(ans.artist)}.`,'hint');
   G.request=makeRequest();renderRequest();flashRequest();renderMeters();if(G.crowd<=0)finish(false);}
 
@@ -1196,8 +1321,16 @@ function requestTimeout(){G.crowd=Math.max(0,G.crowd-2);G.stats.timeouts++;G.com
 function submitSong(text){
   if(!G||G.over||G.paused)return;text=text.trim();if(!text)return;
   audioInit();musicStart();G.stats.attempts++;hideSuggest();
+  const r=G.request;
+  /* fill in the blank: the missing word on its own is enough */
+  if(r.missing){const q=norm(text),m=norm(r.missing);if(q&&(q===m||(m.length>=4&&lev(q,m)<=1))){evaluate(r.single);return;}}
+  /* name-an-artist cards: the artist's name on its own is enough; their best-known fitting song joins the squad */
+  if(r.artistCard){const a=findArtist(text);if(a){const fits=a.songs.filter(s=>!G.playedIds.has(s.id)&&requestOK(s)).sort((x,y)=>y.pop-x.pop);
+      if(fits.length){evaluate(fits[0]);return;}
+      const any=a.songs.find(s=>!G.playedIds.has(s.id));if(!any){reject(`You've already played every ${esc(a.name)} song this set.`);return;}
+      evaluate(any);return;}}
   const {song}=identify(text);
-  if(!song){reject(`“${esc(text)}” isn't in the song catalog. Check the spelling or pick a suggestion.`);return;}
+  if(!song){const a=findArtist(text);reject(a?`To reclaim or play ${esc(a.name)}, type one of their songs.`:`“${esc(text)}” isn't in the song catalog. Check the spelling or pick a suggestion.`);return;}
   evaluate(song);
 }
 function requestOK(song){return G.request.crits.every(c=>c.test(song));}
@@ -1220,13 +1353,13 @@ function flashInput(cls){const inp=$('#songInput');inp.classList.remove('reject'
 function accept(song,reqOK,hits){
   const card={uid:++uidc,song,joined:G.t+Math.random()*1e-4};
   G.playedIds.add(song.id);G.played.push(song);G.combo++;G.bestCombo=Math.max(G.bestCombo,G.combo);flashInput('accept');
-  const isNew=!PROF.crate[song.id];PROF.crate[song.id]={t:song.title,a:song.artist,g:song.genre,r:rarityOf(song).id,n:((PROF.crate[song.id]||{}).n||0)+1,ai:song.source==='ai'?1:0};if(isNew)G.newFinds++;saveProfile();
+  const isNew=!G.demo&&!PROF.crate[song.id];if(!G.demo)PROF.crate[song.id]={t:song.title,a:song.artist,g:song.genre,r:rarityOf(song).id,n:((PROF.crate[song.id]||{}).n||0)+1,ai:song.source==='ai'?1:0};if(isNew)G.newFinds++;if(!G.demo)saveProfile();
   const {slot,old}=addToSquad(card);
   const fx=[];
   sfx(()=>{sfxHook(song);sfxReveal(rarityOf(song).id);if(G.combo>=2)sfxCombo(G.combo);});
   if(G.combo>=2)pop(`COMBO ×${G.combo}`,96,196,'cyan');
   burstAt(LANES[slot],SQUAD_Y-14,16,[GENRES[song.genre].color,'#ffffff']);
-  if(reqOK){const res=calcStrike(card,slot,G.slots);G.lastStrike={song,slot,res};G.anim[slot]=performance.now();
+  if(reqOK){if(G.request.artistCard)G.stats.artistCards++;const res=calcStrike(card,slot,G.slots);G.lastStrike={song,slot,res};G.anim[slot]=performance.now();
     if(res.links.length)G.linkFx={from:slot,links:res.links,until:performance.now()+2200};
     launchProjectile(LANES[slot],SQUAD_Y-20,96,G.boss.y+28,GENRES[song.genre].color,420,true);
     G.events.push({at:G.t+.42,fn:()=>{G.boss.hp=Math.max(0,G.boss.hp-res.total);G.boss.hitUntil=performance.now()+160;pop(String(res.total),96,G.boss.y+22,'huge');pop(res.exact?'NAILED IT':'REQUEST FILLED',96,G.boss.y+44,'counter');shake(320,4);flashCol='255,248,235';flashUntil=performance.now()+150;
@@ -1245,10 +1378,10 @@ function accept(song,reqOK,hits){
   if(hits.length){sfx(()=>sfxReclaim(hits.some(h=>h.type==='golden')));if(checkPhase()==='win')return;}
   fx.push(`<span>Joined the ${SLOT_NAMES[slot].toLowerCase()} slot${old?`, ${esc(old.song.title)} left`:''}</span>`);
   G.lastPlayed={song,fx,isNew};renderLastPlayed();
-  const r=rarityOf(song);rarityFX(r.id,slot);
+  const r=rarityOf(song);if(!G.demo){scans.push({x:LANES[slot],t0:performance.now(),c:r.color});G.events.push({at:G.t+.3,fn:()=>rarityFX(r.id,slot)});}
   setFb(`<b style="color:${r.color}">${r.label.toUpperCase()}</b> · ${esc(song.title)} · ${reqOK&&hits.length?'request filled and an Echo reclaimed':reqOK?'request filled':`reclaimed ${esc(hits.map(h=>h.artist).join(' and '))}`}${G.combo>=2?` · combo ×${G.combo}`:''}${isNew?' · new to your crate':''}`,'good');
   renderAll();
-  if(G.played.filter(s=>s.year).length>=3&&G.t-G.lastFraud>=26&&Math.random()<.45)setTimeout(()=>fraudCheck(false),700);
+  if(G.played.filter(s=>s.year).length>=3&&G.t-G.lastFraud>=26&&Math.random()<.45&&!G.demo)setTimeout(()=>fraudCheck(false),700);
 }
 function addToSquad(card){let slot=[1,0,2].find(i=>!G.slots[i]);let old=null;
   if(slot==null){slot=[0,1,2].reduce((a,i)=>G.slots[i].joined<G.slots[a].joined?i:a,0);old=G.slots[slot];}
@@ -1283,6 +1416,7 @@ function intermission(np){G.boss.phase=np;G.boss.max=G.boss.hp=G.daily?BAR_D:bar
   log(`Track ${np-1} done! The Topline retreats to remix${heal?` and the crowd remembers ${heal}`:''}. Next up: ${phaseName(np)}, faster and trickier.`);
   G.request=makeRequest();G.request.left=G.request.dur+5;renderRequest();flashRequest();renderMeters();setTimeout(()=>fraudCheck(true),1200);}
 function useHint(){if(!G||G.over||G.paused||G.mod==='nohints')return;const s=requestHint();if(!s){setFb('No hint available. Try skipping this request.','hint');return;}
+  if(G.request.artistCard){G.crowd=Math.max(0,G.crowd-1);renderMeters();setFb(`Hint: try <b>${esc(s.artist.replace(/[A-Za-z0-9]/g,(ch,i)=>i===0||/\s/.test(s.artist[i-1])?ch:'_'))}</b>`,'hint');log('Used a hint (-1 memory).');if(G.crowd<=0)finish(false);return;}
   G.crowd=Math.max(0,G.crowd-1);renderMeters();const mask=s.title.replace(/[A-Za-z0-9]/g,(ch,i)=>i===0||/\s/.test(s.title[i-1])?ch:'_');
   setFb(`Hint: ${esc(mask)}${G.request.hideArtist?'':` by ${esc(s.artist)}`}`,'hint');log(`Used a hint (-1 memory).`);if(G.crowd<=0)finish(false);}
 function skipRequest(){if(!G||G.over||G.paused||G.mod==='nohints')return;G.crowd=Math.max(0,G.crowd-2);G.combo=0;G.request=makeRequest();renderRequest();flashRequest();renderMeters();setFb('Skipped. New request (-2 memory).','');log('Skipped a request (-2 memory).');if(G.crowd<=0)finish(false);}
@@ -1307,7 +1441,7 @@ function makeFraudQuestion(){
   return{song:s,title:`You played “${s.title}”. What year did it come out?`,opts:shuffle([s.year,...offs.map(o=>s.year+o)]).map(y=>({label:String(y),correct:y===s.year})),explain:`“${esc(s.title)}” came out in <b>${s.year}</b>.`};}
 let fraudTimer=0,fraudKeys=null;
 function fraudCheck(forced){
-  if(!G||G.over||G.paused)return;const q=makeFraudQuestion();if(!q)return;G.lastFraud=G.t;G.paused=true;muffle(true);sfx(()=>sfxAlarm());hideSuggest();
+  if(!G||G.over||G.paused||G.demo)return;const q=makeFraudQuestion();if(!q)return;G.lastFraud=G.t;G.paused=true;muffle(true);sfx(()=>sfxAlarm());hideSuggest();
   const m=$('#modal');$('#qBig').textContent=forced?'THE TOPLINE SUSPECTS YOU':"PROVE YOU AIN'T A FRAUD";$('#qEyebrow').textContent='Everything is frozen · 12 seconds';$('#qTitle').textContent=q.title;
   $('#qStakes').textContent='Right: The Topline takes 20, the crowd recovers 3, and your strikes get ×1.3 for 20 seconds. Wrong or too slow: the crowd forgets 3 and that song is kicked off stage.';
   const box=$('#qOpts');box.innerHTML='';$('#qRes').hidden=true;$('#qNext').hidden=true;let done=false;const T=12000,start=performance.now();
@@ -1327,7 +1461,7 @@ function fraudCheck(forced){
 /* ---------- results ---------- */
 let lastResultText='';
 function finish(win){
-  if(!G||G.over)return;G.over=true;G.paused=false;muffle(false);clearInterval(fraudTimer);$('#modal').hidden=true;hideSuggest();
+  if(!G||G.over)return;checkMissions();G.over=true;G.paused=false;muffle(false);clearInterval(fraudTimer);$('#modal').hidden=true;hideSuggest();
   sfx(()=>win?sfxWin():sfxLose());
   if(win){G.boss.dead=performance.now();for(let k=0;k<140;k++)particles.push({x:96+(Math.random()-.5)*100,y:G.boss.y+20+(Math.random()-.5)*20,vx:(Math.random()-.5)*150,vy:-Math.random()*110,g:160,c:pick(['#8696a3','#5d6b78','#ffd46b','#ff5a4f',GENRES[G.boss.genre].color]),life:1+Math.random(),max:2,s:Math.random()<.5?2:1});shake(700,5);flashCol='255,248,235';flashUntil=performance.now()+400;}
   const st=G.stats;const songs=G.played;const mod=modOf(G.mod);
@@ -1365,7 +1499,9 @@ function finish(win){
     $('#rSet').innerHTML=songs.map(s=>{const r=rarityOf(s);return `<li style="--gc:${GENRES[s.genre].color}"><span>${esc(s.title)} <span class="muted">· ${esc(s.artist)}${s.year?' · '+s.year:''}</span></span><span style="color:${r.color}">${r.label}</span></li>`;}).join('')||'<li style="--gc:#444"><span>No songs played</span><span></span></li>';
     $('#rStats').innerHTML=`<dt>MVP song</dt><dd>${mvp?esc(mvp.title)+' · '+mv+' dmg':'—'}</dd><dt>Requests filled</dt><dd>${st.filled} (${st.timeouts} timed out)</dd><dt>Echoes reclaimed</dt><dd>${st.reclaims}${st.golden?` (${st.golden} golden)`:''}</dd><dt>Cleared by your squad</dt><dd>${st.kills-st.reclaims}</dd><dt>Broke through</dt><dd>${st.breaches}</dd><dt>Crowd memory left</dt><dd>${G.crowd} / ${G.crowdMax}</dd>`;
     $('#againBtn').textContent=G.daily?'Practice again':'Play again';
-    $('#results').hidden=false;$('#copyBtn').focus();
+    lastShare={score:finalScore,grade,mode:G.daily?'daily':'endless',title:G.daily?`Daily Set #${G.dayNum} · ${mod.name}`:`Endless · ${mod.name}`,line:G.daily?(win?`beat the boss in ${fmtTime(G.t)}`:`held on ${fmtTime(G.t)}`):`track ${G.boss.phase} · ${cleared} cleared`,rar:songs.map(s=>rarityOf(s).color)};
+    $('#results').hidden=false;$('#shareBtn').focus();
+    renderDistribution({mode:G.daily?'daily':'endless',day:G.daily?G.dayKey:null,score:finalScore,track:G.boss.phase,cleared,won:!!win},(G.daily&&G.counted)||!G.daily);
   },win?1400:900);
 }
 
@@ -1417,8 +1553,8 @@ function moodLayer(g,ms,p,bi,al){
 }
 /* whole-screen color grade, in screen space */
 function gradeMood(ms){if(!moodNow)return;const k=moodK(ms);cx.globalCompositeOperation='soft-light';
-  if(moodPrev&&k<1){const m=MOOD[moodPrev];cx.globalAlpha=m.a*(1-k)*1.6;cx.fillStyle=m.tint;cx.fillRect(0,0,cv.width,cv.height);}
-  const m=MOOD[moodNow];cx.globalAlpha=m.a*k*1.6;cx.fillStyle=m.tint;cx.fillRect(0,0,cv.width,cv.height);
+  if(moodPrev&&k<1){const m=MOOD[moodPrev];cx.globalAlpha=m.a*(1-k);cx.fillStyle=m.tint;cx.fillRect(0,0,cv.width,cv.height);}
+  const m=MOOD[moodNow];cx.globalAlpha=m.a*k;cx.fillStyle=m.tint;cx.fillRect(0,0,cv.width,cv.height);
   cx.globalAlpha=1;cx.globalCompositeOperation='source-over';}
 /* the sky changes as the set goes on: dusk, a red alien aurora, then a storm (endless keeps cycling, harder each lap) */
 let boltAt=0;
@@ -1428,7 +1564,7 @@ function drawSky(ms){const ph=G.boss.phase;const look=(ph-1)%3,lap=Math.floor((p
       if(since<120){cx.strokeStyle='#e8f0ff';cx.lineWidth=1;cx.beginPath();let x=(boltAt%cv.width),y=0;cx.moveTo(x,y);while(y<top){x+=(hash(String(boltAt+y))%9)-4;y+=6;cx.lineTo(x,y);}cx.stroke();}}}
 }
 /* ===================== rarity feel: the rarer the song, the louder the moment ===================== */
-let rings=[],raysUntil=0,raysX=96,hitStopUntil=0;
+let rings=[],scans=[],raysUntil=0,raysX=96,hitStopUntil=0;
 function bigStamp(text,sub,col,small){const el=document.createElement('div');el.className='bigstamp'+(small?' small':'');el.style.setProperty('--c',col);el.textContent=text;if(sub){const s=document.createElement('small');s.textContent=sub;el.appendChild(s);}$('#gameScreen').appendChild(el);setTimeout(()=>el.remove(),1800);}
 function rarityFX(id,slot){const x=LANES[slot],y=SQUAD_Y-14,t=performance.now();
   if(id==='air'){shake(140,1);rings.push({x,y,r1:18,c:'#a9aab8',t0:t,dur:360});}
@@ -1440,6 +1576,8 @@ function rarityFX(id,slot){const x=LANES[slot],y=SQUAD_Y-14,t=performance.now();
 }
 function drawRings(ms){
   if(ms<raysUntil&&!reduce){const left=(raysUntil-ms)/1600;cx.globalCompositeOperation='lighter';cx.fillStyle='#ffd46b';for(let k=0;k<12;k++){const a=k/12*Math.PI*2+ms/900;cx.globalAlpha=.16*left;cx.beginPath();cx.moveTo(raysX,SQUAD_Y-14);cx.lineTo(raysX+Math.cos(a-.06)*300,SQUAD_Y-14+Math.sin(a-.06)*300);cx.lineTo(raysX+Math.cos(a+.06)*300,SQUAD_Y-14+Math.sin(a+.06)*300);cx.closePath();cx.fill();}cx.globalAlpha=1;cx.globalCompositeOperation='source-over';}
+  scans=scans.filter(sc=>ms-sc.t0<420);
+  for(const sc of scans){const k=(ms-sc.t0)/380;if(k>1)continue;const y=Math.round(SQUAD_Y-2-k*38);cx.globalCompositeOperation='lighter';cx.fillStyle=sc.c;cx.globalAlpha=.9*(1-k*.4);cx.fillRect(sc.x-14,y,28,1);cx.globalAlpha=.16;cx.fillRect(sc.x-14,y,28,SQUAD_Y-y);cx.globalAlpha=1;cx.globalCompositeOperation='source-over';}
   rings=rings.filter(r=>ms<r.t0+r.dur);
   for(const r of rings){const k=(ms-r.t0)/r.dur;if(k<0)continue;const rad=r.r1*(1-Math.pow(1-k,3));cx.strokeStyle=r.c;cx.globalAlpha=1-k;cx.lineWidth=k<.5?2:1;cx.beginPath();cx.ellipse(r.x,r.y,rad,rad*.6,0,0,Math.PI*2);cx.stroke();}
   cx.globalAlpha=1;cx.lineWidth=1;
@@ -1498,7 +1636,7 @@ let vignette=null,lastMs=0,lastBeatSeen=-1;
 function frame(ms){
   requestAnimationFrame(frame);
   const dt=Math.min(.05,Math.max(0,(ms-lastMs)/1000));lastMs=ms;
-  if(screen!=='game'||!G)return;
+  if(!G)return;
   if(!G.over&&!G.paused)update(dt*G.timeScale*(ms<hitStopUntil?.08:1));
   const{p,bi}=beatInfo(ms);if(bi!==lastBeatSeen){lastBeatSeen=bi;onBeat(bi);}
   render(ms,p,bi,G.paused?0:dt);
@@ -1506,7 +1644,7 @@ function frame(ms){
 function render(ms,p,bi,dt){
   const CW=cv.width,CH=cv.height;
   cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,CW,CH);
-  let sx=0,sy=0;if(!reduce&&ms<shakeUntil){sx=Math.round((Math.random()-.5)*shakeAmp*2);sy=Math.round((Math.random()-.5)*shakeAmp);}
+  let sx=0,sy=0;if(!reduce&&ms<shakeUntil&&!G.demo){sx=Math.round((Math.random()-.5)*shakeAmp*2);sy=Math.round((Math.random()-.5)*shakeAmp);}
   if(WORLD)cx.drawImage(WORLD,sx,sy);
   drawSky(ms);
   cx.setTransform(1,0,0,1,L.ox+sx,L.oy+sy);
@@ -1534,12 +1672,12 @@ function render(ms,p,bi,dt){
   cx.globalAlpha=1;
   cx.fillStyle='rgba(255,240,200,.35)';motes.forEach(m=>{if(dt)m.p+=.01;const mx=(m.x+Math.sin(m.p)*6+W)%W,my=m.y+Math.cos(m.p*.7)*4;cx.fillRect(Math.round(mx),Math.round(my),1,1);});
   cx.setTransform(1,0,0,1,0,0);
-  cx.fillStyle='rgba(190,200,230,.26)';for(const d of rain){if(dt){d.y+=3.2*d.s;d.x-=.8*d.s;}if(d.y>CH){d.y=-4;d.x=Math.random()*CW+20;}cx.fillRect(Math.round(d.x),Math.round(d.y),1,3);}
-  if(!vignette){vignette=document.createElement('canvas');vignette.width=CW;vignette.height=CH;const v=vignette.getContext('2d');const g=v.createRadialGradient(CW/2,CH*.45,Math.min(CW,CH)*.3,CW/2,CH*.5,Math.max(CW,CH)*.72);g.addColorStop(0,'rgba(10,8,20,0)');g.addColorStop(1,'rgba(10,8,20,.6)');v.fillStyle=g;v.fillRect(0,0,CW,CH);}
+  cx.fillStyle='rgba(190,200,230,.15)';for(const d of rain){if(dt){d.y+=3.2*d.s;d.x-=.8*d.s;}if(d.y>CH){d.y=-4;d.x=Math.random()*CW+20;}cx.fillRect(Math.round(d.x),Math.round(d.y),1,3);}
+  if(!vignette){vignette=document.createElement('canvas');vignette.width=CW;vignette.height=CH;const v=vignette.getContext('2d');const g=v.createRadialGradient(CW/2,CH*.45,Math.min(CW,CH)*.3,CW/2,CH*.5,Math.max(CW,CH)*.72);g.addColorStop(0,'rgba(10,8,20,0)');g.addColorStop(1,'rgba(10,8,20,.42)');v.fillStyle=g;v.fillRect(0,0,CW,CH);}
   gradeMood(ms);
   cx.drawImage(vignette,0,0);
   if(G.crowd/G.crowdMax<.3&&!G.over){cx.fillStyle=`rgba(255,40,40,${(.08+.06*Math.sin(ms/200)).toFixed(3)})`;cx.fillRect(0,0,CW,CH);}
-  if(ms<flashUntil){cx.fillStyle=`rgba(${flashCol},${((flashUntil-ms)/300*.5).toFixed(3)})`;cx.fillRect(0,0,CW,CH);}
+  if(ms<flashUntil&&!G.demo){cx.fillStyle=`rgba(${flashCol},${((flashUntil-ms)/300*.32).toFixed(3)})`;cx.fillRect(0,0,CW,CH);}
   updateLabels();
 }
 function drawShip(ms,p){
@@ -1648,7 +1786,7 @@ function buildWorld(cw,ch,ox,oy){
 function initRain(cw,ch){rain=Array.from({length:Math.round(cw*ch/1300)},()=>({x:Math.random()*cw,y:Math.random()*ch,s:.7+Math.random()*.6}));}
 function positionPads(){const s=L.s;document.querySelectorAll('.pad').forEach(d=>{const i=+d.dataset.slot;d.style.left=(L.ox+LANES[i]-25)*s+'px';d.style.top=(L.oy+217)*s+'px';d.style.width=50*s+'px';d.style.height=Math.max(18,12*s)+'px';});}
 function layout(){
-  if(screen!=='game')return;const gs=$('#gameScreen');const vw=gs.clientWidth,vh=gs.clientHeight;if(!vw||!vh)return;
+  if(!G)return;const gs=$('#gameScreen');const root=document.documentElement;const vw=root.clientWidth,vh=root.clientHeight;if(!vw||!vh)return;
   const tb=$('#typebar').offsetHeight,avail=vh-tb;
   const shipY=-40,VIS=BOT_VIS-shipY;let s=Math.min(avail/VIS,vw/196,4.2);
   let banw=Math.min(640,vw-20,Math.max(192*s*1.2,400)),hudw=Math.min(360,(vw-banw)/2-24);const narrow=hudw<190;gs.classList.toggle('narrow',narrow);
@@ -1660,8 +1798,8 @@ function layout(){
   cv.style.width=cw*s+'px';cv.style.height=ch*s+'px';
   const req=$('#requestBox');if(req.parentNode!==gs)gs.appendChild(req);
   gs.classList.toggle('short',!narrow&&vh<700);
-  gs.style.setProperty('--s',s.toFixed(3));gs.style.setProperty('--hudw',Math.round(hudw)+'px');gs.style.setProperty('--banw',Math.round(banw)+'px');gs.style.setProperty('--bantop',Math.round((oy+shipY+43)*s)+'px');
-  gs.style.setProperty('--railbot',tb+8+'px');
+  root.style.setProperty('--s',s.toFixed(3));root.style.setProperty('--hudw',Math.round(hudw)+'px');root.style.setProperty('--banw',Math.round(banw)+'px');root.style.setProperty('--bantop',Math.round((oy+shipY+43)*s)+'px');
+  root.style.setProperty('--railbot',tb+8+'px');
   gs.classList.toggle('small',s<2);
   positionPads();
 }
@@ -1689,8 +1827,8 @@ function renderMeters(){
   $('#hypeTxt').textContent=G.hype>=100?'Hype full: DROP!':`Hype ${G.hype}%`;$('#hypeBar').style.width=G.hype+'%';
   const db=$('#dropBtn');if(db)db.hidden=!(G.hype>=100&&!G.over);
 }
-function musicBright(){if(!A.tone||!G)return;const tgt=Math.min(16000,Math.round(2400+2000*Math.min(G.combo,6)+(G.hype>=100?3000:0)+(A.bar&&A.bar.dropping?8000:0)));if(tgt!==A.toneT){A.toneT=tgt;A.tone.frequency.setTargetAtTime(tgt,A.ctx.currentTime,.2);}}
-function renderTimers(){musicBright();if(G.score!==G._ls){G._ls=G.score;const sc=$('#scoreChip');sc.classList.remove('bump');void sc.offsetWidth;sc.classList.add('bump');}$('#killChip').textContent=`${G.stats.kills} cleared`;
+function musicBright(){if(!A.tone||!G||G.demo)return;const tgt=Math.min(16000,Math.round(2400+2000*Math.min(G.combo,6)+(G.hype>=100?3000:0)+(A.bar&&A.bar.dropping?8000:0)));if(tgt!==A.toneT){A.toneT=tgt;A.tone.frequency.setTargetAtTime(tgt,A.ctx.currentTime,.2);}}
+function renderTimers(){musicBright();checkMissions();if(G.score!==G._ls){G._ls=G.score;const sc=$('#scoreChip');sc.classList.remove('bump');void sc.offsetWidth;sc.classList.add('bump');}$('#killChip').textContent=`${G.stats.kills} cleared`;
   if(!G)return;const r=G.request;const k=clamp(r.left/r.dur,0,1);$('#reqBar').style.width=(k*100)+'%';$('#reqBarWrap').classList.toggle('low',k<.3);$('#reqLeft').textContent=`${Math.ceil(Math.max(0,r.left))}s`;
   $('#timeChip').textContent=fmtTime(G.t);$('#speedChip').textContent=`Tempo ×${tempoMult().toFixed(2)}`;$('#scoreChip').textContent=fmtNum(G.score);
   const cc=$('#comboChip');cc.hidden=G.combo<2;cc.textContent=`Combo ×${G.combo}`;cc.className='chip'+(G.combo>=2?' combo':'');
@@ -1731,7 +1869,7 @@ function renderStrip(){
 }
 function renderRequest(){
   if(!G||!G.request)return;const r=G.request;$('#reqText').innerHTML=r.html;$('#reqType').textContent=r.label;
-  $('#critRow').innerHTML=r.single?`<span>One exact answer · ×1.5 · first half ×1.25</span>`:`<span>Needs</span>`+r.crits.filter(c=>c.chip).map(c=>`<span class="crit">${esc(c.chip)}</span>`).join('')+`<span>· first half ×1.25</span>`;
+  $('#critRow').innerHTML=r.artistCard?`<span>Type an artist's name, or any of their songs</span>`:r.missing?`<span>Type the missing word, or the whole title · ×1.5</span>`:r.single?`<span>One exact answer · ×1.5 · first half ×1.25</span>`:`<span>Needs</span>`+r.crits.filter(c=>c.chip).map(c=>`<span class="crit">${esc(c.chip)}</span>`).join('')+`<span>· first half ×1.25</span>`;
   renderOr();
 }
 function renderOr(){
@@ -1798,14 +1936,15 @@ let freeMod=PROF.freeMod||'none';
 function renderTitle(){
   const spec=dailySpec();const mod=modOf(spec.mod);const done=PROF.daily[spec.key];
   $('#dailyEyebrow').textContent=`Daily Set #${spec.num} · ${new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})}`;
-  $('#dailyTitle').textContent=mod.name;$('#dailyDesc').textContent=mod.desc;
+  $('#dailyTitle').textContent=mod.name;$('#dailyDesc').textContent=mod.desc;$('#dailySpot').textContent=`Spotlight: ${spotLabel(spec.spot)}`;$('#rankChip').textContent=rankOf(PROF.xp).name;$('#homeFoot').innerHTML=`Daily Set <b>#${spec.num}</b> is live · <b>${esc(mod.name)}</b>`;
   const y=new Date();y.setDate(y.getDate()-1);const alive=PROF.streak.last===spec.key||PROF.streak.last===dayKey(y);const streak=alive?PROF.streak.n:0;
   $('#dailyStats').innerHTML=`<span class="stat"><b>${streak}</b><span>Day streak</span></span>`+(done?`<span class="stat"><b>${fmtNum(done.score)}</b><span>Today's score</span></span><span class="stat"><b>${done.grade}</b><span>${done.win?'Beat the boss':'Lost'}</span></span>`:`<span class="stat"><b>—</b><span>Not played today</span></span>`);
   $('#dailyBtn').textContent=done?'Practice today’s set':'Play today’s set';
-  $('#dailyNote').textContent=done?`Done for today. Come back tomorrow for Daily #${spec.num+1}${streak?` to keep your ${streak}-day streak`:''}.`:(streak?`Play today to keep your ${streak}-day streak. `:'')+'Same Echoes, requests and boss for everyone today: three tracks, then The Topline goes down. Your first run counts.';
+  $('#dailyNote').textContent=done?`Back tomorrow for #${spec.num+1}`:(streak?`Keep your ${streak}-day streak`:'');
   $('#modChips').innerHTML='';MODS.forEach(m=>{const b=document.createElement('button');b.type='button';b.className='modchip';b.textContent=m.name;b.setAttribute('aria-pressed',String(m.id===freeMod));b.addEventListener('click',()=>{freeMod=m.id;PROF.freeMod=m.id;saveProfile();renderTitle();});$('#modChips').appendChild(b);});
-  const fm=modOf(freeMod);$('#modDesc').textContent=fm.desc+(fm.mult!==1&&!/Score/.test(fm.desc)?` Score ×${fm.mult}.`:'');
+  const fm=modOf(freeMod);$('#modName').textContent=fm.name;$('#modDesc').textContent=fm.desc+(fm.mult!==1&&!/Score/.test(fm.desc)?` Score ×${fm.mult}.`:'');
   const be=PROF.bestEndless;$('#freeBest').textContent=be&&be.score?`Best: ${fmtNum(be.score)} pts · Track ${be.track} · ${be.echoes} Echoes cleared`:'Every track cleared makes the next one faster. Play until the crowd forgets.';
+  renderMissions();
   const rk=rankOf(PROF.xp);$('#rankName').textContent=rk.name;$('#rankBar').style.width=Math.round(rk.pct*100)+'%';$('#rankNext').textContent=rk.next?`${fmtNum(PROF.xp)} XP · ${fmtNum(rk.next-PROF.xp)} to ${rk.nextName}`:`${fmtNum(PROF.xp)} XP · top rank`;
   $('#profStats').innerHTML=`<span class="stat"><b>${PROF.runs}</b><span>Sets played</span></span><span class="stat"><b>${PROF.wins}</b><span>Bosses beaten</span></span><span class="stat"><b>${Object.keys(PROF.daily).length}</b><span>Dailies done</span></span>`;
   const crate=Object.entries(PROF.crate);const found=crate.filter(([id])=>LOCAL.some(s=>s.id===id)).length;const extra=crate.length-found;
@@ -1818,7 +1957,7 @@ function renderTitle(){
 /* ===================== screens + controls ===================== */
 function ringHTML(){return RING.map(g=>`<span class="g" style="--gc:${GENRES[g].color}"><img class="ic" alt="" src="${iconURL(g)}">${GENRES[g].label}</span>`).join('<span class="arr">›</span>')+'<span class="arr">› back to Rock</span>';}
 $('#ringMenu').innerHTML=ringHTML();$('#ringGame').innerHTML=ringHTML();
-function showScreen(s){screen=s;$('#startScreen').hidden=s!=='start';$('#gameScreen').hidden=s!=='game';document.body.classList.toggle('ingame',s==='game');setDrawer(false);if(s==='start')renderTitle();else requestAnimationFrame(layout);window.scrollTo(0,0);}
+function showScreen(s){screen=s;$('#home').hidden=s!=='home';$('#startScreen').hidden=s!=='start';$('#gameScreen').hidden=s!=='game';document.body.classList.toggle('ingame',s==='game');setDrawer(false);closeSheets();if(s==='start')renderTitle();if(s!=='game'&&!(G&&G.demo))startDemo();requestAnimationFrame(layout);}
 function setPaused(v){if(!G||G.over)return;G.userPaused=v;if(!$('#modal').hidden)return;G.paused=v;muffle(v);$('#pausedOv').hidden=!v;$('#pauseBtn').textContent=v?'Resume':'Pause';$('#pauseBtn').setAttribute('aria-pressed',String(v));if(!v)$('#songInput').focus({preventScroll:true});}
 function setDrawer(open){const gs=$('#gameScreen');gs.classList.toggle('drawer',open);$('#detailsBtn').setAttribute('aria-expanded',String(open));if(G&&!G.over&&(L.narrow||$('#gameScreen').classList.contains('short'))){if(open&&!G.userPaused)setPaused(true);else if(!open&&G.userPaused&&setDrawer.paused)setPaused(false);setDrawer.paused=open;}}
 let lastOpts={};
@@ -1840,17 +1979,109 @@ $('#titleBtn').addEventListener('click',()=>{$('#results').hidden=true;G=null;sh
 $('#copyBtn').addEventListener('click',()=>{const pre=$('#rShare');try{navigator.clipboard.writeText(lastResultText).then(()=>toast('Copied. Paste it in your group chat.'),()=>{selectPre(pre);toast('Copy was blocked here. The text is selected so you can copy it.');});}catch(e){selectPre(pre);toast('Copy was blocked here. The text is selected so you can copy it.');}});
 function selectPre(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);}
 $('#quitBtn').addEventListener('click',()=>{if(G){G.over=true;clearInterval(fraudTimer);}G=null;muffle(false);$('#modal').hidden=true;showScreen('start');});
-$('#muteBtn').addEventListener('click',()=>{A.muted=!A.muted;audioInit();if(A.musicBus)A.musicBus.gain.setTargetAtTime(A.muted?0:.7,A.ctx.currentTime,.05);$('#muteBtn').textContent=A.muted?'Music off':'Music on';$('#muteBtn').setAttribute('aria-pressed',String(A.muted));});
+function toggleSound(){A.muted=!A.muted;audioInit();if(A.musicBus)A.musicBus.gain.setTargetAtTime(A.muted?0:.7,A.ctx.currentTime,.05);for(const id of ['#muteBtn','#soundBtn']){$(id).textContent=A.muted?(id==='#muteBtn'?'Music off':'Sound off'):(id==='#muteBtn'?'Music on':'Sound on');$(id).setAttribute('aria-pressed',String(A.muted));}}
+$('#muteBtn').addEventListener('click',toggleSound);$('#soundBtn').addEventListener('click',toggleSound);
+/* front screens */
+function enterMenu(){audioInit();musicStart();sfx(()=>sfxRight());showScreen('start');}
+$('#home').addEventListener('click',enterMenu);
+function openSheet(id){renderTitle();$(id).hidden=false;const x=$(id).querySelector('[data-close]');x&&x.focus();}
+function closeSheets(){['#howModal','#profileModal'].forEach(id=>$(id).hidden=true);}
+$('#howBtn').addEventListener('click',()=>openSheet('#howModal'));$('#profileBtn').addEventListener('click',()=>openSheet('#profileModal'));
+document.querySelectorAll('.sheet').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m||e.target.closest('[data-close]'))m.hidden=true;});});
+document.addEventListener('keydown',e=>{if(screen==='home'&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&$('#splash').classList.contains('out')){e.preventDefault();enterMenu();return;}
+  if(screen==='start'&&e.key==='Escape')closeSheets();});
 document.addEventListener('keydown',e=>{if(screen!=='game'||!G||!$('#results').hidden||!$('#coach').hidden)return;
   if(!$('#modal').hidden&&fraudKeys){if(/^[1-4]$/.test(e.key)){e.preventDefault();fraudKeys(+e.key-1);}else if(e.key==='Enter'&&!$('#qNext').hidden){e.preventDefault();$('#qNext').click();}return;}
   if(e.key==='Escape'){e.preventDefault();if($('#gameScreen').classList.contains('drawer'))setDrawer(false);else setPaused(!G.userPaused);return;}
   if(e.target!==$('#songInput')&&e.key.length===1&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&!G.paused){$('#songInput').focus();}});
 const AUTOTEST=/[?&]autotest\b/.test(location.search);
 document.addEventListener('visibilitychange',()=>{if(!AUTOTEST&&document.hidden&&G&&!G.over&&!G.userPaused&&screen==='game')setPaused(true);});
-let atBeat=0;if(AUTOTEST)window.__bside={step(sec){for(let t=0;t<sec;t+=.05){if(!G||G.over||G.paused)break;update(.05);const nb=atBeat+.05*2*tempoMult();if(Math.floor(nb)!==Math.floor(atBeat))onBeat(Math.floor(nb));atBeat=nb;}return G&&{t:G.t,hp:G.boss.hp,crowd:G.crowd,echoes:G.echoes.length,phase:G.boss.phase,score:G.score,req:G.request.type};},answer(){const r=G.request;if(r.theme)return null;const s=r.single||requestHint();return s?`${s.title} - ${s.artist}`:null;},req(){return G.request;},state(){return G;},fx(id){rarityFX(id,1);}};
-renderTitle();
+/* ===================== daily missions ===================== */
+const MISSIONS=[
+  {id:'rare',label:'Land a Crate Dig or White Label',goal:1,val:()=>G.played.filter(s=>s.pop<60).length},
+  {id:'combo',label:'Reach a ×6 combo',goal:6,val:()=>G.bestCombo},
+  {id:'reclaim',label:'Reclaim 5 Echoes',goal:5,val:()=>G.stats.reclaims},
+  {id:'artists',label:'Answer 3 "name an artist" cards',goal:3,val:()=>G.stats.artistCards},
+  {id:'clear',label:'Clear 40 Echoes in one set',goal:40,val:()=>G.stats.kills},
+  {id:'fraud',label:'Pass a fraud check',goal:1,val:()=>G.stats.fraudPass},
+  {id:'fast',label:'Fill 5 requests in the first half of the timer',goal:5,val:()=>G.stats.fast},
+  {id:'track',label:'Reach Track 3',goal:3,val:()=>G.boss.phase},
+  {id:'genres',label:'Play songs from 5 different genres in one set',goal:5,val:()=>new Set(G.played.map(s=>s.genre)).size},
+  {id:'golden',label:'Reclaim a Golden Echo',goal:1,val:()=>G.stats.golden}];
+const MISSION_XP=60;
+function todaysMissions(){const spec=dailySpec();return shuffle(MISSIONS.slice(),rng(spec.seed^0x3155)).slice(0,3);}
+function missionState(){const k=dayKey();if(!PROF.missions||PROF.missions.day!==k)PROF.missions={day:k,done:{}};return PROF.missions;}
+function checkMissions(){if(!G||G.demo)return;const st=missionState();let changed=false;
+  for(const m of todaysMissions()){if(st.done[m.id])continue;if(m.val()>=m.goal){st.done[m.id]=1;PROF.xp+=MISSION_XP;changed=true;toast(`Mission complete: ${m.label} (+${MISSION_XP} XP)`);sfx(()=>sfxRight());}}
+  if(changed)saveProfile();}
+function renderMissions(){const st=missionState();const list=todaysMissions();const n=list.filter(m=>st.done[m.id]).length;
+  $('#missions').innerHTML=list.map(m=>`<li class="${st.done[m.id]?'done':''}"><i aria-hidden="true">${st.done[m.id]?'✓':''}</i>${esc(m.label)}<small>+${MISSION_XP} XP</small></li>`).join('');
+  $('#missions').setAttribute('aria-label',`Today's missions: ${n} of 3 done`);}
+
+/* ===================== score curve + shareable card ===================== */
+/* Real scores come from Supabase once enough people have played; until then the curve is an estimate from test runs, and it says so. */
+const LIVE=!AUTOTEST&&!/^(localhost|127\.|\[::1\])/.test(location.hostname);
+/* shape of the estimate, fitted to test-run scores (strong daily runs ~19-21k, endless ~13-25k) */
+const SCORE_MODEL={daily:{max:26000,a:3,b:2.2},endless:{max:34000,a:2.6,b:2.2}};
+let lastDist=null;
+async function scoreStats(entry,submit){
+  if(!CATALOG.url||!CATALOG.key)return null;const H={apikey:CATALOG.key,'Content-Type':'application/json'};
+  if(submit&&LIVE){try{await fetchT(`${CATALOG.url}/rest/v1/scores`,5000,{method:'POST',headers:Object.assign({Prefer:'return=minimal'},H),body:JSON.stringify(entry)});}catch(e){}}
+  try{const r=await fetchT(`${CATALOG.url}/rest/v1/rpc/score_stats`,5000,{method:'POST',headers:H,body:JSON.stringify({p_mode:entry.mode,p_day:entry.day,p_score:entry.score})});if(!r.ok)return null;return await r.json();}catch(e){return null;}}
+function distShape(entry,stats){
+  if(stats&&stats.n>=30&&stats.buckets&&stats.buckets.length){const max=Math.max(1,stats.max+1);const B=24;const counts=new Array(B).fill(0);for(const [k,c] of stats.buckets)if(k>=1&&k<=B)counts[k-1]=c;
+    const sm=counts.map((c,i)=>(counts[i-1]||0)*.25+c*.5+(counts[i+1]||0)*.25);const pts=sm.map((c,i)=>[(i+.5)/B,c]);
+    return{pts,max,pct:clamp(Math.round(100*stats.below/stats.n),1,99),real:true,n:stats.n};}
+  const m=SCORE_MODEL[entry.mode];const pts=[];let tot=0,below=0;const x0=clamp(entry.score/m.max,0,1);
+  for(let i=0;i<=80;i++){const x=i/80;const y=Math.pow(x,m.a-1)*Math.pow(1-x,m.b-1);pts.push([x,y]);tot+=y;if(x<x0)below+=y;}
+  return{pts,max:m.max,pct:clamp(Math.round(100*below/tot),1,99),real:false};}
+function drawDist(cvs,d,score,opts={}){
+  const c=cvs.getContext('2d'),W=cvs.width,H=cvs.height,padB=opts.padB??22,padT=opts.padT??26;c.clearRect(0,0,W,H);
+  const ymax=Math.max(...d.pts.map(p=>p[1]))||1;const X=x=>x*W,Y=y=>H-padB-(y/ymax)*(H-padB-padT);
+  const g=c.createLinearGradient(0,0,W,0);g.addColorStop(0,'rgba(195,161,255,.55)');g.addColorStop(1,'rgba(95,217,240,.55)');
+  c.beginPath();c.moveTo(0,H-padB);for(const [x,y] of d.pts)c.lineTo(X(x),Y(y));c.lineTo(W,H-padB);c.closePath();c.fillStyle=g;c.fill();
+  c.beginPath();d.pts.forEach(([x,y],i)=>i?c.lineTo(X(x),Y(y)):c.moveTo(X(x),Y(y)));c.strokeStyle='rgba(241,236,228,.85)';c.lineWidth=opts.lw||2;c.stroke();
+  c.fillStyle='rgba(255,255,255,.15)';c.fillRect(0,H-padB,W,1);
+  const sx=clamp(score/d.max,0.01,0.99)*W;c.fillStyle='#f6b75a';c.fillRect(Math.round(sx)-(opts.mw||1.5),padT-6,(opts.mw||1.5)*2,H-padB-padT+6);
+  c.beginPath();c.arc(sx,padT-8,opts.dot||6,0,Math.PI*2);c.fill();
+  c.font=`700 ${opts.fs||13}px "Chakra Petch",sans-serif`;c.textAlign=sx>W*.8?'right':sx<W*.2?'left':'center';c.fillText(opts.you||'You',sx+(sx>W*.8?-12:sx<W*.2?12:0),padT-14);
+  c.textAlign='left';c.fillStyle='rgba(179,174,198,.9)';c.font=`500 ${opts.fs2||11.5}px "Chakra Petch",sans-serif`;c.fillText('0',2,H-6);c.textAlign='right';c.fillText(fmtNum(d.max),W-2,H-6);c.textAlign='left';}
+function showDist(entry,d){lastDist={d,entry};drawDist($('#distCv'),d,entry.score);const who=entry.mode==='daily'?'players today':'endless runs';
+  $('#distTxt').innerHTML=d.real?`You beat <b>${d.pct}%</b> of ${who} · based on ${fmtNum(d.n)} scores`:`You beat about <b>${d.pct}%</b> of ${who} <span class="muted">· estimated from test plays until enough real scores are in</span>`;
+  lastResultText=lastResultText.replace(/\n(Top \d+%[^\n]*\n)?\(○/,`\nTop ${100-d.pct+1}%${d.real?'':' (est.)'} ${entry.mode==='daily'?'today':'of endless runs'}\n(○`);$('#rShare').textContent=lastResultText;}
+async function renderDistribution(entry,submit){
+  showDist(entry,distShape(entry,null));
+  const stats=await scoreStats(entry,submit);if(stats&&stats.n>=30)showDist(entry,distShape(entry,stats));}
+function makeShareCard(){
+  const info=lastShare;if(!info)return null;const cv=document.createElement('canvas');cv.width=1080;cv.height=1350;const c=cv.getContext('2d');
+  const bg=c.createLinearGradient(0,0,0,1350);bg.addColorStop(0,'#231d3a');bg.addColorStop(1,'#100f1a');c.fillStyle=bg;c.fillRect(0,0,1080,1350);
+  const r=rng(hash(String(info.score)));for(let i=0;i<120;i++){c.fillStyle=r()<.25?'rgba(201,195,224,.9)':'rgba(109,104,144,.7)';const s=r()<.2?4:2;c.fillRect(Math.floor(r()*1080),Math.floor(r()*700),s,s);}
+  c.font='700 170px "Pixelify Sans",monospace';c.textAlign='left';{const parts=[['B','#f1ece4'],['-','#ff6b6b'],['SIDE','#f1ece4']];let x=540-parts.reduce((w,[t])=>w+c.measureText(t).width,0)/2;for(const [t,col] of parts){c.fillStyle=col;c.fillText(t,x,250);x+=c.measureText(t).width;}}c.textAlign='center';
+  c.fillStyle='#f6b75a';c.font='600 40px "Chakra Petch",sans-serif';c.fillText(info.title.toUpperCase(),540,330);
+  c.fillStyle='#ffd77a';c.font='700 190px "Pixelify Sans",monospace';c.fillText(fmtNum(info.score),540,560);
+  c.fillStyle='#b3aec6';c.font='500 40px "Chakra Petch",sans-serif';c.fillText(`points · grade ${info.grade} · ${info.line}`,540,630);
+  if(lastDist){const sub=document.createElement('canvas');sub.width=900;sub.height=300;drawDist(sub,lastDist.d,info.score,{padB:40,padT:70,lw:4,mw:3,dot:12,fs:34,fs2:26,you:'YOU'});c.drawImage(sub,90,690);
+    c.fillStyle='#f1ece4';c.font='700 56px "Chakra Petch",sans-serif';c.fillText(`Top ${100-lastDist.d.pct+1}%${lastDist.d.real?'':' (est.)'} ${info.mode==='daily'?'today':'of runs'}`,540,1080);}
+  const syms=info.rar.slice(-24);const w=34,gap=8,tw=syms.length*(w+gap)-gap;let x=540-tw/2;for(const col of syms){c.fillStyle=col;c.beginPath();c.arc(x+w/2,1160,w/2,0,Math.PI*2);c.fill();x+=w+gap;}
+  c.fillStyle='#7a7692';c.font='500 34px "Chakra Petch",sans-serif';c.fillText('Can you beat it?  ·  '+location.host,540,1270);
+  return cv;}
+let lastShare=null;
+async function shareCard(){const cv=makeShareCard();if(!cv)return;const blob=await new Promise(r=>cv.toBlob(r,'image/png'));if(!blob)return;
+  const file=new File([blob],'b-side-result.png',{type:'image/png'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],text:lastResultText});return;}catch(e){if(e&&e.name==='AbortError')return;}}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='b-side-result.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('Saved your result card. Post it anywhere.');}
+
+$('#shareBtn').addEventListener('click',shareCard);
+let atBeat=0;if(AUTOTEST)window.__bside={step(sec){for(let t=0;t<sec;t+=.05){if(!G||G.over||G.paused)break;update(.05);const nb=atBeat+.05*2*tempoMult();if(Math.floor(nb)!==Math.floor(atBeat))onBeat(Math.floor(nb));atBeat=nb;}return G&&{t:G.t,hp:G.boss.hp,crowd:G.crowd,echoes:G.echoes.length,phase:G.boss.phase,score:G.score,req:G.request.type};},answer(){const r=G.request;if(r.theme)return null;const s=r.single||requestHint();return s?`${s.title} - ${s.artist}`:null;},req(){return G.request;},state(){return G;},fx(id){rarityFX(id,1);},card(){return makeShareCard();}};
 const catalogLoading=loadCatalog();
-requestAnimationFrame(frame);
+/* boot: a short welcome while fonts and songs load, then the home screen over the live demo */
+(async function boot(){const bar=$('#splashBar'),t0=performance.now();let shown=8;const tick=setInterval(()=>{shown=Math.min(88,shown+(92-shown)*.12);bar.style.width=shown+'%';},120);
+  screen='home';startDemo();requestAnimationFrame(frame);
+  const lines=['Tuning in…','Dusting off the crates…','Warming up the amps…'];let li=0;const lt=setInterval(()=>{li=(li+1)%lines.length;$('#splashTxt').textContent=lines[li];},900);
+  await Promise.race([Promise.all([catalogLoading,document.fonts?document.fonts.ready:null]),new Promise(r=>setTimeout(r,6000))]);
+  const wait=Math.max(0,900-(performance.now()-t0));await new Promise(r=>setTimeout(r,wait));
+  clearInterval(tick);clearInterval(lt);bar.style.width='100%';$('#splashTxt').textContent='Ready';
+  await new Promise(r=>setTimeout(r,250));renderTitle();showScreen('home');$('#splash').classList.add('out');setTimeout(()=>$('#splash').hidden=true,700);$('#startBtn').focus({preventScroll:true});})();
 })();
 </script>
 

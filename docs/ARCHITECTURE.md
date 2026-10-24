@@ -61,6 +61,19 @@ Everything is synthesized with the Web Audio API.
 - **Frame** (`frame → render`): sky effects, background, arena mood (`drawMood`), ship, Echoes, squad links, squad, booth, crowd, rarity rings, projectiles and particles in "street space", then rain, color grade, vignette and flashes in screen space.
 - **DOM overlays** on top of the canvas: Echo name tags (`updateLabels`), squad tags (pads), damage popups, big rarity stamps.
 
-## 10. UI
+## 10. Front screens
+
+- **Splash** while fonts and `data/songs.json` load (at most ~6 s; the game works with the built-in list if the file is slow).
+- **Home**: the logo and "Click to start" over an attract-mode demo, a real game (`startDemo`, `G.demo`) that plays itself in the background. Demo games never touch the profile, never show quizzes, and keep sound effects and screen flashes off.
+- **Menu**: the Daily card (modifier, Spotlight, three missions, streak) and the Endless card (best run, modifier picker). Rank, crate and how-to-play open as sheets.
+
+## 11. Freshness, missions and scores
+
+- `SPOTS` and `G.spot`: each set's Spotlight biases the Echo pool (`echoSpot`) and adds the `spot` and `spotName` request types.
+- `MISSIONS`: three per day, picked from the date seed; progress is checked a few times a second during play (`checkMissions`) and stored in the profile.
+- `renderDistribution`: draws an estimate curve immediately, submits the score (live site only), then redraws from `score_stats()` once 30+ real scores exist.
+- `makeShareCard` / `shareCard`: a 1080×1350 PNG with the score, curve and rarity dots, shared through the system share sheet when available, otherwise downloaded.
+
+## 12. UI
 
 Title screen (daily card, endless card with modifier chips, rank, crate, how to play, catalog status), the in-game HUD and typing bar with the suggestion strip (`updateSuggest`), the fraud-check modal, the first-run coach card, and the results screen.
