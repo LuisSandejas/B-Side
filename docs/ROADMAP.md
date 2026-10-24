@@ -23,6 +23,9 @@
 
 ## Then: playing together
 
+- **1v1 mode**: summon units by answering, steal named units with a less popular song by the same artist, best of 3 (see [1V1-MODE.md](1V1-MODE.md))
+- Vercel Web Analytics (one script tag; enable it in the Vercel dashboard first)
+
 - Shared **Daily leaderboard** and **Endless high scores** (a `scores` table plus a function that sanity-checks submissions)
 - Nicknames without sign-up
 - A share link that previews nicely in group chats
