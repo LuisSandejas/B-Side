@@ -38,8 +38,8 @@ set search_path = public, extensions
 set pg_trgm.word_similarity_threshold = 0.55
 as $$
 declare
-  -- the browser sends norm(text); clean it again so nothing but [a-z0-9 ] reaches LIKE
-  qq text := left(btrim(regexp_replace(lower(coalesce(q, '')), '[^a-z0-9]+', ' ', 'g')), 80);
+  -- same as norm() in the game: lowercase, [a-z0-9 ] only (nothing else reaches LIKE), no standalone "the"
+  qq text := left(btrim(regexp_replace(regexp_replace(regexp_replace(lower(coalesce(q, '')), '[^a-z0-9]+', ' ', 'g'), '\mthe\M', ' ', 'g'), '\s+', ' ', 'g')), 80);
   n  integer := least(greatest(coalesce(lim, 6), 1), 20);
 begin
   if length(qq) < 2 then

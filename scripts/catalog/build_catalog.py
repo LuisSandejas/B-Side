@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import csv
 import gzip
+import http.client
 import io
 import json
 import math
@@ -170,7 +171,7 @@ class ListenBrainz:
                     time.sleep(2 ** attempt)
                 else:
                     raise
-            except (urllib.error.URLError, TimeoutError, ConnectionError):
+            except (urllib.error.URLError, TimeoutError, ConnectionError, http.client.HTTPException, json.JSONDecodeError):  # dropped or cut-off responses: retry
                 time.sleep(2 ** attempt)
         raise RuntimeError(f"ListenBrainz {endpoint} kept failing")
 
@@ -278,6 +279,19 @@ def curated_songs() -> dict[tuple[str, str], int]:
     return out
 
 
+# rank in the catalog (0 = most listened) -> 0-100 popularity: top 1% Airplay, next 7% Fan Favorite,
+# next 32% Crate Dig, the rest White Label. Hand ratings are almost all hits, so they can't anchor the low end.
+POP_BANDS = [(0.0, 95), (0.01, 80), (0.08, 60), (0.40, 40), (1.0, 15)]
+
+
+def popularity_from_rank(i: int, n: int) -> int:
+    q = i / max(n - 1, 1)
+    for (q0, p0), (q1, p1) in zip(POP_BANDS, POP_BANDS[1:]):
+        if q <= q1:
+            return round(p0 + (p1 - p0) * (q - q0) / (q1 - q0))
+    return POP_BANDS[-1][1]
+
+
 def fit_line(xs: list[float], ys: list[float]) -> tuple[float, float]:
     mx, my = sum(xs) / len(xs), sum(ys) / len(ys)
     b = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / sum((x - mx) ** 2 for x in xs)
@@ -367,9 +381,7 @@ def main() -> None:
     # 6. popularity scale, genres, output
     log("step 6/6: calibrating and writing")
     curated = curated_songs()
-    pairs = [(math.log10(u), curated[(norm(t), norm(a))]) for _l, u, _li, _r, t, a in picked if (norm(t), norm(a)) in curated]
-    a0, b0 = fit_line([x for x, _ in pairs], [y for _, y in pairs])
-    log(f"  popularity = {a0:.1f} + {b0:.1f} * log10(listeners), fitted on {len(pairs):,} hand-rated songs")
+    rank = {rec: i for i, (_l, _u, _li, rec, _t, _a) in enumerate(sorted(picked, key=lambda p: -p[1]))}
 
     artist_genre: dict[str, Counter] = defaultdict(Counter)
     rows = []
@@ -379,7 +391,7 @@ def main() -> None:
         g = vote_genre([(tags.get("recording"), 3), (tags.get("release_group"), 2), (tags.get("artist"), 1)])
         year = (m.get("release") or {}).get("year")
         year = year if isinstance(year, int) and 1600 <= year <= 2030 else None
-        pop = max(1, min(99, round(a0 + b0 * math.log10(u))))
+        pop = popularity_from_rank(rank[rec], len(picked))
         if g:
             artist_genre[lead][g] += 1
         rows.append([rec, title, artist, g, year, pop, u, lead])
