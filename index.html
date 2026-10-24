@@ -1211,8 +1211,8 @@ function bestMatch(q,songs){let best=null,score=0;for(const s of songs){const sc
 function localMatch(text){const q=norm(text.replace(/\s+-\s+/,' '));if(!q)return{song:null,score:0};
   let r=bestMatch(q,INDEX.candidates(q));if(r.score<60&&q.length>=5){const f=bestMatch(q,INDEX.fuzzy(q));if(f.score>r.score)r=f;}return r;}
 const songCache=new Map();
-function identify(text){const key=norm(text);const c=songCache.get(key);if(c)return{song:c};const lm=localMatch(text);const song=lm.song&&lm.score>=55?lm.song:null;
-  if(song){if(songCache.size>500)songCache.clear();songCache.set(key,song);}return{song};}
+function identify(text){const key=norm(text);const c=songCache.get(key);if(c)return{song:c,score:100};const lm=localMatch(text);const song=lm.song&&lm.score>=55?lm.song:null;
+  if(song&&lm.score>=95){if(songCache.size>500)songCache.clear();songCache.set(key,song);}return{song,score:lm.score};}
 
 /* ===================== full-catalog lookup =====================
    Songs beyond the built-in list live in the Supabase `catalog` table (a few hundred thousand rows)
@@ -1234,7 +1234,7 @@ async function remoteSearch(q,signal){
   if(!remoteOn()||q.length<3)return null;
   const hit=lruGet(q);if(hit)return hit;
   if(remote.misses.some(m=>q.length>m.length&&q.startsWith(m)))return[];
-  try{const r=await fetchT(`${CATALOG.url}/rest/v1/rpc/search_catalog?q=${encodeURIComponent(q)}&lim=8`,2500,{headers:{apikey:CATALOG.key},signal});
+  try{const r=await fetchT(`${CATALOG.url}/rest/v1/rpc/search_catalog?q=${encodeURIComponent(q)}&lim=8`,4000,{headers:{apikey:CATALOG.key},signal});
     if(!r.ok){remote.down=r.status===404?Infinity:Date.now()+30000;return null;}  // 404: the catalog isn't set up, so stop asking this session
     const rows=(await r.json()).filter(x=>x&&x.title&&x.artist).map(catalogSong);lruSet(q,rows);
     if(!rows.length){remote.misses.push(q);if(remote.misses.length>60)remote.misses.shift();}
@@ -1494,18 +1494,19 @@ function submitSong(text){
       if(fits.length){evaluate(fits[0]);return;}
       const any=a.songs.find(s=>!G.playedIds.has(s.id));if(!any){reject(`You've already played every ${esc(a.name)} song this set.`);return;}
       evaluate(any);return;}}
-  const {song}=identify(text);
+  const {song,score}=identify(text);
+  if(song&&(score>=95||!remoteOn())){evaluate(song);return;}
+  if(remoteOn()&&norm(text).length>=3){lookupThenEvaluate(text,song,score);return;}
   if(song){evaluate(song);return;}
-  if(remoteOn()&&norm(text).length>=3){lookupThenEvaluate(text);return;}
   rejectUnknown(text);
 }
 function rejectUnknown(text){const a=findArtist(text);reject(a?`To reclaim or play ${esc(a.name)}, type one of their songs.`:`“${esc(text)}” isn't in the song catalog. Check the spelling or pick a suggestion.`);}
 /* not in the built-in list: look it up in the full catalog while the game keeps running */
-function lookupThenEvaluate(text){const q=norm(text.replace(/\s+-\s+/,' '));const g=G,tok=++remote.tok;const inp=$('#songInput');
+function lookupThenEvaluate(text,local,localScore=0){const q=norm(text.replace(/\s+-\s+/,' '));const g=G,tok=++remote.tok;const inp=$('#songInput');
   setFb('Searching the full catalog…','');inp.classList.add('busy');
   remoteSearch(q).then(rows=>{if(tok===remote.tok)inp.classList.remove('busy');if(G!==g||G.over||tok!==remote.tok)return;
     const m=rows&&rows.length?bestMatch(q,rows):{song:null,score:0};
-    if(m.song&&m.score>=55){songCache.set(norm(text),m.song);evaluate(rememberSong(m.song));}else rejectUnknown(text);});}
+    if(m.song&&m.score>=55&&m.score>localScore){songCache.set(norm(text),m.song);evaluate(rememberSong(m.song));}else if(local)evaluate(local);else rejectUnknown(text);});}
 function requestOK(song){return G.request.crits.every(c=>c.test(song));}
 function evaluate(song){
   if(G.playedIds.has(song.id)){reject(`You already played “${esc(song.title)}” this set. Pick a different song.`);return;}
