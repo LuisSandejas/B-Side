@@ -33,7 +33,7 @@ Any static file server works. From the repo root:
 python3 -m http.server 8000
 ```
 
-Then open <http://localhost:8000>. A short loading screen gives way to the home screen (a self-playing game in the background); click to start, which also switches on the audio (browsers block sound until you interact).
+Then open <http://localhost:8000>. A short loading screen gives way to the title screen (a self-playing game in the background); press any key or click to start, which also switches on the audio (browsers block sound until you interact).
 
 ---
 
@@ -80,7 +80,7 @@ When a song lands, a quick scan sweeps over the new squad member before its rari
 
 **Arenas.** The street changes with whatever genre the boss is broadcasting (laser grid for electronic, stage lights and sparks for rock, a disco floor and confetti for pop, and so on), and the sky changes as the set goes on.
 
-**Music.** All music and sound is generated live with the Web Audio API — nothing is sampled. Your squad is the band (an empty stage is a bare beat; each member brings in another part), the tempo rises as the Echoes speed up, combos brighten the mix, and every hit lands on the beat in the current key.
+**Music.** All music and sound is generated live with the Web Audio API — nothing is sampled. The soundtrack is a chiptune-electro track with a full song structure (intro, verses, a build, a drop) and three rotating melodies, so it takes about five minutes to repeat. Your squad is the band (an empty stage is a bare beat; each member brings in another part), the Headliner's genre restyles the groove, the tempo rises as the Echoes speed up, and combos brighten the mix. Every shot, kill, correct answer and combo has its own 8-bit sound, in the current key and on the beat.
 
 ---
 

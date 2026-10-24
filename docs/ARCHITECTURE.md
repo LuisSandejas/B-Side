@@ -32,9 +32,9 @@ Characters, aliens and the ship are drawn procedurally onto small grids (`mkGrid
 Everything is synthesized with the Web Audio API.
 
 - **Signal chain:** music bus → pause low-pass → compressor → limiter. Harmonic parts also pass through a "pump" gain that ducks on each kick and a tone filter that opens with your combo. A generated plate reverb is fed by per-voice sends.
-- **Sequencer:** 16 steps per bar, scheduled ~150 ms ahead on a 25 ms timer (`musicTick`). `newBar` chooses the groove from the Headliner's genre (`STYLE`), the chord from that genre's progression, the tempo (`GENRES[g].tempo × tempoMult()`, which rises with Echo speed), and how many layers play (one per squad member).
-- **Instruments:** drums (kick, snare, clap, metallic hats and ride, toms, timpani), chord voices (Rhodes, power chords, supersaw, pluck, pad, strings), basses (808, saw, sub, picked, walking, pizzicato) and leads (arp, bell, guitar, sax, flute).
-- **Harmony:** chords are voice-led; bass, leads, counter-melodies, typing sounds and hit sounds all use the current chord's tones, so nothing clashes. `qt()` quantizes sound effects to the next beat subdivision.
+- **Song form:** the soundtrack is one composed chiptune-electro track in a 56-bar form (`FORM`): intro, A, A2, B, a 4-bar break with a filter riser, an 8-bar drop an octave up, C, and B again. Chords come from `CH`, minor progressions in the i–VI–III–VII family. Three melody sets (`MELODIES`) rotate on each pass, so the music runs about five minutes before it repeats exactly. `songTo(section)` jumps to a section (the menu restarts at the intro, a new set at A).
+- **Sequencer:** 16 steps per bar, scheduled ~150 ms ahead on a 25 ms timer (`musicTick`). `newBar` takes the groove from the Headliner's genre (`GROOVE`; the title screen uses its own 140 bpm `menu` groove), the tempo (the groove's bpm × `tempoMult()`, rising with Echo speed, capped at 192), and how many layers play (one per squad member). The pulse-wave chip lead always carries the melody.
+- **Sound effects:** 8-bit blips and noise crunches (`chip`, `crunch`) in the current key: a "pew" on each squad shot, an explosion plus a ding that climbs with your kill streak, a power-up arpeggio for a filled request, a rarity reveal, combo blips, a coin chime on reclaim, a buzzer on a wrong answer, a charge-up when hype is full, and a fanfare when a track is cleared. Menu sounds (`sfxBlip`, `sfxSelect`, `sfxBack`) go through `uiSfx`, which plays even while the attract demo is running. `qt()` quantizes sound effects to the next beat subdivision.
 
 ## 6. Song lookup and catalog
 
@@ -64,8 +64,8 @@ Everything is synthesized with the Web Audio API.
 ## 10. Front screens
 
 - **Splash** while fonts and `data/songs.json` load (at most ~6 s; the game works with the built-in list if the file is slow).
-- **Home**: the logo and "Click to start" over an attract-mode demo, a real game (`startDemo`, `G.demo`) that plays itself in the background. Demo games never touch the profile, never show quizzes, and keep sound effects and screen flashes off.
-- **Menu**: the Daily card (modifier, Spotlight, three missions, streak) and the Endless card (best run, modifier picker). Rank, crate and how-to-play open as sheets.
+- **Title screen** (`#startScreen`): the logo and "Press any key to start" on the left, over an attract-mode demo, a real game (`startDemo`, `G.demo`) that plays itself in the background. Demo games never touch the profile, never show quizzes, and keep sound effects, popups and screen flashes off.
+- **Main menu** (`#mainMenu`): a classic left-side list (Daily Set, Endless, How to Play, Crate & Rank, Music) navigable with the mouse or arrow keys, with today's missions and streak on the right (`renderTitle`). Endless opens the modifier list (`#modMenu`); Escape goes back. Rank, crate and how-to-play open as sheets. On phones the menu sits at the bottom and the missions at the top.
 
 ## 11. Freshness, missions and scores
 
@@ -76,4 +76,4 @@ Everything is synthesized with the Web Audio API.
 
 ## 12. UI
 
-Title screen (daily card, endless card with modifier chips, rank, crate, how to play, catalog status), the in-game HUD and typing bar with the suggestion strip (`updateSuggest`), the fraud-check modal, the first-run coach card, and the results screen.
+Title screen and side menu (daily, endless with the modifier list, rank, crate, how to play), the in-game HUD and typing bar with the suggestion strip (`updateSuggest`), the fraud-check modal, the first-run coach card, and the results screen.
