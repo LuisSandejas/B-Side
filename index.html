@@ -372,6 +372,11 @@ img.ic{width:18px;height:18px;image-rendering:pixelated;vertical-align:-4px}
 /* rarity stamps, score bump, coach */
 .bigstamp{position:absolute;z-index:12;left:50%;top:44%;transform:translate(-50%,-50%) rotate(-6deg);font-family:var(--f-px);font-weight:700;font-size:clamp(34px,7vw,84px);line-height:1;color:var(--c);border:5px solid var(--c);padding:6px 20px;text-shadow:0 0 26px var(--c);background:rgba(10,10,18,.72);pointer-events:none;letter-spacing:.06em;white-space:nowrap;animation:bigstamp 1.7s cubic-bezier(.2,1.6,.4,1) forwards}
 .bigstamp.small{font-size:clamp(24px,4.4vw,48px);border-width:3px;animation-duration:1.2s}
+.persona{display:grid;gap:2px;justify-items:center;text-align:center;padding:12px 14px;border:2px solid var(--amber);background:rgba(246,183,90,.08);animation:personaIn .5s cubic-bezier(.2,1.6,.4,1) both .35s}
+.persona b{font-family:var(--f-px);font-size:clamp(26px,5vw,38px);color:var(--gold);line-height:1.1}
+.persona small{color:var(--muted);font-size:12.5px}
+@keyframes personaIn{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.persona{animation:none}}
 .bigstamp .disc{display:inline-block;width:.78em;height:.78em;margin-right:.28em;vertical-align:-.06em;border-radius:50%;background:radial-gradient(circle,var(--c) 0 13%,#0d0d14 14% 28%,#34343f 29% 31%,#0d0d14 32% 50%,#34343f 51% 53%,#0d0d14 54%);box-shadow:0 0 14px var(--c);animation:discspin .45s linear infinite}
 @keyframes discspin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.bigstamp .disc{animation:none}}
@@ -529,6 +534,7 @@ ol.coach b{color:var(--ink)}
   <div class="mbox" role="dialog" aria-modal="true" aria-labelledby="rTitle">
     <p class="eyebrow" id="rEyebrow">Set complete</p>
     <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap"><span class="grade" id="rGrade">A</span><div style="flex:1 1 220px;display:grid;gap:4px"><h3 id="rTitle"></h3><span class="bigscore" id="rScore">0</span><span class="muted" style="font-size:13px" id="rScoreNote"></span></div></div>
+    <div class="persona" id="rPersona" hidden><span class="eyebrow">Your listening type</span><b id="rPName"></b><span id="rPLine"></span><small id="rPStats"></small></div>
     <div class="dist"><canvas id="distCv" width="640" height="170" aria-label="Where your score falls among other players"></canvas><p class="dist-txt" id="distTxt">Comparing with other players…</p></div>
     <div class="scores">
       <div class="score"><span class="muted" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase">Rarity score</span><span class="n" id="rRar">0</span><div class="bar"><i id="rRarBar"></i></div><span class="muted" style="font-size:12.5px" id="rRarTxt"></span></div>
@@ -1505,7 +1511,7 @@ function accept(song,reqOK,hits){
   if(hits.length){sfx(()=>sfxReclaim(hits.some(h=>h.type==='golden')));if(checkPhase()==='win')return;}
   fx.push(`<span>Joined the ${SLOT_NAMES[slot].toLowerCase()} slot${old?`, ${esc(old.song.title)} left`:''}</span>`);
   G.lastPlayed={song,fx,isNew};renderLastPlayed();
-  const r=rarityOf(song);if(!G.demo){scans.push({x:LANES[slot],t0:performance.now(),c:r.color});G.events.push({at:G.t+.3,fn:()=>rarityFX(r.id,slot)});}
+  const r=rarityOf(song);if(!G.demo){scans.push({x:LANES[slot],t0:performance.now(),c:r.color});G.events.push({at:G.t+.3,fn:()=>rarityFX(r.id,slot,song)});}
   setFb(`<b style="color:${r.color}">${r.label.toUpperCase()}</b> · ${esc(song.title)} · ${reqOK&&hits.length?'request filled and an Echo reclaimed':reqOK?'request filled':`reclaimed ${esc(hits.map(h=>h.artist).join(' and '))}`}${G.combo>=2?` · combo ×${G.combo}`:''}${isNew?' · new to your crate':''}`,'good');
   renderAll();
   if(G.played.filter(s=>s.year).length>=3&&G.t-G.lastFraud>=26&&Math.random()<.45&&!G.demo)setTimeout(()=>fraudCheck(false),700);
@@ -1587,6 +1593,26 @@ function fraudCheck(forced){
 
 /* ---------- results ---------- */
 let lastResultText='';
+/* end-of-set listening persona: a fun title from the genres, eras, rarity and titles a player actually played */
+function personaOf(songs){if(songs.length<3)return null;const n=songs.length,share=f=>songs.filter(f).length/n;
+  const g={};songs.forEach(s=>g[s.genre]=(g[s.genre]||0)+1);const yr=songs.filter(s=>s.year);
+  const dec=d=>yr.length?yr.filter(s=>s.year>=d&&s.year<d+10).length/yr.length:0;const gs=k=>share(s=>s.genre===k);
+  const rare=share(s=>{const r=rarityOf(s).id;return r==='dig'||r==='white';});const avgPop=songs.reduce((a,s)=>a+s.pop,0)/n;
+  const love=share(s=>/\b(love|heart|kiss|baby|darling|lover)\b/i.test(s.title));
+  const decades=new Set(yr.map(s=>decadeOf(s.year))).size,genres=Object.keys(g).length;
+  const P=[[rare-.4,'B-Side Royalty','You live in the deep cuts. The aliens never stood a chance.'],
+    [gs('hiphop')-.5,'Street Certified','Bars on bars on bars.'],[gs('rock')-.5,'Mosh Pit Regular','Loud, proud and slightly sweaty.'],
+    [gs('electronic')-.5,'Afterhours Creature','You only come out when the bass drops.'],[gs('pop')-.5,'Pop Royalty','Every hook, every chorus, every time.'],
+    [gs('rnb')-.5,'Slow Jam Specialist','Smooth operator energy.'],[gs('jazz')-.35,'Smoky Lounge Cat','Somewhere a saxophone is playing just for you.'],
+    [gs('classical')-.3,'Concert Hall Kid','Composers on speed dial.'],[love-.3,'Heartthrob','Your set was basically a love letter.'],
+    [dec(2000)-.5,'CD Demon','Burned discs, flip phones, peak 2000s.'],[dec(1990)-.45,'Mixtape Kid','Rewinding cassettes with a pencil.'],
+    [dec(1980)-.45,'Neon Kid','Synths, shoulder pads, zero regrets.'],[share(s=>s.year&&s.year<1980)-.45,'Vinyl Ghost','Your records are older than your parents.'],
+    [share(s=>s.year>=2018)-.6,'Fresh Off the Feed','Your taste updates weekly.'],[avgPop>=86?(avgPop-86)/20+.05:-1,'Main Character','Only certified hits. The aliens know every word.'],
+    [genres>=5?(genres-4)*.08:-1,'Genre Hopper','No genre can hold you.'],[decades>=5?(decades-4)*.08:-1,'Time Traveler','Decades are just a suggestion.']];
+  P.sort((a,b)=>b[0]-a[0]);const top=Object.entries(g).sort((a,b)=>b[1]-a[1])[0];
+  const dc={};yr.forEach(s=>{const d=decadeOf(s.year);dc[d]=(dc[d]||0)+1;});const topDec=Object.entries(dc).sort((a,b)=>b[1]-a[1])[0];const nRare=Math.round(rare*n);
+  const stats=`${Math.round(100*top[1]/n)}% ${GENRES[top[0]].label}${topDec?` · mostly ${topDec[0]}s`:''}${nRare?` · ${nRare} B-Side${nRare>1?'s':''}`:''}`;
+  const [sc,name,line]=P[0];return sc>0?{name,line,stats}:{name:'Shuffle Enthusiast',line:'A little bit of everything. Respect.',stats};}
 function finish(win){
   if(!G||G.over)return;checkMissions();G.over=true;G.paused=false;muffle(false);clearInterval(fraudTimer);$('#modal').hidden=true;hideSuggest();
   sfx(()=>win?sfxWin():sfxLose());
@@ -1601,7 +1627,7 @@ function finish(win){
   const cleared=st.kills;
   const grade=total>=85?'S':total>=72?'A':total>=58?'B':total>=44?'C':'D';
   let mvp=null,mv=0;for(const id in st.perSong)if(st.perSong[id]>mv){mv=st.perSong[id];mvp=songs.find(s=>s.id===id);}
-  const deep=songs.filter(s=>rarityOf(s).mult>1).length;
+  const deep=songs.filter(s=>rarityOf(s).mult>1).length;const persona=personaOf(songs);
   const before=rankOf(PROF.xp);const xpGain=Math.max(5,Math.round(finalScore/40));PROF.xp+=xpGain;PROF.runs++;if(win)PROF.wins++;
   let streakTxt='';
   if(G.daily&&G.counted){const today=G.dayKey;const y=new Date();y.setDate(y.getDate()-1);const yk=dayKey(y);PROF.streak.n=PROF.streak.last===yk?PROF.streak.n+1:PROF.streak.last===today?PROF.streak.n:1;PROF.streak.last=today;
@@ -1609,10 +1635,11 @@ function finish(win){
   let newBest=false;if(!G.daily){const be=PROF.bestEndless||{score:0};if(finalScore>be.score){PROF.bestEndless={score:finalScore,track:G.boss.phase,echoes:cleared};newBest=true;}PROF.bestFree=Math.max(PROF.bestFree||0,finalScore);}
   saveProfile();const after=rankOf(PROF.xp);
   const grid=songs.map(s=>rarityOf(s).sym).join(' ')||'-';
-  lastResultText=`B-SIDE ${G.daily?`Daily #${G.dayNum}`:'Endless'} · ${mod.name}\n${G.daily?grid:songs.slice(-24).map(s=>rarityOf(s).sym).join(' ')||'-'}\n${G.daily?(win?`Beat The Topline in ${fmtTime(G.t)}`:`Held the stage for ${fmtTime(G.t)}`):`Reached Track ${G.boss.phase} · ${cleared} Echoes cleared`} · ${fmtNum(finalScore)} pts · Grade ${grade}${streakTxt?` · ${streakTxt}`:''}\n(○ Airplay ◐ Fan Favorite ● Crate Dig ◆ White Label)`;
+  lastResultText=`B-SIDE ${G.daily?`Daily #${G.dayNum}`:'Endless'} · ${mod.name}${persona?` · ${persona.name}`:''}\n${G.daily?grid:songs.slice(-24).map(s=>rarityOf(s).sym).join(' ')||'-'}\n${G.daily?(win?`Beat The Topline in ${fmtTime(G.t)}`:`Held the stage for ${fmtTime(G.t)}`):`Reached Track ${G.boss.phase} · ${cleared} Echoes cleared`} · ${fmtNum(finalScore)} pts · Grade ${grade}${streakTxt?` · ${streakTxt}`:''}\n(○ Airplay ◐ Fan Favorite ● Crate Dig ◆ White Label)`;
   setTimeout(()=>{
     $('#rEyebrow').textContent=G.daily?`Daily Set #${G.dayNum}${G.counted?'':' · practice'} · `+(win?'The Topline is down':'The crowd forgot'):`Endless · ${mod.name}`;
     $('#rTitle').textContent=!G.daily?`You held the stage to Track ${G.boss.phase} and cleared ${cleared} Echoes in ${fmtTime(G.t)}.`:win?`You reminded the city in ${fmtTime(G.t)}.`:`The Topline won. You held the stage for ${fmtTime(G.t)}.`;
+    $('#rPersona').hidden=!persona;if(persona){$('#rPName').textContent=persona.name;$('#rPLine').textContent=persona.line;$('#rPStats').textContent=persona.stats;}
     $('#rGrade').textContent=grade;$('#rScore').textContent=fmtNum(finalScore);
     $('#rScoreNote').textContent=`${mod.name}${mod.mult!==1?` ×${mod.mult}`:''} · best combo ×${G.bestCombo}${G.daily&&!G.counted?' · practice runs don’t change your daily score':''}${newBest?' · new endless best!':''}`;
     $('#rRar').textContent=rarity;$('#rRarBar').style.width=rarity+'%';
@@ -1626,7 +1653,7 @@ function finish(win){
     $('#rSet').innerHTML=songs.map(s=>{const r=rarityOf(s);return `<li style="--gc:${GENRES[s.genre].color}"><span>${esc(s.title)} <span class="muted">· ${esc(s.artist)}${s.year?' · '+s.year:''}</span></span><span style="color:${r.color}">${r.label}</span></li>`;}).join('')||'<li style="--gc:#444"><span>No songs played</span><span></span></li>';
     $('#rStats').innerHTML=`<dt>MVP song</dt><dd>${mvp?esc(mvp.title)+' · '+mv+' dmg':'—'}</dd><dt>Requests filled</dt><dd>${st.filled} (${st.timeouts} timed out)</dd><dt>Echoes reclaimed</dt><dd>${st.reclaims}${st.golden?` (${st.golden} golden)`:''}</dd><dt>Cleared by your squad</dt><dd>${st.kills-st.reclaims}</dd><dt>Broke through</dt><dd>${st.breaches}</dd><dt>Crowd memory left</dt><dd>${G.crowd} / ${G.crowdMax}</dd>`;
     $('#againBtn').textContent=G.daily?'Practice again':'Play again';
-    lastShare={score:finalScore,grade,mode:G.daily?'daily':'endless',title:G.daily?`Daily Set #${G.dayNum} · ${mod.name}`:`Endless · ${mod.name}`,line:G.daily?(win?`beat the boss in ${fmtTime(G.t)}`:`held on ${fmtTime(G.t)}`):`track ${G.boss.phase} · ${cleared} cleared`,rar:songs.map(s=>rarityOf(s).color)};
+    lastShare={persona:persona&&persona.name,score:finalScore,grade,mode:G.daily?'daily':'endless',title:G.daily?`Daily Set #${G.dayNum} · ${mod.name}`:`Endless · ${mod.name}`,line:G.daily?(win?`beat the boss in ${fmtTime(G.t)}`:`held on ${fmtTime(G.t)}`):`track ${G.boss.phase} · ${cleared} cleared`,rar:songs.map(s=>rarityOf(s).color)};
     $('#results').hidden=false;$('#shareBtn').focus();
     renderDistribution({mode:G.daily?'daily':'endless',day:G.daily?G.dayKey:null,score:finalScore,track:G.boss.phase,cleared,won:!!win},(G.daily&&G.counted)||!G.daily);
   },win?1400:900);
@@ -1693,13 +1720,26 @@ function drawSky(ms){const ph=G.boss.phase;const look=(ph-1)%3,lap=Math.floor((p
 /* ===================== rarity feel: the rarer the song, the louder the moment ===================== */
 let rings=[],scans=[],raysUntil=0,raysX=96,hitStopUntil=0;
 function bigStamp(text,sub,col,small,disc){const el=document.createElement('div');el.className='bigstamp'+(small?' small':'');el.style.setProperty('--c',col);if(disc){const d=document.createElement('span');d.className='disc';el.appendChild(d);}el.appendChild(document.createTextNode(text));if(sub){const s=document.createElement('small');s.textContent=sub;el.appendChild(s);}$('#gameScreen').appendChild(el);setTimeout(()=>el.remove(),1800);}
-function rarityFX(id,slot){const x=LANES[slot],y=SQUAD_Y-14,t=performance.now();
+/* hype callouts: every accepted song earns a line that fits it, so playing always feels like winning something */
+const CALLOUTS={
+  white:["THAT'S A B-SIDE!",'WOWZA!','DEEP CUT!','CRATE KING','UNDERGROUND!','WHO EVEN KNOWS THIS?'],
+  dig:["IT'S A B-SIDE",'SWAGGER!','TASTE!','DIGGER!','OFF THE RECORD','HIDDEN GEM'],
+  old:['VINTAGE!','DUSTY GROOVE','VINYL ERA','TIMELESS','GOLDEN AGE'],
+  e80:['NEON!','SYNTH SEASON','CASSETTE CLASSIC'],e90:['MIXTAPE MATERIAL','RETRO!','WALKMAN WARRIOR'],
+  e00:['BURNED TO CD','FLIP PHONE ERA','CD DEMON'],e10:['CERTIFIED BOP','PLAYLIST GOLD','AUX CORD HERO'],
+  fresh:['FRESH DROP','NEW HEAT','HOT OFF THE PRESS'],hit:['BANGER','CLASSIC','ON REPEAT','CROWD PLEASER','SING-ALONG']};
+let lastCallout='';
+function calloutFor(song,rar){const y=song&&song.year||0;const pool=rar==='white'||rar==='dig'?CALLOUTS[rar]:!y?CALLOUTS.hit:y<1980?CALLOUTS.old:y>=2021?CALLOUTS.fresh:y>=2010?CALLOUTS.e10:y>=2000?CALLOUTS.e00:y>=1990?CALLOUTS.e90:y>=1980?CALLOUTS.e80:CALLOUTS.hit;
+  let c=pick(pool);if(c===lastCallout)c=pick(pool);lastCallout=c;return c;}
+function rarityFX(id,slot,song){const x=LANES[slot],y=SQUAD_Y-14,t=performance.now();
+  const old=song&&song.year&&song.year<1980?' · vintage':'';
+  if(id==='air'||id==='fan')pop(calloutFor(song,id),x,SQUAD_Y-34,id==='fan'?'cyan':'gold');
   if(id==='air'){shake(140,1);rings.push({x,y,r1:18,c:'#a9aab8',t0:t,dur:360});}
   else if(id==='fan'){shake(240,2);rings.push({x,y,r1:32,c:'#7ec8ff',t0:t,dur:480});burstAt(x,y,14,['#7ec8ff','#ffffff']);}
-  else if(id==='dig'){shake(420,4);hitStopUntil=t+160;flashCol='199,155,255';flashUntil=t+240;rings.push({x,y,r1:62,c:'#c79bff',t0:t,dur:620},{x,y,r1:36,c:'#ffffff',t0:t+80,dur:460});burstAt(x,y,30,['#c79bff','#ffffff','#7a4bd8']);bigStamp("IT'S A B-SIDE",'crate dig · the aliens barely know it','#c79bff',true,true);sfx(()=>sfxDig());}
+  else if(id==='dig'){shake(420,4);hitStopUntil=t+160;flashCol='199,155,255';flashUntil=t+240;rings.push({x,y,r1:62,c:'#c79bff',t0:t,dur:620},{x,y,r1:36,c:'#ffffff',t0:t+80,dur:460});burstAt(x,y,30,['#c79bff','#ffffff','#7a4bd8']);bigStamp(calloutFor(song,'dig'),'crate dig'+old+' · the aliens barely know it','#c79bff',true,true);sfx(()=>sfxDig());}
   else{shake(800,6);hitStopUntil=t+420;flashCol='255,212,107';flashUntil=t+420;rings.push({x,y,r1:120,c:'#ffd46b',t0:t,dur:950},{x,y,r1:72,c:'#ffffff',t0:t+110,dur:720},{x,y,r1:40,c:'#ffd46b',t0:t+220,dur:600});raysUntil=t+1600;raysX=x;
     burstAt(x,y,50,['#ffd46b','#fff3c4','#ffffff']);for(let k=0;k<50;k++)particles.push({x:Math.random()*W,y:-4,vx:(Math.random()-.5)*20,vy:18+Math.random()*30,g:16,c:Math.random()<.7?'#ffd46b':'#ffffff',life:2.4,max:2.4,s:1});
-    bigStamp("THAT'S A B-SIDE!",'white label · the aliens have never heard it','#ffd46b',false,true);sfx(()=>sfxChoir());}
+    bigStamp(calloutFor(song,'white'),'white label'+old+' · the aliens have never heard it','#ffd46b',false,true);sfx(()=>sfxChoir());}
 }
 function drawRings(ms){
   if(ms<raysUntil&&!reduce){const left=(raysUntil-ms)/1600;cx.globalCompositeOperation='lighter';cx.fillStyle='#ffd46b';for(let k=0;k<12;k++){const a=k/12*Math.PI*2+ms/900;cx.globalAlpha=.16*left;cx.beginPath();cx.moveTo(raysX,SQUAD_Y-14);cx.lineTo(raysX+Math.cos(a-.06)*300,SQUAD_Y-14+Math.sin(a-.06)*300);cx.lineTo(raysX+Math.cos(a+.06)*300,SQUAD_Y-14+Math.sin(a+.06)*300);cx.closePath();cx.fill();}cx.globalAlpha=1;cx.globalCompositeOperation='source-over';}
@@ -2215,6 +2255,7 @@ function makeShareCard(){
   const r=rng(hash(String(info.score)));for(let i=0;i<120;i++){c.fillStyle=r()<.25?'rgba(201,195,224,.9)':'rgba(109,104,144,.7)';const s=r()<.2?4:2;c.fillRect(Math.floor(r()*1080),Math.floor(r()*700),s,s);}
   c.font='700 170px "Pixelify Sans",monospace';c.textAlign='left';{const parts=[['B','#f1ece4'],['-','#ff6b6b'],['SIDE','#f1ece4']];let x=540-parts.reduce((w,[t])=>w+c.measureText(t).width,0)/2;for(const [t,col] of parts){c.fillStyle=col;c.fillText(t,x,250);x+=c.measureText(t).width;}}c.textAlign='center';
   c.fillStyle='#f6b75a';c.font='600 40px "Chakra Petch",sans-serif';c.fillText(info.title.toUpperCase(),540,330);
+  if(info.persona){c.fillStyle='#c79bff';c.font='700 46px "Pixelify Sans",monospace';c.fillText(info.persona.toUpperCase(),540,395);}
   c.fillStyle='#ffd77a';c.font='700 190px "Pixelify Sans",monospace';c.fillText(fmtNum(info.score),540,560);
   c.fillStyle='#b3aec6';c.font='500 40px "Chakra Petch",sans-serif';c.fillText(`points · grade ${info.grade} · ${info.line}`,540,630);
   if(lastDist){const sub=document.createElement('canvas');sub.width=900;sub.height=300;drawDist(sub,lastDist.d,info.score,{padB:40,padT:70,lw:4,mw:3,dot:12,fs:34,fs2:26,you:'YOU'});c.drawImage(sub,90,690);
