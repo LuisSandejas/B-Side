@@ -1,0 +1,5 @@
+# never upload local secrets or tool state
+.env*
+.vercel
+supabase/.temp
+supabase/.branches
