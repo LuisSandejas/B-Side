@@ -77,6 +77,11 @@ Endless can be played with a **modifier**: Decades Night, No Airplay, Double Tim
 
 ```
 index.html                    the entire game: markup, styles and script
+404.html                      themed "page not found" page
+assets/                       social preview image (og.png) and app icons
+favicon.ico, site.webmanifest browser tab icon and home-screen install info
+robots.txt, sitemap.xml       search-engine basics
+vercel.json                   security headers and caching for the live site
 supabase/
   migrations/
     20261024120000_create_songs.sql   songs table, indexes, read-only access policy
@@ -120,7 +125,9 @@ It's a static site, so any static host works.
 
 **Vercel (recommended):** in the Vercel dashboard choose **Add New → Project**, import `LuisSandejas/B-Side`, leave the framework preset as **Other** with no build command, and deploy. Every push to `main` redeploys automatically.
 
-**Custom domain:** add it under the project's **Settings → Domains** in Vercel and follow the DNS instructions there.
+**Custom domain:** add it under the project's **Settings → Domains** in Vercel and follow the DNS instructions there. Then replace `https://b-side-murex.vercel.app` with the new domain in `index.html` (canonical and preview-image tags), `robots.txt` and `sitemap.xml`.
+
+**Security headers** (`vercel.json`) include a Content-Security-Policy. If the game ever loads something from a new site (another font host, a new API), add that site to the policy or the browser will block it.
 
 ---
 

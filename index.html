@@ -9,10 +9,25 @@
 <meta name="description" content="A fast music typing game: name real songs to fight off an alien boss that only knows chart hits.">
 <meta property="og:title" content="B-SIDE">
 <meta property="og:description" content="Name real songs to fight off an alien boss that only knows chart hits. New Daily Set every day.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23111'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%23333' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23ff5a4f'/%3E%3Ccircle cx='16' cy='16' r='1.5' fill='%23111'/%3E%3C/svg%3E">
+<link rel="canonical" href="https://b-side-murex.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://b-side-murex.vercel.app/">
+<meta property="og:site_name" content="B-SIDE">
+<meta property="og:image" content="https://b-side-murex.vercel.app/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="B-SIDE: a pixel-art alien UFO over a city street, with the tagline Name real songs. Fight the charts.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="B-SIDE">
+<meta name="twitter:description" content="Name real songs to fight off an alien boss that only knows chart hits. New Daily Set every day.">
+<meta name="twitter:image" content="https://b-side-murex.vercel.app/assets/og.png">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Pixelify+Sans:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Pixelify+Sans:wght@400;500;600;700&display=swap"></noscript>
 <style>
 /* Layout: title screen = daily set + free play + profile. Game = full-screen typing game: HUD on top, request banner, centered arena, squad strip, and a typing bar fixed at the bottom. Side rails (last played / math) appear on wide screens and in a Details drawer on narrow ones. */
 :root{
@@ -67,7 +82,7 @@ img.ic{width:18px;height:18px;image-rendering:pixelated;vertical-align:-4px}
 .mode{position:relative;background:var(--panel);border:1px solid var(--line);padding:18px;display:grid;gap:10px;align-content:start}
 .mode.daily{border-top:4px solid var(--amber);background-image:radial-gradient(circle at 100% 0,rgba(242,178,76,.12),transparent 55%)}
 .mode.free{border-top:4px solid var(--cyan)}
-.mode h3{font-size:clamp(22px,3vw,28px);line-height:1.1}
+.mode h2{font-size:clamp(22px,3vw,28px);line-height:1.1;letter-spacing:normal;text-transform:none}
 .mode .desc{color:var(--muted)}
 .mode .row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:14px}
 .stat b{font-family:var(--f-px);font-size:20px;font-weight:500;color:var(--ink);display:block;line-height:1}
@@ -324,6 +339,7 @@ ol.coach b{color:var(--ink)}
 </style>
 </head>
 <body>
+<noscript><p style="margin:0;padding:14px 16px;background:#3a1420;color:#ece8df;font:15px system-ui,sans-serif;text-align:center">B-SIDE is a game and needs JavaScript turned on to play.</p></noscript>
 
 <!-- ======== TITLE ======== -->
 <div class="wrap" id="startScreen">
@@ -334,14 +350,14 @@ ol.coach b{color:var(--ink)}
   <div class="modes">
     <article class="mode daily" aria-labelledby="dailyTitle">
       <p class="eyebrow" id="dailyEyebrow">Daily Set</p>
-      <h3 id="dailyTitle">Today's modifier</h3>
+      <h2 id="dailyTitle">Today's modifier</h2>
       <p class="desc" id="dailyDesc"></p>
       <div class="row" id="dailyStats"></div>
       <div class="row"><button class="btn" id="dailyBtn" type="button">Play today's set</button><span class="muted" id="dailyNote" style="font-size:13px"></span></div>
     </article>
     <article class="mode free" aria-labelledby="freeTitle">
       <p class="eyebrow" style="color:var(--cyan)">Endless</p>
-      <h3 id="freeTitle">How long can you hold the stage?</h3>
+      <h2 id="freeTitle">How long can you hold the stage?</h2>
       <div class="mods" id="modChips" role="group" aria-label="Modifier"></div>
       <p class="moddesc" id="modDesc"></p>
       <div class="row"><button class="btn" id="freeBtn" type="button" style="background:var(--cyan);color:#071418">Play endless</button><span class="muted" id="freeBest" style="font-size:13px"></span></div>
