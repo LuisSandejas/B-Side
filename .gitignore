@@ -1,0 +1,13 @@
+# local tooling
+.vercel/
+.env
+.env.*
+!.env.example
+
+# Supabase CLI local state
+supabase/.branches/
+supabase/.temp/
+
+# OS / editor
+.DS_Store
+node_modules/
