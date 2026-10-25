@@ -2651,7 +2651,7 @@ $('#shareBtn').addEventListener('click',shareCard);
 const VS={W:288,H:144,X0:40,LEN:208,FLOOR:50,LANE_Y:[78,101,124],ROUND:75,CHORUS:20,PROMPT:10,CROWD:100,SPEED:13,RANGE:56,GAP:14,ENCORE:30,CLOSE:5,SNAP:200,STEALS:3,DROP:1,SPLASH:2.6,COUNT:3,RECAP:5};
 const VS_COL={me:'#3fe0ff',foe:'#ff5a4f'};
 const VS_RAR={air:1,fan:1.25,dig:1.6,white:2};
-const VS_BOTS={opener:{name:'Opener',delay:[6,9],wrong:.15,pool:'air',steal:0,resteal:false},headliner:{name:'Headliner',delay:[3.5,6],wrong:.08,pool:'mix',steal:.3,resteal:false},legend:{name:'Legend',delay:[2,3.5],wrong:.03,pool:'rare',steal:.7,resteal:true}};
+const VS_BOTS={opener:{name:'Opener',delay:[6,9],wrong:.15,pool:'air',steal:0,resteal:false},headliner:{name:'Headliner',delay:[3.5,6],wrong:.08,pool:'mix',steal:.3,resteal:false},legend:{name:'Legend',delay:[2.5,4],wrong:.03,pool:'rare',steal:.7,resteal:true}};
 const VS_PH=['splash','count','play','recap','over'];
 let V=null,VV=null,vsS=null,vsNet=null,VS_Q=null;
 const vsFoe=s=>s==='a'?'b':'a';
@@ -2908,7 +2908,15 @@ function vsViewStart(me,o){
   VE.vsHint.hidden=true;VE.vsCenter.hidden=true;VE.vsCenter.textContent='';VE.vsReqText.textContent='Get ready…';VE.vsReqType.textContent='Versus';VE.vsReqHl.hidden=true;VE.vsReqLeft.textContent='';VE.vsReq.classList.remove('headline');VE.vsReq.classList.add('idle');VE.vsReqBar.style.width='0%';
   VE.vsInput.value='';VE.vsInput.classList.remove('jam','reject','accept');VE.vsInput.placeholder='Type a song…';
   for(const el of vsTagEls.values())el.remove();vsTagEls.clear();$('#pops').textContent='';$('#vsRes').hidden=true;}
-function vsPop(text,x,y,cls){const pops=$('#pops');if(pops.childElementCount>36)return;const el=document.createElement('span');el.className='pop '+(cls||'');el.textContent=text;
+/* pop director: words compete for the stage. At most one small word and two headlines at a time, nudged apart;
+   damage numbers always show (capped), since they're the moment-to-moment feedback */
+const VS_POP={live:[]};
+function vsPop(text,x,y,cls){cls=cls||'';const pops=$('#pops');if(pops.childElementCount>14)return;
+  const num=/^-?\d+$|^POOF$/.test(text),big=/\b(big|huge)\b/.test(cls);VS_POP.live=VS_POP.live.filter(p=>p.el.isConnected);
+  if(!num){const words=VS_POP.live.filter(p=>!p.num);
+    if(big?words.filter(p=>p.big).length>=2:words.length>=1)return;
+    for(const p of words)if(Math.abs(p.x-x)<80&&Math.abs(p.y-y)<16)y=p.y+(p.y>VS.H/2?-16:16);}
+  const el=document.createElement('span');VS_POP.live.push({x,y,big,num,el});el.className='pop '+(cls||'');el.textContent=text;
   el.style.left=clamp((VL.ox+x)*VL.s,60,VL.vw-60)+'px';el.style.top=clamp((VL.oy+y)*VL.s,40,VL.vh-20)+'px';pops.appendChild(el);const kill=()=>el.remove();el.addEventListener('animationend',kill);setTimeout(kill,2400);}
 function vsInputFlash(cls){const inp=VE.vsInput;inp.classList.remove('reject','accept');void inp.offsetWidth;inp.classList.add(cls);clearTimeout(vsInputFlash.t);vsInputFlash.t=setTimeout(()=>inp.classList.remove(cls),450);}
 function sfxRivalWin(){const t=now()+.01;[0,2,4].forEach((k,i)=>chip(t+i*.07,mtof(keyTone(k)+12),0,.11,.022,'triangle',.3));}
@@ -2945,9 +2953,9 @@ function vsOnWin(p){const s=vsSongOut(p.s);if(!s)return;const mine=p.side===VV.m
   vsRarityFX(r.id,x,y,s,mine,p.side);
   if(p.hd){vsPop('HEADLINER!',x,y-26,'gold big');uiSfx(()=>sfxCombo(8));}
   if(p.un)vsPop('UNDERDOG +30% HP',x,y+12,'tag cyan');
-  if(p.cb>=3&&p.cb%3===0)vsPop(`${p.cb} IN A ROW · HEADLINER NEXT`,VS.W/2,64,mine?'cyan':'bad');}
+  if(mine&&p.cb>=3&&p.cb%3===0)vsPop(`${p.cb} IN A ROW · HEADLINER NEXT`,VS.W/2,64,'cyan');}
 function vsRarityFX(id,x,y,song,mine,side){const t=performance.now();
-  if(id==='air'||id==='fan')vsPop(calloutFor(song,id),x,y-4,id==='fan'?'cyan':'gold');
+  if(mine&&(id==='air'||id==='fan'))vsPop(calloutFor(song,id),x,y-4,id==='fan'?'cyan':'gold');
   if(id==='air')rings.push({x,y,r1:18,c:'#a9aab8',t0:t,dur:360});
   else if(id==='fan'){if(mine)shake(240,2);rings.push({x,y,r1:32,c:'#7ec8ff',t0:t,dur:480});burstAt(x,y,14,['#7ec8ff','#ffffff']);}
   else if(id==='dig'){shake(mine?420:200,mine?4:2);if(!reduce)hitStopUntil=Math.max(hitStopUntil,t+160);flashCol='199,155,255';flashUntil=t+240;rings.push({x,y,r1:62,c:'#c79bff',t0:t,dur:620},{x,y,r1:36,c:'#ffffff',t0:t+80,dur:460});burstAt(x,y,30,['#c79bff','#ffffff','#7a4bd8']);
@@ -3000,9 +3008,15 @@ function layoutVs(){if(screen!=='vs')return;const root=document.documentElement;
   const scr=VE.vsScreen,phone=vw<760;scr.classList.toggle('phone',phone);
   const hudB=VE.vsHud.offsetTop+VE.vsHud.offsetHeight;const req=VE.vsReq,tb=VE.vsTypebar;
   let s,ax,ay,reqTop,reqW,reqL,feedTop,feedH,feedW,feedLx,feedRx;
-  if(phone){s=vw/VS.W;reqL=8;reqW=vw-16;reqTop=hudB+6;req.style.cssText=`left:${reqL}px;top:${reqTop}px;width:${reqW}px`;ay=reqTop+req.offsetHeight+14;ax=0;
-    feedTop=ay+VS.H*s+5;feedH=72;feedW=(vw-22)/2;feedLx=8;feedRx=vw-8-feedW;
-    tb.style.top=Math.round(feedTop+feedH+2)+'px';tb.style.bottom='auto';}
+  if(phone){s=vw/VS.W;reqL=8;reqW=vw-16;reqTop=hudB+6;req.style.cssText=`left:${reqL}px;top:${reqTop}px;width:${reqW}px`;ax=0;
+    feedW=(vw-22)/2;feedLx=8;feedRx=vw-8-feedW;
+    /* input pinned to the bottom of what's visible (it rides up with the keyboard), guess feed right above it,
+       arena a little above centre so the crowd fills the space between instead of dead space */
+    const reqB=reqTop+Math.max(req.offsetHeight,96)+10,vvh=Math.round((window.visualViewport&&visualViewport.height)||vh),tbH=tb.offsetHeight||64,tbTop=vvh-tbH-6,arH=VS.H*s;
+    feedH=clamp((tbTop-reqB-arH)/2,54,104);feedTop=tbTop-feedH-6;const room=feedTop-reqB-arH;
+    if(room>=4){ay=reqB+room*.4;tb.style.top=tbTop+'px';}
+    else{ay=reqB+2;feedTop=ay+arH+5;feedH=54;tb.style.top=Math.round(Math.max(tbTop,feedTop+feedH+2))+'px';}
+    tb.style.bottom='auto';}
   else{const tbH=tb.offsetHeight||96;reqW=Math.min(660,vw-40);reqTop=hudB+10;req.style.cssText=`left:${(vw-reqW)/2}px;top:${reqTop}px;width:${reqW}px`;const reqB=reqTop+Math.max(req.offsetHeight,86)+18;
     const gut=clamp(vw*.165,190,300);s=Math.min(4,(vw-2*gut-24)/VS.W,(vh-reqB-tbH-10)/VS.H);s=Math.max(1,s);
     ax=(vw-VS.W*s)/2;ay=reqB+Math.max(0,(vh-reqB-tbH-VS.H*s)*.3);feedTop=ay;feedH=VS.H*s;feedW=Math.min(300,ax-24);feedLx=ax-12-feedW;feedRx=ax+VS.W*s+12;
@@ -3015,6 +3029,7 @@ function layoutVs(){if(screen!=='vs')return;const root=document.documentElement;
   fl.hidden=fr.hidden=!phone&&feedW<120;
   const h=VE.vsHint;h.style.left=vw/2+'px';h.style.top=Math.round((oy+VS.FLOOR-2)*s)+'px';}
 addEventListener('resize',()=>{if(screen==='vs')layoutVs();});
+if(window.visualViewport)visualViewport.addEventListener('resize',()=>{if(screen==='vs')layoutVs();});
 /* the world behind the arena: the main game's sky, moon and skyline across the full width, buildings in the gutters */
 function buildVsWorld(cw,ch,ox,oy){
   const c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d');const r=rng(9157);const F=(col,a,b,w,h)=>{x.fillStyle=col;x.fillRect(a|0,b|0,w|0,h|0);};
