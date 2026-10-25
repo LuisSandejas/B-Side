@@ -1475,7 +1475,11 @@ function identify(text){const key=norm(text);const c=songCache.get(key);if(c)ret
    - songs a player actually plays are remembered in localStorage, so they're recognized instantly, even offline, next time */
 const GENRE_ENERGY={rock:.75,electronic:.75,hiphop:.7,jazz:.45,classical:.35,pop:.65,rnb:.55};
 const FOUND_KEY='bside-found-v1',FOUND_MAX=500;
-const remote={lru:new Map(),misses:[],ctl:null,timer:0,down:0,tok:0};
+const remote={lru:new Map(),misses:[],ctl:null,timer:0,down:0,tok:0,pending:new Map(),warm:false};
+/* the closest answer already in hand: this exact query, or the longest cached query it extends ("nost" while "nostalgi" is in flight) */
+function remoteNear(q){const exact=remote.lru.get(q);if(exact)return{rows:exact,exact:true,complete:true};for(let k=q.length-1;k>=3;k--){const v=remote.lru.get(q.slice(0,k));if(v)return{rows:v,exact:false,complete:v.length<8};}return null;}
+/* open the HTTPS connection (and wake the database) before the first real lookup */
+function warmRemote(){if(remote.warm||!remoteOn())return;remote.warm=true;fetchT(`${CATALOG.url}/rest/v1/rpc/search_catalog?q=zzz&lim=1`,4000,{headers:{apikey:CATALOG.key}}).catch(()=>{});}
 function lruGet(k){const v=remote.lru.get(k);if(v!==undefined){remote.lru.delete(k);remote.lru.set(k,v);}return v;}
 function lruSet(k,v){remote.lru.set(k,v);if(remote.lru.size>200)remote.lru.delete(remote.lru.keys().next().value);}
 const remoteOn=()=>!!(CATALOG.url&&CATALOG.key)&&remote.down<=Date.now();
@@ -1485,12 +1489,16 @@ async function remoteSearch(q,signal){
   if(!remoteOn()||q.length<3)return null;
   const hit=lruGet(q);if(hit)return hit;
   if(remote.misses.some(m=>q.length>m.length&&q.startsWith(m)))return[];
-  try{const r=await fetchT(`${CATALOG.url}/rest/v1/rpc/search_catalog?q=${encodeURIComponent(q)}&lim=8`,4000,{headers:{apikey:CATALOG.key},signal});
+  /* one request per query: a submit reuses the lookup that typing already started */
+  const inflight=remote.pending.get(q);if(inflight)return inflight;
+  const nr=remoteNear(q);if(nr&&nr.complete)return nr.rows;  // nothing new can come back: answer locally
+  const p=(async()=>{try{const r=await fetchT(`${CATALOG.url}/rest/v1/rpc/search_catalog?q=${encodeURIComponent(q)}&lim=8`,4000,{headers:{apikey:CATALOG.key},signal});
     if(!r.ok){remote.down=r.status===404?Infinity:Date.now()+30000;return null;}  // 404: the catalog isn't set up, so stop asking this session
     const rows=(await r.json()).filter(x=>x&&x.title&&x.artist).map(catalogSong);lruSet(q,rows);
     if(!rows.length){remote.misses.push(q);if(remote.misses.length>60)remote.misses.shift();}
     return rows;
-  }catch(e){if(!(signal&&signal.aborted))remote.down=Date.now()+15000;return null;}}
+  }catch(e){if(!(signal&&signal.aborted))remote.down=Date.now()+15000;return null;}finally{remote.pending.delete(q);}})();
+  remote.pending.set(q,p);return p;}
 function loadFound(){try{const f=JSON.parse(localStorage.getItem(FOUND_KEY)||'{}');return f&&typeof f==='object'?f:{};}catch(e){return{};}}
 function rememberSong(s){if(s.source!=='big')return s;INDEX.add(s);const f=loadFound();f[s.id]=[s.title,s.artist,s.genre,s.year,s.pop,Date.now()];
   const ids=Object.keys(f);if(ids.length>FOUND_MAX)ids.sort((a,b)=>f[a][5]-f[b][5]).slice(0,ids.length-FOUND_MAX).forEach(k=>delete f[k]);
@@ -1754,6 +1762,8 @@ function submitSong(text){
 function rejectUnknown(text){const a=findArtist(text);reject(a?`To reclaim or play ${esc(a.name)}, type one of their songs.`:`“${esc(text)}” isn't in the song catalog. Check the spelling or pick a suggestion.`);}
 /* not in the built-in list: look it up in the full catalog while the game keeps running */
 function lookupThenEvaluate(text,local,localScore=0){const q=norm(text.replace(/\s+-\s+/,' '));const g=G,tok=++remote.tok;const inp=$('#songInput');
+  const near=remoteNear(q),quick=near?bestMatch(q,near.rows):null;
+  if(quick&&quick.song&&quick.score>=95&&quick.score>localScore){songCache.set(norm(text),quick.song);evaluate(rememberSong(quick.song));return;}
   setFb('Searching the full catalog…','');inp.classList.add('busy');
   remoteSearch(q).then(rows=>{if(tok===remote.tok)inp.classList.remove('busy');if(G!==g||G.over||tok!==remote.tok)return;
     const m=rows&&rows.length?bestMatch(q,rows):{song:null,score:0};
@@ -2442,11 +2452,11 @@ function updateSuggest(ctx=SG_MAIN){
   scored.sort((a,b)=>b[0]-a[0]);
   /* thin or weak local results: top up from the full catalog (cached answers right away, otherwise after a pause) */
   const thin=q.length>=3&&remoteOn()&&(scored.length<6||scored[0][0]<100);
-  const cached=thin?lruGet(q):null;
-  if(cached){cached.forEach(s=>{if(!seen.has(s.id)){seen.add(s.id);scored.push([(suggestScore(s,q,qt)||30+s.pop/40)-(ctx.played(s)?60:0)-5,s]);}});scored.sort((a,b)=>b[0]-a[0]);}
-  else if(thin&&!remote.ctl){
-    remote.timer=setTimeout(()=>{const ctl=remote.ctl=new AbortController();ctl.q=q;remoteSearch(q,ctl.signal).finally(()=>{if(remote.ctl===ctl)remote.ctl=null;}).then(rows=>{if(rows&&!ctl.signal.aborted&&norm($(ctx.input).value)===q)updateSuggest(ctx);});},160);}
-  renderSuggest(scored.slice(0,6).map(x=>x[1]),thin&&!cached,ctx);
+  const near=thin?remoteNear(q):null,cached=near&&near.exact?near.rows:null;
+  if(near){near.rows.forEach(s=>{if(seen.has(s.id))return;const sc=suggestScore(s,q,qt);if(!sc&&!near.exact)return;seen.add(s.id);scored.push([(sc||30+s.pop/40)-(ctx.played(s)?60:0)-5,s]);});scored.sort((a,b)=>b[0]-a[0]);}
+  if(!(near&&near.complete)&&thin&&!remote.ctl){
+    remote.timer=setTimeout(()=>{const ctl=remote.ctl=new AbortController();ctl.q=q;remoteSearch(q,ctl.signal).finally(()=>{if(remote.ctl===ctl)remote.ctl=null;}).then(rows=>{if(rows&&!ctl.signal.aborted&&norm($(ctx.input).value)===q)updateSuggest(ctx);});},90);}
+  renderSuggest(scored.slice(0,6).map(x=>x[1]),thin&&!(near&&near.complete)&&!scored.length,ctx);
 }
 function renderSuggest(list,searching,ctx=SG_MAIN){
   const same=list.length===sugg.length&&list.every((s,i)=>s===sugg[i]);sugg=list;
@@ -2460,7 +2470,7 @@ function renderSuggest(list,searching,ctx=SG_MAIN){
   if(ctx.fb)$(ctx.fb).hidden=!!box.children.length;
 }
 function moveSuggest(d,ctx=SG_MAIN){if(!sugg.length)return;suggIdx=(suggIdx+d+sugg.length)%sugg.length;[...$(ctx.box).querySelectorAll('.sg:not(.ask)')].forEach((b,i)=>b.classList.toggle('on',i===suggIdx));}
-function hideSuggest(ctx=SG_MAIN){clearTimeout(remote.timer);if(remote.ctl){remote.ctl.abort();remote.ctl=null;}sugg=[];suggIdx=-1;$(ctx.box).innerHTML='';if(ctx.fb)$(ctx.fb).hidden=false;}
+function hideSuggest(ctx=SG_MAIN){clearTimeout(remote.timer);sugg=[];suggIdx=-1;$(ctx.box).innerHTML='';if(ctx.fb)$(ctx.fb).hidden=false;}
 
 /* ===================== title screen ===================== */
 let freeMod=PROF.freeMod||'none';
@@ -2494,6 +2504,7 @@ $('#dailyBtn').addEventListener('click',async()=>{uiSfx(sfxSelect);if(!catalogRe
 $('#coachGo').addEventListener('click',()=>{PROF.coached=1;saveProfile();$('#coach').hidden=true;setPaused(false);});
 $('#freeBtn').addEventListener('click',()=>{uiSfx(sfxSelect);showModMenu();});
 $('#askForm').addEventListener('submit',e=>{e.preventDefault();const inp=$('#songInput');let v=inp.value;if(!v.trim()&&G&&G.hype>=100){djDrop();return;}if(suggIdx>=0&&sugg[suggIdx]&&norm(v).length>=2){const s=sugg[suggIdx],q=norm(v);const lm=localMatch(v);if(!(lm.score>=95)&&(suggestScore(s,q,q.split(' '))>=80||matchScore(q,s)>=55)){v=`${s.title} - ${s.artist}`;rememberSong(s);}}inp.value='';hideSuggest();submitSong(v);});
+['#songInput','#vsInput'].forEach(id=>{const el=$(id);if(el)el.addEventListener('focus',warmRemote,{once:true});});
 $('#songInput').addEventListener('input',e=>{updateSuggest();if(A.ctx)sfx(()=>sfxType(!!(e.inputType&&e.inputType.startsWith('delete'))));});
 $('#songInput').addEventListener('keydown',e=>{if(e.key==='ArrowDown'||(e.key==='Tab'&&sugg.length&&!e.shiftKey)){e.preventDefault();moveSuggest(1);}else if(e.key==='ArrowUp'||(e.key==='Tab'&&e.shiftKey&&sugg.length)){e.preventDefault();moveSuggest(-1);}else if(e.key==='Escape'&&sugg.length){e.preventDefault();e.stopPropagation();hideSuggest();}});
 $('#songInput').addEventListener('blur',()=>setTimeout(()=>{if(document.activeElement!==$('#songInput'))hideSuggest();},120));
@@ -3373,6 +3384,7 @@ function vsLeave(){if(vsNet&&vsNet.room)try{vsNet.send(vsNet.room,'bye',{});}cat
   showScreen('start');}
 async function vsResolve(text){const {song,score}=identify(text);if(song&&score>=95)return song;
   const q=norm(text.replace(/\s+-\s+/,' '));let best={song:song||null,score:song?score:0};
+  const near=remoteNear(q),quick=near?bestMatch(q,near.rows):null;if(quick&&quick.song&&quick.score>=95&&quick.score>best.score)return rememberSong(quick.song);
   if(remoteOn()&&q.length>=3){const rows=await remoteSearch(q);if(rows&&rows.length){const m=bestMatch(q,rows);if(m.song&&m.score>=55&&m.score>best.score)best={song:rememberSong(m.song),score:m.score};}}
   return best.song&&best.score>=55?best.song:null;}
 async function vsSend(text){if(!VV||!V)return;text=String(text).trim().slice(0,160);if(!text)return;audioInit();musicStart();
