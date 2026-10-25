@@ -439,7 +439,8 @@ body.invs #padLayer{display:none}
 .vsscreen.phone .vs-feed.foe .fe .fr{order:-1}
 .vsscreen.phone .fe .fa{display:none}
 .vsscreen.phone .fe .ft{font-size:13px;line-height:1.35}
-.vsscreen.phone .fe .fr{font-size:10px;margin:0}
+.vsscreen.phone .fe .fr{font-size:10px;margin:0;max-width:44%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:1}
+.vsscreen.phone .fe .ft{min-width:52%}
 .vsscreen.phone .fe:nth-child(n+4){display:none}
 /* typing bar: the main game's, minus the message line; suggestions float just above the input */
 #vsScreen .typebar{background:linear-gradient(rgba(12,12,20,0),rgba(12,12,20,.88) 20px,rgba(12,12,20,.95))}
@@ -448,7 +449,8 @@ body.invs #padLayer{display:none}
 #vsScreen .tfoot{justify-content:space-between}
 .vs-net{font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums}
 .vsscreen.phone .typebar{bottom:auto;padding-top:2px;background:rgba(12,12,20,.94)}
-.vsscreen.phone .tfoot{display:none}
+.vs-req.idle .live{visibility:hidden}
+.vsscreen.phone .tfoot{display:flex;gap:8px;margin-top:2px}.vsscreen.phone .tfoot .icon-btn{padding:2px 10px;font-size:12px}.vsscreen.phone .vs-net{display:none}
 .vsscreen.phone .vs-mid b{font-size:20px}.vsscreen.phone .vs-mid{padding:3px 8px;min-width:70px}
 .vsscreen.phone .vs-mid .rd,.vsscreen.phone .vs-mid .ph{font-size:9.5px;letter-spacing:.08em}
 .vsscreen.phone .vs-hud{gap:6px}
@@ -1173,6 +1175,8 @@ const A={ctx:null,bus:null,musicBus:null,musicFilter:null,sfxBus:null,pump:null,
 function audioInit(){
   if(!A.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;
     const ctx=A.ctx=new AC();
+    /* test runs (?autotest) can be silenced for good with localStorage 'bside-test-mute' */
+    try{if(/[?&]autotest\b/.test(location.search)&&localStorage.getItem('bside-test-mute')){ctx.suspend();ctx.resume=()=>Promise.resolve();}}catch(e){}
     const comp=ctx.createDynamicsCompressor();comp.threshold.value=-16;comp.ratio.value=3;comp.attack.value=.006;comp.release.value=.2;
     const lim=ctx.createDynamicsCompressor();lim.threshold.value=-2;lim.ratio.value=20;lim.attack.value=.001;lim.release.value=.08;
     const master=ctx.createGain();master.gain.value=.9;
@@ -1783,7 +1787,7 @@ function evaluate(song){
 }
 function reject(msg,song){G.stats.rejects++;if(G.combo>=3)pop('COMBO LOST',96,200,'bad');G.combo=0;setFb(msg,'bad');flashInput('reject');
   const ar=$('#stage');ar.classList.remove('shake');void ar.offsetWidth;ar.classList.add('shake');shake(250,3);flashCol='255,90,79';flashUntil=performance.now()+200;sfx(()=>sfxReject());
-  pop('NOPE',96,160,'bad big');renderTimers();if(song)log(`Rejected: ${song.title} didn't fit.`);}
+  pop('NOPE',96,160,'bad big');renderTimers();if(song)log(`Rejected: ${song.title} by ${song.artist} didn't fit.`);}
 function flashInput(cls){const inp=$('#songInput');inp.classList.remove('reject','accept');void inp.offsetWidth;inp.classList.add(cls);clearTimeout(flashInput.t);flashInput.t=setTimeout(()=>inp.classList.remove(cls),500);}
 function accept(song,reqOK,hits){
   const card={uid:++uidc,song,joined:G.t+Math.random()*1e-4};
@@ -2651,7 +2655,7 @@ $('#shareBtn').addEventListener('click',shareCard);
 const VS={W:288,H:144,X0:40,LEN:208,FLOOR:50,LANE_Y:[78,101,124],ROUND:75,CHORUS:20,PROMPT:10,CROWD:100,SPEED:13,RANGE:56,GAP:14,ENCORE:30,CLOSE:5,SNAP:200,STEALS:3,DROP:1,SPLASH:2.6,COUNT:3,RECAP:5};
 const VS_COL={me:'#3fe0ff',foe:'#ff5a4f'};
 const VS_RAR={air:1,fan:1.25,dig:1.6,white:2};
-const VS_BOTS={opener:{name:'Opener',delay:[6,9],wrong:.15,pool:'air',steal:0,resteal:false},headliner:{name:'Headliner',delay:[3.5,6],wrong:.08,pool:'mix',steal:.3,resteal:false},legend:{name:'Legend',delay:[2.5,4],wrong:.03,pool:'rare',steal:.7,resteal:true}};
+const VS_BOTS={opener:{name:'Opener',delay:[4.5,7.5],wrong:.15,pool:'air',steal:0,resteal:false},headliner:{name:'Headliner',delay:[3.5,6],wrong:.08,pool:'mix',steal:.3,resteal:false},legend:{name:'Legend',delay:[2.5,4],wrong:.03,pool:'rare',steal:.45,resteal:true}};
 const VS_PH=['splash','count','play','recap','over'];
 let V=null,VV=null,vsS=null,vsNet=null,VS_Q=null;
 const vsFoe=s=>s==='a'?'b':'a';
@@ -2705,7 +2709,7 @@ function vsMakeReq(){const w=V.reqN===0?{genre:2,decade:1,vibe:1}:VS_REQW;const 
   for(let k=0;k<40&&!r;k++){let keys=Object.keys(w).filter(x=>!recent.includes(x));if(!keys.length)keys=Object.keys(w);
     const tot=keys.reduce((a,x)=>a+w[x],0);let x=Math.random()*tot,type=keys[0];for(const kk of keys){x-=w[kk];if(x<=0){type=kk;break;}}
     let cand=null;try{cand=(VS_REQ[type]||REQ[type])();}catch(e){cand=null;}if(!cand)continue;
-    const need=Math.max(2,cand.need!=null?cand.need:cand.two?2:3);if(vsAnswers(cand.crits).length<need)continue;cand.type=type;r=cand;}
+    const need=cand.two?4:6;if(vsAnswers(cand.crits).length<need)continue;cand.type=type;r=cand;}
   if(!r)r=Object.assign(VS_REQ.genre(),{type:'genre'});V.recentReq=[r.type,...recent].slice(0,3);
   const parts=vsParts(r.html);for(let i=0;i+1<parts.length;i++)if(!parts[i][1]&&/(^|\s)a $/.test(parts[i][0])&&/^(Electronic|R&B)/.test(parts[i+1][0]))parts[i][0]=parts[i][0].replace(/a $/,'an ');
   const n=++V.reqN;return{n,type:r.type,label:r.label,crits:r.crits,parts,headline:n%3===0,left:VS.PROMPT,at:V.t};}
@@ -2767,7 +2771,7 @@ function vsMove(dt){const sp=VS.SPEED*(V.encore?2:V.chorus?1.5:1);
     u.x+=dir*sp*(u.slowUntil>V.t?u.slowF:1)*dt;u.walking=true;
     if(dir>0?u.x>=VS.LEN:u.x<=0){vsStageHit(u);if(V.phase!=='play')return;}}}
 /* a unit that reaches the rival's stage hits their crowd for its remaining HP; a named one also fires its genre skill */
-function vsStageHit(u){const foe=vsFoe(u.side);const i=V.units.indexOf(u);if(i>=0)V.units.splice(i,1);const dmg=Math.max(1,Math.ceil(u.hp));V.crowd[foe]=Math.max(0,V.crowd[foe]-dmg);
+function vsStageHit(u){const foe=vsFoe(u.side);const i=V.units.indexOf(u);if(i>=0)V.units.splice(i,1);const dmg=clamp(Math.ceil(u.hp),1,12);V.crowd[foe]=Math.max(V.chorus||V.encore?0:1,V.crowd[foe]-dmg);  // knockouts only land in the Final Chorus, so every round builds to it
   vsFx({k:'breach',id:u.id,side:u.side,lane:u.lane,d:dmg,named:u.named?1:0});
   if(V.crowd[foe]<=0||V.encore){vsEndRound(u.side);return;}
   if(u.named)vsSkill(u,foe,true);}
@@ -2801,7 +2805,7 @@ function vsSubmit(side,song){
   if(V.used.has(song.id)){vsGuess(side,{k:'wrong',s:vsPackSong(song),why:'already played'});vsWrong(side);return;}
   const foe=vsFoe(side);let stolen=null,why='';
   const tg=V.units.filter(u=>u.side===foe&&u.named&&artistMatch(u.art,song.artist)).sort((x,y)=>(side==='a'?x.x-y.x:y.x-x.x));
-  for(const u of tg){if(V.t-u.born<VS.DROP){why='still landing';continue;}if(u.steals>=VS.STEALS){why='locked: stolen 3 times';continue;}if(song.pop>=u.tag){why=`steal needs under ${u.tag}`;continue;}stolen=u;break;}
+  for(const u of tg){if(V.t-u.born<VS.DROP){why='still landing';continue;}if(u.steals>=VS.STEALS){why='locked: stolen 3 times';continue;}if(song.pop>=u.tag){why=`${song.pop} ≥ ${u.tag}: steal needs a deeper cut`;continue;}stolen=u;break;}
   const fits=!!V.req&&V.req.crits.every(c=>c.test(song));
   if(!stolen&&!fits){vsGuess(side,{k:'wrong',s:vsPackSong(song),why:why||vsWhy(song)});vsWrong(side);return;}
   V.used.add(song.id);V.st[side].songs.push(song);
@@ -3015,7 +3019,7 @@ function layoutVs(){if(screen!=='vs')return;const root=document.documentElement;
     const reqB=reqTop+Math.max(req.offsetHeight,96)+10,vvh=Math.round((window.visualViewport&&visualViewport.height)||vh),tbH=tb.offsetHeight||64,tbTop=vvh-tbH-6,arH=VS.H*s;
     feedH=clamp((tbTop-reqB-arH)/2,54,104);feedTop=tbTop-feedH-6;const room=feedTop-reqB-arH;
     if(room>=4){ay=reqB+room*.4;tb.style.top=tbTop+'px';}
-    else{ay=reqB+2;feedTop=ay+arH+5;feedH=54;tb.style.top=Math.round(Math.max(tbTop,feedTop+feedH+2))+'px';}
+    else{ay=reqB+2;feedTop=ay+arH+4;feedH=Math.max(0,tbTop-feedTop-4);tb.style.top=tbTop+'px';}
     tb.style.bottom='auto';}
   else{const tbH=tb.offsetHeight||96;reqW=Math.min(660,vw-40);reqTop=hudB+10;req.style.cssText=`left:${(vw-reqW)/2}px;top:${reqTop}px;width:${reqW}px`;const reqB=reqTop+Math.max(req.offsetHeight,86)+18;
     const gut=clamp(vw*.165,190,300);s=Math.min(4,(vw-2*gut-24)/VS.W,(vh-reqB-tbH-10)/VS.H);s=Math.max(1,s);
@@ -3026,7 +3030,7 @@ function layoutVs(){if(screen!=='vs')return;const root=document.documentElement;
   Object.assign(VL,{s,cw,ch,ox,oy,vw,vh,phone});cv.style.width=cw*s+'px';cv.style.height=ch*s+'px';
   root.style.setProperty('--s',s.toFixed(3));
   const fl=VE.vsFeedMe,fr=VE.vsFeedFoe;for(const [el,x] of [[fl,feedLx],[fr,feedRx]]){el.style.left=Math.round(x)+'px';el.style.top=Math.round(feedTop)+'px';el.style.width=Math.max(120,Math.round(feedW))+'px';el.style.maxHeight=Math.round(feedH)+'px';el.style.overflow='hidden';}
-  fl.hidden=fr.hidden=!phone&&feedW<120;
+  fl.hidden=fr.hidden=(!phone&&feedW<120)||(phone&&feedH<30);
   const h=VE.vsHint;h.style.left=vw/2+'px';h.style.top=Math.round((oy+VS.FLOOR-2)*s)+'px';}
 addEventListener('resize',()=>{if(screen==='vs')layoutVs();});
 if(window.visualViewport)visualViewport.addEventListener('resize',()=>{if(screen==='vs')layoutVs();});
@@ -3239,7 +3243,7 @@ function vsShareText(){const R=VV.summary;if(!R)return '';const me=VV.me,foe=VV.
   const out=[`B-SIDE VERSUS  ${VV.names[me].toUpperCase()} ${R.wins[me==='a'?0:1]}-${R.wins[me==='a'?1:0]} ${VV.names[foe].toUpperCase()}`,...lines];
   if(R.ra){const r=rarityOf({pop:R.ra[2]});out.push(`Rarest: "${R.ra[0]}" (${r.label})`);}
   if(R.bs)out.push(`Best steal: ${R.bs[0]}, ${R.bs[1]} (${R.bs[2]})`);
-  out.push(`Beat me: ${location.host}/?vs`);return out.join('\n');}
+  const won=R.wins[me==='a'?0:1]>R.wins[me==='a'?1:0];out.push(`${won?'Beat me':'Think you know more songs?'}: ${location.host}/?vs`);return out.join('\n');}
 function vsShowResult(){const R=VV.summary;if(!R)return;const me=VV.me,foe=VV.foe,w=R.w,l=vsFoe(w),won=w===me;const P={a:R.a,b:R.b};const wi=x=>R.wins[x==='a'?0:1];
   const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;};
   $('#vsResEyebrow').textContent=`B-SIDE Versus${VV.bot?' · practice vs bot':''}${R.ff?' · forfeit':''}`;
@@ -3418,7 +3422,7 @@ VE.vsInput.addEventListener('input',e=>{updateSuggest(SG_VS);if(A.ctx)uiSfx(()=>
 VE.vsInput.addEventListener('keydown',e=>{if(e.key==='ArrowDown'||(e.key==='Tab'&&sugg.length&&!e.shiftKey)){e.preventDefault();moveSuggest(1,SG_VS);}else if(e.key==='ArrowUp'||(e.key==='Tab'&&e.shiftKey&&sugg.length)){e.preventDefault();moveSuggest(-1,SG_VS);}else if(e.key==='Escape'&&sugg.length){e.preventDefault();hideSuggest(SG_VS);}});
 VE.vsInput.addEventListener('blur',()=>setTimeout(()=>{if(document.activeElement!==VE.vsInput)hideSuggest(SG_VS);},120));
 document.addEventListener('keydown',e=>{if(screen!=='vs'||!VV||!$('#vsRes').hidden||e.metaKey||e.ctrlKey||e.altKey)return;if(e.target!==VE.vsInput&&e.key.length===1&&!(e.target.closest&&e.target.closest('input,textarea,button')))VE.vsInput.focus();});
-$('#vsLeave').addEventListener('click',()=>{uiSfx(sfxBack);vsLeave();});
+$('#vsLeave').addEventListener('click',()=>{const live=VV&&VV.phase0!=='over'&&!(vsState()&&vsState().phase==='over');if(live&&!confirm('Leave this match? It counts as a forfeit.'))return;uiSfx(sfxBack);vsLeave();});
 VE.vsMute.addEventListener('click',()=>{toggleSound();VE.vsMute.textContent=A.muted?'Music off':'Music on';VE.vsMute.setAttribute('aria-pressed',String(A.muted));});
 $('#vsResLeave').addEventListener('click',()=>{uiSfx(sfxBack);vsLeave();});
 $('#vsShareCard').addEventListener('click',vsShareCard);
